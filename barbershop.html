@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Barbershop</title>
+	<style>
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	overflow: hidden;
+}
+
+#game-canvas {
+	background-color: #96f779;
+}
+
+.overlay {
+	display: none;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: scroll;
+}
+
+.overlay div h1 {
+	margin-bottom: 10px;
+}
+
+.overlay div {
+	padding-top: 100px;
+	text-align: center;
+}
+
+#main-menu-container textarea {
+	width: 200px;
+	height: 200px;
+	font-size: 20px;
+}
+
+#setup-container #setup-name-box {
+	width: 200px;
+	height: 30px;
+	font-size: 20px;
+}
+
+#setup-container #setup-spells {
+	padding: 20px;
+	margin: 0;
+}
+
+	</style>
+</head>
+<body>
+	<canvas id="game-canvas">Canvas not supported</canvas>
+	<div class="overlay" id="main-menu-overlay">
+		<div id="main-menu-container">
+			<h1>Barbershop</h1>
+			<p>Enter player names here:</p>
+			<textarea id="name-input-box"></textarea>
+			<br>
+			<input id="start-game" type="button" value="START GAME!!!" onclick="state.start()">
+			<input id="player-setup-button" type="button" value="Player Setup" onclick="state = new Setup();">
+		</div>
+	</div>
+	<div class="overlay" id="setup-overlay">
+		<div id="setup-container">
+			<h1>Player Setup</h1>
+			<p>Enter player name here:</p>
+			<input id="setup-name-box" type="text">
+			<br>
+			<input id="back-to-menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<div id="setup-spells"></div>
+		</div>
+	</div>
+	<div class="overlay" id="game-over-overlay">
+		<div id="game-over-container">
+			<h1>Game Over</h1>
+			<div id="game-over-page"></div>
+		</div>
+	</div>
+	<script>
+
+
+
+// Configuration
+var config = {
+	doencoding: true,
+	manaperturn: 20
+};
+
+
+
+// Declarations
+
+l = function(id) {return document.getElementById(id);};
+
+var canvas = l("game-canvas");
+var ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var animator =
+	window.requestAnimationFrame ||
+	window.oRequestAnimationFrame ||
+	window.msRequestAnimationFrame ||
+	window.mozRequestAnimationFrame ||
+	window.webkitRequestAnimationFrame;
+
+var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+var magic, colors;
+
+var Model, model;
+var Player;
+
+var Projectile,
+			Fireball,
+			Beam,
+		Zap,
+		PoisonCloud,
+		Shield,
+		Float;
+
+var Sword;
+
+var Info;
+
+var state,
+			Menu,
+				Setup,
+				Turn, 
+					Animation,
+					Sim;
+
+var mouse = {
+	x: 0,
+	y: 0
+};
+
+var course = "s";
+
+
+
+// Util
+
+//Webkit2's crazy invertible mapping generator
+// Theory is here: http://dl.acm.org/citation.cfm?id=752741
+var gen = (function() {
+  var max = Math.pow(2, 32),
+      seed;
+  return {
+    setSeed : function(val) {
+      seed = val || Math.round(Math.random() * max);
+    },
+    getSeed : function() {
+      return seed;
+    },
+    rand : function() {
+      // creates randomness...somehow...
+      seed += (seed * seed) | 5;
+      // Shift off bits, discarding the sign. Discarding the sign is
+      // important because OR w/ 5 can give us + or - numbers.
+      return (seed >>> 32) / max;
+    }
+  };
+}());
+
+function hash(string) {
+  var hash = 0, i, chr, len;
+  if (string.length === 0) return hash;
+  for (i = 0, len = string.length; i < len; i++) {
+    chr   = string.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+function scramble(string, seed) {
+	gen.setSeed(hash(seed));
+	var newOrder = [];
+	for(var i = 0; i < string.length; i++) {
+		newOrder.splice(Math.floor(gen.rand() * (newOrder.length + 1)), 0, string[i]);
+	}
+	string = "";
+	for(i = 0; i < newOrder.length; i++) {
+		string += newOrder[i];
+	}
+	return string;
+}
+
+function genKey(seed) {
+	var cipher = scramble(az, seed);
+	var key = {};
+	for(var i = 0; i < cipher.length; i++) {
+		key[cipher[i]] = az[i];
+	}
+	return key;
+}
+
+function encode(string, key) {
+	var output = "";
+	for(var i = 0; i < string.length; i++) {
+		output += key[string[i]];
+	}
+	return output;
+}
+
+function decode(string, key) {
+	var output = "";
+	for(var i = 0; i < string.length; i++) {
+		for(var j in key) {
+			if(key[j] === string[i]) {
+				output += j;
+				break;
+			}
+		}
+	}
+	return output;
+}
+
+function selectRandom(arr) {
+	var r = gen.rand() * arr.length;
+	return arr[Math.floor(r)];
+}
+
+function isLetter(str) {
+  return str.length === 1 && str.match(/[a-z]/i);
+}
+
+function vTo(posFrom, posTo) {
+	return {
+		x: posTo.x - posFrom.x,
+		y: posTo.y - posFrom.y
+	};
+}
+
+function getDir(posFrom, posTo) {
+	var diff = vTo(posFrom, posTo);
+	return Math.atan2(diff.y, diff.x);
+}
+
+function getDist(pos1, pos2) {
+	return Math.sqrt(
+		Math.pow(pos1.x - pos2.x, 2) +
+		Math.pow(pos1.y - pos2.y, 2)
+	);
+}
+
+function getClosest(arr, pos) {
+	var dist = 10000000000000; // Anything is smaller
+	var index = 0;
+	for(var i in arr) {
+		var d = getDist(arr[i].pos, pos);
+		if(d < dist) {
+			dist = d;
+			index = i;
+		}
+	}
+	return arr[index];
+}
+
+function getMouse() {
+	if(model.players[0].jinxed) {
+		return {
+			x: canvas.width - mouse.x,
+			y: canvas.height - mouse.y
+		};
+	} else {
+		return {
+			x: mouse.x,
+			y: mouse.y
+		};
+	}
+}
+
+function addV(a, b) {
+	return {
+		x: a.x + b.x,
+		y: a.y + b.y
+	};
+}
+
+function scaleV(v, s) {
+	return {
+		x: v.x * s,
+		y: v.y * s
+	};
+}
+
+function normalize(v) {
+	var dist = getDist({x:0,y:0}, v);
+	return {
+		x: v.x / dist,
+		y: v.y / dist
+	};
+}
+
+function dot(a, b) {
+	return a.x * b.x + a.y * b.y;
+}
+
+function easeInOutQuint(t) {
+	return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
+}
+
+function translate(pos) {
+	ctx.translate(pos.x, pos.y);
+}
+
+
+
+/* Magic
+
+mouse => getMouse();
+projectile => <projectileName>(<playerName>,<pos>,<dir>)
+
+*/
+magic = {
+	
+	// Teleport to mouse
+	"TP": {
+		mana: 50,
+		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
+	},
+	
+	// Fireball towards mouse
+	"AB": {
+		mana: 5,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
+	},
+	
+	// Heal player closest to mouse
+	"CX": {
+		mana: 60,
+		code: "getClosest(model.players,getMouse()).heal(20)"
+	},
+	
+	// Stun player closest to mouse
+	"CW": {
+		mana: 40,
+		code: "getClosest(model.players,getMouse()).stun()"
+	},
+	
+	// Jinx player closest to mouse
+	"BC": {
+		mana: 30,
+		code: "getClosest(model.players,getMouse()).jinx()"
+	},
+	
+	// Beam shot towards mouse + 2 radians
+	"BG": {
+		mana: 5,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+2;model.things.push(new Beam(p.pos,r))"
+	},
+	
+	// Zap with lightning
+	"GC": {
+		mana: 10,
+		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
+	},
+	
+	// Swap Four Corners
+	"XY": {
+		mana: 15,
+		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
+	},
+	
+	// Poison Cloud at mouse
+	"PW": {
+		mana: 25,
+		code: "model.things.push(new PoisonCloud(getMouse()));"
+	},
+	
+	// Disappear thing closest to mouse
+	"WX": {
+		mana: 45,
+		code: "getClosest(model.things,getMouse()).dead=true;"
+	},
+	
+	// Set a player's health to 50
+	"NM": {
+		mana: 40,
+		code: "getClosest(model.players,getMouse()).health=50;"
+	},
+	
+	// Shield at mouse
+	"TY": {
+		mana: 50,
+		code: "model.things.push(new Shield(getMouse()));"
+	},
+	
+	// Phase until next turn
+	"ER": {
+		mana: 35,
+		code: "getClosest(model.players,getMouse()).phasing=true;"
+	},
+	
+	// Float at mouse
+	"HJ": {
+		mana: 65,
+		code: "model.things.push(new Float(getMouse()));"
+	},
+	
+	// Sword mob at mouse
+	"LK": {
+		mana: 45,
+		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
+	},
+	
+	// Vampire
+	"VM": {
+		mana: 30,
+		code: "model.players[0].heal(10);getClosest(model.players,getMouse()).hurt(10);"
+	}
+};
+
+// Avatar colors
+colors = {
+	hat: [
+		"#6b4112",
+		"#604a30",
+		"#51493f",
+		"#7f7467",
+		"#ada49a",
+		"#7a8959",
+		"#598984",
+		"#000000"
+	],
+	head: [
+		"#f9bc75",
+		"#c19562",
+		"#916737",
+		"#5b3a15",
+		"#422504"
+	],
+	beard: [
+		"#3f2c0a",
+		"#000000",
+		"#544d42",
+		"#8c8477",
+		"#cec9c0"
+	],
+	robe: [
+		"#6b4112",
+		"#604a30",
+		"#51493f",
+		"#7f7467",
+		"#ada49a",
+		"#7a8959",
+		"#598984",
+		"#000000"
+	]
+};
+
+
+
+// Model
+Model = function() {
+	this.players = [];
+	this.mobs = [];
+	this.things = [];
+	this.everything = [];
+	
+	this.graveyard = [];
+	
+	this.fx = [];
+};
+
+Model.prototype.drawBackground = function() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+Model.prototype.sortByDepth = function() {
+	// Combine everything
+	this.everything = [];
+	for(var i in this.things) {
+		this.everything.push(this.things[i]);
+	}
+	for(i in this.mobs) {
+		this.everything.push(this.mobs[i]);
+	}
+	for(i in this.players) {
+		this.everything.push(this.players[i]);
+	}
+	for(i in this.fx) {
+		this.everything.push(this.fx[i]);
+	}
+	
+	// Sort by y coordinate
+	var changed;
+	do {
+		changed = false;
+		for(var i = 0; i < this.everything.length - 1; i++) {
+			if(this.everything[i].pos.y > this.everything[i+1].pos.y) {
+				var temp = this.everything[i];
+				this.everything[i] = this.everything[i+1];
+				this.everything[i+1] = temp;
+				changed = true;
+			}
+		}
+	} while(changed);
+};
+
+Model.prototype.drawLayer = function(layer) {
+	for(var i = 0; i < this.everything.length; i++) {
+		this.everything[i].draw(layer);
+	}
+};
+
+Model.prototype.draw = function() {
+	this.drawBackground();
+	this.sortByDepth();
+	this.drawLayer("ground");
+	this.drawLayer("grounded");
+	this.drawLayer("airborn");
+	this.drawLayer("info");
+};
+
+
+
+// Player
+Player = function(name) {
+	this.name = name;
+	this.key = genKey(name);
+	this.skin = {
+		hat: selectRandom(colors.hat),
+		head: selectRandom(colors.head),
+		beard: selectRandom(colors.beard),
+		robe: selectRandom(colors.robe)
+	};
+	
+	this.rad = 15;
+	
+	var margin = 50;
+	this.pos = {
+		x: (canvas.width-margin) * Math.random() + margin/2,
+		y: (canvas.height-margin) * Math.random() + margin/2
+	};
+	
+	this.course = "s";
+	this.speed = 0.5;
+	this.vel = {
+		x: 0,
+		y: 0
+	};
+	
+	this.health = 100;
+	this.mana = 0;
+	
+	this.stunned = false;
+	this.jinxed = false;
+	this.phasing = false;
+	this.dead = false;
+	
+	this.grounded = true;
+};
+
+Player.prototype.draw = function(layer) {
+	if(layer === "info") {
+		ctx.save();
+		translate(this.pos);
+		
+		// Name bar
+		ctx.fillStyle = "black";
+		ctx.textAlign = "center";
+		ctx.fillText(this.name, 0, -37);
+		
+		ctx.fillStyle = "green";
+		ctx.textAlign = "right";
+		ctx.fillText(this.health, -3, -27);
+		
+		ctx.fillStyle = "blue";
+		ctx.textAlign = "left";
+		ctx.fillText(this.mana, 3, -27);
+		
+		ctx.restore();
+	}
+	
+	if(layer !== "grounded") return;
+	ctx.save();
+	translate(this.pos);
+	
+	if(this.phasing) ctx.globalAlpha = 0.5;
+	
+	// Head
+	ctx.beginPath();
+	ctx.arc(0, -4, 10, 0, 2*Math.PI);
+	ctx.fillStyle = this.skin.head;
+	ctx.fill();
+	
+	// Robe
+	ctx.beginPath();
+	ctx.moveTo(7, 3);
+	ctx.lineTo(13, 26);
+	ctx.lineTo(-13, 26);
+	ctx.lineTo(-7, 3);
+	ctx.fillStyle = this.skin.robe;
+	ctx.fill();
+	
+	// Beard
+	ctx.beginPath();
+	if(this.course === "s") {
+		ctx.moveTo(0, -2);
+		ctx.lineTo(7, 3);
+		ctx.lineTo(0, 20);
+		ctx.lineTo(-7, 3);
+	} else if(this.course === "e") {
+		ctx.moveTo(10, -2);
+		ctx.lineTo(12, 20);
+		ctx.lineTo(0, 3);
+	} else if(this.course === "w") {
+		ctx.moveTo(-10, -2);
+		ctx.lineTo(-12, 20);
+		ctx.lineTo(0, 3);
+	}
+	ctx.fillStyle = this.skin.beard;
+	ctx.fill();
+	
+	// Hat
+	ctx.beginPath();
+	ctx.moveTo(5, -13);
+	ctx.lineTo(15, -10);
+	ctx.lineTo(-15, -10);
+	ctx.lineTo(-5, -13);
+	ctx.lineTo(-2, -25);
+	ctx.lineTo(2, -25);
+	if(this.course === "s" || this.course === "w") {
+		ctx.moveTo(2, -25);
+		ctx.lineTo(08, -18);
+		ctx.lineTo(3, -20);
+	} else if(this.course === "n" || this.course === "e") {
+		ctx.moveTo(-2, -25);
+		ctx.lineTo(-3, -20);
+		ctx.lineTo(-08, -18);
+	}
+	ctx.fillStyle = this.skin.hat;
+	ctx.fill();
+	
+	ctx.restore();
+};
+
+Player.prototype.drawSpell = function(dir, spell) {
+	while(spell.length !== 2) {
+		spell = "#" + spell;
+	}
+	
+	ctx.save();
+	translate(this.pos);
+	ctx.fillStyle = "black";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	ctx.fillText(spell, 30*Math.cos(dir), 30*Math.sin(dir));
+	ctx.restore();
+};
+
+Player.prototype.useMana = function(mana) {
+	this.mana -= mana;
+	
+	if(this.mana > 100) this.mana = 100;
+	if(this.mana < 0) {
+		this.health += this.mana;
+		this.mana = 0;
+	}
+	if(this.health <= 0) this.dead = true;
+};
+
+Player.prototype.hurt = function(damage) {
+	this.health -= damage;
+	if(this.health <= 0) {
+		 this.dead = true;
+	}
+	
+	model.fx.push(new Info("-"+damage, "damage", this.pos));
+};
+
+Player.prototype.heal = function(health) {
+	this.health += health;
+	if(this.health > this.maxHealth) {
+		this.health = this.maxHealth;
+	}
+	
+	model.fx.push(new Info("+"+health, "heal", this.pos));
+};
+
+Player.prototype.stun = function() {
+	this.stunned = true;
+	
+	model.fx.push(new Info("Stunned", "stun", this.pos));
+};
+
+Player.prototype.jinx = function() {
+	this.jinxed = !this.jinxed;
+	
+	model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
+};
+
+Player.prototype.setCourse = function(dir) {
+	this.course = dir;
+	switch(this.course) {
+		case "n":
+			this.vel.x = 0;
+			this.vel.y = -this.speed;
+			break;
+		case "s":
+			this.vel.x = 0;
+			this.vel.y = this.speed;
+			break;
+		case "e":
+			this.vel.x = this.speed;
+			this.vel.y = 0;
+			break;
+		case "w":
+			this.vel.x = -this.speed;
+			this.vel.y = 0;
+			break;
+	}
+};
+
+Player.prototype.update = function() {
+	this.pos = addV(this.pos, this.vel);
+	var p = this.pos;
+	var v = this.vel;
+	var r = this.rad * 2;
+	if(p.x < r && v.x < 0) {
+		this.setCourse("e");
+	} else if(p.x > canvas.width-r && v.x > 0) {
+		this.setCourse("w");
+	} else if(p.y < r && v.y < 0) {
+		this.setCourse("s");
+	} else if(p.y > canvas.height-r && v.y > 0) {
+		this.setCourse("n");
+	}
+};
+
+
+
+// Sword mob
+Sword = function(name, pos) {
+	this.name = name;
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	this.vel = {
+		x: Math.random() * 6 - 3,
+		y: Math.random() * 6 - 3
+	};
+	this.accel = 0.05;
+	
+	this.rad = 20;
+	this.attackTimer = 0;
+	
+	this.canBounce = true;
+	
+	this.dead = false;
+};
+
+Sword.prototype.draw = function(layer) {
+	if(layer !== "airborn") return;
+	
+	ctx.save();
+	translate(this.pos);
+	ctx.rotate(getDir({x:0,y:0}, this.vel));
+	
+	ctx.strokeStyle = "grey";
+	ctx.beginPath();
+	ctx.moveTo(-30, 0);
+	ctx.lineTo(20, 0);
+	ctx.lineWidth = 5;
+	ctx.stroke();
+	
+	ctx.strokeStyle = "black";
+	ctx.beginPath();
+	ctx.moveTo(-20, -5);
+	ctx.lineTo(-20, 5);
+	ctx.stroke();
+	
+	ctx.restore();
+};
+
+Sword.prototype.hurt = function(damage) {
+	this.dead = true;
+};
+
+Sword.prototype.update = function() {
+	// Steer towards closest player
+	var goalPlayer = getClosest(model.players, this.pos);
+	if(this.name !== goalPlayer.name) {
+		this.vel = addV(this.vel, scaleV(vTo(this.pos, goalPlayer.pos), this.accel / getDist(this.pos, goalPlayer.pos)));
+	}
+	
+	// Apply velocity to position
+	this.pos = addV(this.pos, this.vel);
+	
+	// Hurt players
+	this.attackTimer++;
+	if(this.attackTimer > 0) {
+		for(var i in model.players) {
+			var p = model.players[i];
+			if(this.name === p.name) continue;
+			if(getDist(this.pos, p.pos) < this.rad + p.rad) {
+				p.hurt(5);
+				this.attackTimer = -20;
+			}
+		}
+	}
+};
+
+
+
+// Projectile prototype
+Projectile = function() {
+	this.canBounce = true;
+	this.update = function() {
+		this.pos = addV(this.pos, this.vel);
+
+		for(var i in model.players) {
+			if(model.players[i].phasing) continue;
+			var dist = getDist(this.pos, model.players[i].pos);
+			if(dist < model.players[i].rad + this.rad) {
+				model.players[i].hurt(this.damage);
+				this.dead = true;
+				break;
+			}
+		}
+	};
+};
+
+
+
+// Fireball
+Fireball = function(pos, dir) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 10;
+	
+	var speed = 3;
+	this.vel = {
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
+	};
+	
+	this.pos = addV(this.pos, scaleV(this.vel, 8));
+	
+	this.damage = 25;
+	
+	this.dead = false;
+};
+Fireball.prototype = new Projectile();
+
+Fireball.prototype.draw = function(layer) {
+	if(layer === "airborn") {
+		ctx.save();
+		translate(this.pos);
+		ctx.rotate(getDir({x:0,y:0},this.vel));
+		
+		ctx.fillStyle = "red";
+		ctx.beginPath();
+		ctx.moveTo(this.rad, 0);
+		ctx.lineTo(0, this.rad);
+		ctx.lineTo(-2*this.rad, 0);
+		ctx.lineTo(0, -this.rad);
+		ctx.fill();
+		
+		ctx.restore();
+	}
+};
+
+
+
+// Beam
+Beam = function(pos, dir) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 5;
+	
+	var speed = 4;
+	this.vel = {
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
+	};
+	
+	this.pos = addV(this.pos, scaleV(this.vel, 5));
+	
+	this.damage = 50;
+	
+	this.dead = false;
+};
+Beam.prototype = new Projectile();
+
+Beam.prototype.draw = function(layer) {
+	if(layer === "airborn") {
+		ctx.save();
+		translate(this.pos);
+		ctx.rotate(getDir({x:0,y:0},this.vel));
+
+		ctx.fillStyle = "blue";
+		ctx.beginPath();
+		ctx.moveTo(this.rad, 0);
+		ctx.lineTo(0, this.rad);
+		ctx.lineTo(-2*this.rad, 0);
+		ctx.lineTo(0, -this.rad);
+		ctx.fill();
+
+		ctx.restore();
+	}
+};
+
+
+
+// Zap
+Zap = function(posFrom, posTo) {
+	this.pos = posTo;
+	this.pArr = [{
+		x: posFrom.x,
+		y: posFrom.y
+	}];
+	var dist = getDist(posFrom, posTo);
+	var dir = getDir(posFrom, posTo);
+	var step = 50;
+	var range = 0.5;
+	for(var i = step; i < dist; i += step) {
+		var angle = range/2 - Math.random()*range;
+		this.pArr.push({
+			x: posFrom.x + Math.cos(dir+angle) * i,
+			y: posFrom.y + Math.sin(dir+angle) * i
+		});
+	}
+	this.pArr.push({
+		x: posTo.x,
+		y: posTo.y
+	});
+	
+	for(i in model.players) {
+		if(model.players[i].phasing) continue;
+		if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(15);
+	}
+	
+	this.dead = false;
+};
+
+Zap.prototype.draw = function(layer) {
+	if(layer !== "grounded") return;
+	ctx.save();
+
+	ctx.lineWidth = 5;
+	ctx.strokeStyle = "blue";
+	ctx.beginPath();
+	ctx.moveTo(this.pArr[0].x, this.pArr[0].y);
+	for(var i = 1; i < this.pArr.length; i++) {
+		ctx.lineTo(this.pArr[i].x, this.pArr[i].y);
+	}
+	ctx.stroke();
+	this.dead = true;
+
+	ctx.restore();
+};
+
+Zap.prototype.update = function() {
+};
+
+
+
+// Poison Cloud
+PoisonCloud = function(pos) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 75;
+	
+	this.timerSet = 20;
+	this.timer = this.timerSet;
+	
+	this.dead = false;
+}
+
+PoisonCloud.prototype.draw = function(layer) {
+	if(layer !== "airborn") return;
+	ctx.beginPath();
+	ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
+	ctx.globalAlpha = 0.5;
+	ctx.fillStyle = "green";
+	ctx.fill();
+	ctx.globalAlpha = 1;
+	ctx.lineWidth = 3;
+	ctx.strokeStyle = "darkgreen";
+	ctx.stroke();
+};
+
+PoisonCloud.prototype.update = function() {
+	this.timer--;
+	if(this.timer < 0) {
+		this.timer = this.timerSet;
+		for(var i in model.players) {
+			if(model.players[i].phasing) continue;
+			if(getDist(this.pos, model.players[i].pos) < this.rad) {
+				model.players[i].hurt(2);
+			}
+		}
+	}
+};
+
+
+
+// Shield
+Shield = function(pos) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 75;
+	
+	this.dead = false;
+}
+
+Shield.prototype.draw = function(layer) {
+	if(layer !== "airborn") return;
+	ctx.beginPath();
+	ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
+	ctx.globalAlpha = 0.5;
+	ctx.fillStyle = "lightblue";
+	ctx.fill();
+	ctx.globalAlpha = 1;
+	ctx.lineWidth = 3;
+	ctx.strokeStyle = "blue";
+	ctx.stroke();
+};
+
+Shield.prototype.update = function() {
+	for(var i in model.everything) {
+		var t = model.everything[i];
+		if(t.canBounce) {
+			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+				var norm = normalize(vTo(this.pos, t.pos));
+				var vel = dot(t.vel, norm);
+				if(vel < 0) {
+					t.vel = addV(t.vel, scaleV(norm, vel * -2));
+				}
+			}
+		}
+	}
+};
+
+
+
+// Float
+Float = function(pos) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	this.vel = {
+		x: Math.random() * 6 - 3,
+		y: Math.random() * 6 - 3
+	};
+	
+	this.rad = 60;
+	
+	this.dead = false;
+};
+
+Float.prototype.draw = function(layer) {
+	if(layer !== "ground") return;
+	
+	ctx.save();
+	translate(this.pos);
+	
+	ctx.fillStyle = "#74d557";
+	ctx.beginPath();
+	ctx.arc(0, 0, this.rad, 0, 2*Math.PI);
+	ctx.fill();
+	
+	ctx.restore();
+};
+
+Float.prototype.update = function() {
+	// Bounce off sides
+	if((this.vel.x < 0 && this.pos.x < this.rad) || (this.vel.x > 0 && this.pos.x > canvas.width - this.rad)) this.vel.x *= -1;
+	if((this.vel.y < 0 && this.pos.y < this.rad) || (this.vel.y > 0 && this.pos.y > canvas.height - this.rad)) this.vel.y *= -1;
+	
+	// Move self
+	this.pos = addV(this.pos, this.vel);
+	
+	// Move anything grounded
+	for(var i in model.everything) {
+		var thing = model.everything[i];
+		if(thing.grounded) {
+			if(getDist(thing.pos, this.pos) < this.rad) {
+				thing.pos = addV(thing.pos, this.vel);
+			}
+		}
+	}
+};
+
+
+
+// Info
+Info = function(text, type, pos) {
+	this.text = text;
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.color = {
+		"damage": "red",
+		"heal": "green",
+		"stun": "red",
+		"poison": "green",
+		"jinx": "blue"
+	}[type];
+	
+	this.timer = 0;
+	this.deadTime = 30;
+	
+	this.dead = false;
+};
+
+Info.prototype.draw = function(layer) {
+	if(layer !== "info") return;
+	
+	ctx.save();
+	translate(this.pos);
+	
+	ctx.globalAlpha = 1 - this.timer / this.deadTime;
+	
+	ctx.fillStyle = this.color;
+	ctx.textAlign = "center";
+	ctx.fillText(this.text, 0, -50 - Math.sqrt(this.timer));
+	
+	ctx.restore();
+};
+
+Info.prototype.update = function(layer) {
+	this.timer++;
+	if(this.timer > this.deadTime) this.dead = true;
+};
+
+
+
+// Menu
+Menu = function() {
+	l("setup-overlay").style.display = "none";
+	l("name-input-box").value = "";
+	l("main-menu-overlay").style.display = "block";
+	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+Menu.prototype.start = function() {
+	var list = l("name-input-box").value;
+	list = list.split("\n");
+	for(var i = 0; i < list.length; i++) {
+		if(list[i] === "") {
+			list.splice(i, 1);
+			i--;
+		}
+	}
+	
+	if(list.length < 2) return;
+	
+	model = new Model();
+	for(var i = 0; i < list.length; i++) {
+		model.players.push(new Player(list[i]));
+	}
+	
+	l("main-menu-overlay").style.display = "none";
+	state = new Turn();
+};
+
+Menu.prototype.update = function() {
+};
+
+
+
+// Setup
+Setup = function() {
+	l("main-menu-overlay").style.display = "none";
+	l("setup-name-box").value = "";
+	l("setup-overlay").style.display = "block";
+	
+	this.player = new Player("");
+};
+
+Setup.prototype.update = function() {
+	this.player = new Player(l("setup-name-box").value);
+	this.player.pos = {
+		x: canvas.width / 2,
+		y: canvas.height / 4 * 3
+	};
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	this.player.draw("grounded");
+	
+	l("setup-spells").innerHTML = "Fireball - " + decode("AB", this.player.key);
+};
+
+
+
+// Turn
+Turn = function() {
+	this.input = "";
+	this.spellRot = 0;
+	
+	// Current player setup
+	course = model.players[0].course;
+	model.players[0].phasing = false;
+	model.players[0].mana += config.manaperturn;
+};
+
+Turn.prototype.draw = function() {
+	model.draw();
+	model.players[0].drawSpell(this.spellRot, this.input);
+};
+
+Turn.prototype.newInput = function(char) {
+	if(this.input.length === 2) {
+		this.input = this.input[1] + char;
+	} else {
+		this.input += char;
+	}
+};
+
+Turn.prototype.cast = function() {
+	if(this.input.length !== 2) return;
+	
+	var spell = this.input;
+	if(config.doencoding) {
+		spell = encode(spell, model.players[0].key);
+	}
+	
+	state = new Sim();
+	
+	try {
+		model.players[0].useMana(magic[spell].mana);
+		eval(magic[spell].code);
+	} catch(e) {
+		// Oh well
+	}
+};
+
+Turn.prototype.update = function() {
+	model.players[0].setCourse(course);
+	this.spellRot += 0.05;
+	this.draw();
+};
+
+
+
+// Sim
+Sim = function() {
+	var timeBetweenTurns = 100;
+	this.timer = timeBetweenTurns / model.players.length;
+};
+
+Sim.prototype.draw = function() {
+	model.draw();
+};
+
+Sim.prototype.updatePlayers = function() {
+	for(var i = 0; i < model.players.length; i++) {
+		model.players[i].update();
+	};
+	for(i = 0; i < model.players.length; i++) {
+		if(model.players[i].dead) {
+			model.graveyard.push(model.players[i]);
+			model.players.splice(i, 1);
+			i--;
+		}
+	}
+};
+
+Sim.prototype.updateMobs = function() {
+	for(var i = 0; i < model.mobs.length; i++) {
+		model.mobs[i].update();
+	};
+	for(i = 0; i < model.mobs.length; i++) {
+		if(model.mobs[i].dead) {
+			model.mobs.splice(i, 1);
+			i--;
+		}
+	}
+};
+
+Sim.prototype.updateThings = function() {
+	for(var i = 0; i < model.things.length; i++) {
+		model.things[i].update();
+	}
+	for(i = 0; i < model.things.length; i++) {
+		if(model.things[i].dead) {
+			model.things.splice(i, 1);
+		}
+	}
+};
+
+Sim.prototype.updateFX = function() {
+	for(var i = 0; i < model.fx.length; i++) {
+		model.fx[i].update();
+	}
+	for(i = 0; i < model.fx.length; i++) {
+		if(model.fx[i].dead) {
+			model.fx.splice(i, 1);
+		}
+	}
+};
+
+Sim.prototype.bounceThings = function() {
+	for(var i in model.things) {
+		if(model.things[i].canBounce) {
+			var p = model.things[i].pos;
+			var v = model.things[i].vel;
+			var r = model.things[i].rad;
+			if((p.x < r && v.x < 0) || (p.x > canvas.width-r && v.x > 0)) v.x = 0 - v.x;
+			if((p.y < r && v.y < 0) || (p.y > canvas.height-r && v.y > 0)) v.y = 0 - v.y;
+		}
+	}
+	for(var i in model.players) {
+		var pl = model.players[i];
+		var p = pl.pos;
+		var v = pl.vel;
+		var r = pl.rad * 2;
+		if(p.x < r && v.x < 0) {
+			pl.setCourse("e");
+		} else if(p.x > canvas.width-r && v.x > 0) {
+			pl.setCourse("w");
+		} else if(p.y < r && v.y < 0) {
+			pl.setCourse("s");
+		} else if(p.y > canvas.height-r && v.y > 0) {
+			pl.setCourse("n");
+		}
+	}
+};
+
+Sim.prototype.update = function() {
+	this.updateThings();
+	this.updateFX();
+	this.updatePlayers();
+	this.bounceThings();
+	this.draw();
+	
+	if(model.players.length < 2) {
+		state = new GameOver();
+		return;
+	}
+	
+	this.timer--;
+	if(this.timer < 0) {
+		var temp = model.players.splice(0, 1)[0];
+		model.players.push(temp);
+		while(model.players[0].stunned) {
+			var temp = model.players.splice(0, 1)[0];
+			temp.stunned = false;
+			model.players.push(temp);
+		}
+		state = new Turn();
+	}
+};
+
+
+
+// Animation
+Animation = function(type, a, b) {
+	this.type = type;
+	switch(this.type) {
+		case "four corner":
+			// Change positions of everything
+			for(var i in model.players) {
+				var p = model.players[i].pos;
+				if(p.x < a) p.x += canvas.width - a;
+				else if(p.x > a) p.x -= a;
+				if(p.y < b) p.y += canvas.height - b;
+				else if(p.y > b) p.y -= b;
+			}
+			for(var i in model.things) {
+				var p = model.things[i].pos;
+				if(p.x < a) p.x += canvas.width - a;
+				else if(p.x > a) p.x -= a;
+				if(p.y < b) p.y += canvas.height - b;
+				else if(p.y > b) p.y -= b;
+			}
+				
+			// Setup animation
+			this.startPos = [
+				{x: 0, y: 0},
+				{x: a, y: 0},
+				{x: 0, y: b},
+				{x: a, y: b}
+			];
+			ctx.lineWidth = 10;
+			ctx.strokeStyle = "black";
+			ctx.beginPath();
+			ctx.rect(0, 0, canvas.width, canvas.height);
+			ctx.moveTo(a, 0);
+			ctx.lineTo(a, canvas.height);
+			ctx.moveTo(0, b);
+			ctx.lineTo(canvas.width, b);
+			ctx.stroke();
+			this.corners = [
+				ctx.getImageData(0, 0, a, b),
+				ctx.getImageData(a, 0, canvas.width - a, b),
+				ctx.getImageData(0, b, a, canvas.height - b),
+				ctx.getImageData(a, b, canvas.width - a, canvas.height - b)
+			];
+			this.goalDiff = [
+				{x:canvas.width-a,y:canvas.height-b},
+				{x:-a,y:canvas.height-b},
+				{x:canvas.width-a,y:-b},
+				{x:-a,y:-b}
+			];
+			this.inc = 0.02;
+			this.ani = this.inc;
+			break;
+	}
+};
+
+Animation.prototype.draw = function() {
+	switch(this.type) {
+		case "four corner":
+			ctx.fillStyle = "black";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			for(var i = 0; i < 4; i++) {
+				var pos = addV(this.startPos[i], scaleV(this.goalDiff[i], easeInOutQuint(this.ani)));
+				ctx.putImageData(
+					this.corners[i],
+					pos.x,
+					pos.y
+				);
+			}
+			break;
+	}
+};
+
+Animation.prototype.update = function() {
+	switch(this.type) {
+		case "four corner":
+			this.draw();
+			this.ani += this.inc;
+			if(this.ani >= 1) {
+				state = new Sim();
+			}
+			break;
+	}
+};
+
+
+
+// Game Over
+GameOver = function() {
+	// Dim background
+	ctx.globalAlpha = 0.5;
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.globalAlpha = 1;
+	
+	// Game Over overlay setup
+	var page = l("game-over-page");
+	page.innerHTML = "";
+	if(model.players.length > 0) {
+		model.graveyard.splice(0, 0, model.players[0]);
+	}
+	var spellNames = [];
+	for(var i in magic) {
+		spellNames.push(i);
+	}
+	for(i in model.graveyard) {
+		var p = model.graveyard[i];
+		var discovery = spellNames[Math.floor(Math.random() * spellNames.length)];
+		discovery = decode(discovery, p.key);
+		page.innerHTML += "<p>" + p.name + " " + discovery + "</p>";
+	}
+	
+	// Game Over overlay display
+	l("game-over-overlay").style.display = "block";
+};
+
+GameOver.prototype.update = function() {
+};
+
+
+
+// Draw function
+
+state = new Menu();
+
+function draw() {
+	animator(draw);
+	state.update();
+}
+
+
+
+// Event handlers
+window.addEventListener("keydown", function(e) {
+	if(state instanceof Turn) {
+		var char = String.fromCharCode(e.keyCode);
+		if(isLetter(char)) {
+			state.newInput(char);
+		}
+		switch(e.keyCode) {
+			case 37:
+				course = "w";
+				break;
+			case 38:
+				course = "n";
+				break;
+			case 39:
+				course = "e";
+				break;
+			case 40:
+				course = "s";
+				break;
+		}
+	}
+}, false);
+
+window.addEventListener("mousemove", function(e) {
+	mouse.x = e.clientX;
+	mouse.y = e.clientY;
+}, false);
+
+window.addEventListener("click", function(e) {
+	if(state instanceof Turn) {
+		state.cast();
+	}
+}, false);
+
+
+
+// Start!
+draw();
+
+
+
+	</script>
+</body>
+</html>
