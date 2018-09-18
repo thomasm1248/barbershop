@@ -92,7 +92,8 @@ body {
 // Configuration
 var config = {
 	doencoding: true,
-	manaperturn: 20
+	manaperturn: 20,
+	framesperround: 100
 };
 
 
@@ -142,8 +143,6 @@ var mouse = {
 	x: 0,
 	y: 0
 };
-
-var course = "s";
 
 
 
@@ -306,6 +305,14 @@ function dot(a, b) {
 	return a.x * b.x + a.y * b.y;
 }
 
+function getMagOfV(v) {
+	return getDist({x:0,y:0}, v);
+}
+
+function getDirOfV(v) {
+	return getDir({x:0,y:0}, v);
+}
+
 function easeInOutQuint(t) {
 	return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
 }
@@ -331,85 +338,85 @@ magic = {
 	},
 	
 	// Fireball towards mouse
-	"AB": {
+	"FB": {
 		mana: 5,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
-	// Heal player closest to mouse
-	"CX": {
+	// Heal self
+	"HE": {
 		mana: 60,
-		code: "getClosest(model.players,getMouse()).heal(20)"
+		code: "model.player[0].heal(20)"
 	},
 	
 	// Stun player closest to mouse
-	"CW": {
+	"ST": {
 		mana: 40,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
-	"BC": {
+	"JX": {
 		mana: 30,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse + 2 radians
-	"BG": {
+	"BM": {
 		mana: 5,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+2;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
-	"GC": {
+	"ZP": {
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
-	"XY": {
-		mana: 15,
+	"QK": {
+		mana: 40,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
-	"PW": {
+	"PC": {
 		mana: 25,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
-	"WX": {
+	"DP": {
 		mana: 45,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Set a player's health to 50
-	"NM": {
+	"MD": {
 		mana: 40,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
-	"TY": {
+	"SH": {
 		mana: 50,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
-	"ER": {
+	"PH": {
 		mana: 35,
-		code: "getClosest(model.players,getMouse()).phasing=true;"
+		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
-	"HJ": {
+	"FL": {
 		mana: 65,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
-	"LK": {
+	"SD": {
 		mana: 45,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
@@ -418,6 +425,18 @@ magic = {
 	"VM": {
 		mana: 30,
 		code: "model.players[0].heal(10);getClosest(model.players,getMouse()).hurt(10);"
+	},
+	
+	// Move
+	"MV": {
+		mana: 0,
+		code: "var p=model.players[0];var v=vTo(p.pos,getMouse());v=scaleV(v,1/config.framesperround);p.vel=v;"
+	},
+	
+	// Swap position with another player
+	"SP": {
+		mana: 40,
+		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	}
 };
 
@@ -536,6 +555,8 @@ Player = function(name) {
 		robe: selectRandom(colors.robe)
 	};
 	
+	this.lastSpell = "";
+	
 	this.rad = 15;
 	
 	var margin = 50;
@@ -560,6 +581,7 @@ Player = function(name) {
 	this.dead = false;
 	
 	this.grounded = true;
+	this.canBounce = true;
 };
 
 Player.prototype.draw = function(layer) {
@@ -656,7 +678,7 @@ Player.prototype.drawSpell = function(dir, spell) {
 	ctx.fillStyle = "black";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
-	ctx.fillText(spell, 30*Math.cos(dir), 30*Math.sin(dir));
+	ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
 	ctx.restore();
 };
 
@@ -701,41 +723,17 @@ Player.prototype.jinx = function() {
 	model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
 };
 
-Player.prototype.setCourse = function(dir) {
-	this.course = dir;
-	switch(this.course) {
-		case "n":
-			this.vel.x = 0;
-			this.vel.y = -this.speed;
-			break;
-		case "s":
-			this.vel.x = 0;
-			this.vel.y = this.speed;
-			break;
-		case "e":
-			this.vel.x = this.speed;
-			this.vel.y = 0;
-			break;
-		case "w":
-			this.vel.x = -this.speed;
-			this.vel.y = 0;
-			break;
-	}
-};
-
 Player.prototype.update = function() {
+	// Add velocity to position
 	this.pos = addV(this.pos, this.vel);
-	var p = this.pos;
-	var v = this.vel;
-	var r = this.rad * 2;
-	if(p.x < r && v.x < 0) {
-		this.setCourse("e");
-	} else if(p.x > canvas.width-r && v.x > 0) {
-		this.setCourse("w");
-	} else if(p.y < r && v.y < 0) {
-		this.setCourse("s");
-	} else if(p.y > canvas.height-r && v.y > 0) {
-		this.setCourse("n");
+	
+	// Control the direction player is facing
+	this.course = "s";
+	if(getMagOfV(this.vel) > 0) {
+		var dir = getDirOfV(this.vel);
+		if(dir < 0) this.course = "n";
+		if(Math.abs(dir) > 2.36) this.course = "w";
+		if(Math.abs(dir) < 0.79) this.course = "e";
 	}
 };
 
@@ -1207,7 +1205,7 @@ Setup.prototype.update = function() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	this.player.draw("grounded");
 	
-	l("setup-spells").innerHTML = "Fireball - " + decode("AB", this.player.key);
+	l("setup-spells").innerHTML = "Fireball - " + decode("FB", this.player.key) + "<br>Move - " + decode("MV", this.player.key);
 };
 
 
@@ -1218,7 +1216,8 @@ Turn = function() {
 	this.spellRot = 0;
 	
 	// Current player setup
-	course = model.players[0].course;
+	model.players[0].vel.x = 0;
+	model.players[0].vel.y = 0;
 	model.players[0].phasing = false;
 	model.players[0].mana += config.manaperturn;
 };
@@ -1237,15 +1236,25 @@ Turn.prototype.newInput = function(char) {
 };
 
 Turn.prototype.cast = function() {
+	// Only cast if spell has been entered
 	if(this.input.length !== 2) return;
 	
+	// End turn
+	state = new Sim();
+	
+	// Get spell and make sure it hasn't been used since player's last turn
 	var spell = this.input;
+	model.players[0].lastSpell = spell;
+	for(var i = 1; i < model.players.length; i++) {
+		if(spell === model.players[i].lastSpell) return;
+	}
+	
+	// Encode spell
 	if(config.doencoding) {
 		spell = encode(spell, model.players[0].key);
 	}
 	
-	state = new Sim();
-	
+	// Cast spell
 	try {
 		model.players[0].useMana(magic[spell].mana);
 		eval(magic[spell].code);
@@ -1255,7 +1264,6 @@ Turn.prototype.cast = function() {
 };
 
 Turn.prototype.update = function() {
-	model.players[0].setCourse(course);
 	this.spellRot += 0.05;
 	this.draw();
 };
@@ -1264,8 +1272,7 @@ Turn.prototype.update = function() {
 
 // Sim
 Sim = function() {
-	var timeBetweenTurns = 100;
-	this.timer = timeBetweenTurns / model.players.length;
+	this.timer = config.framesperround / model.players.length;
 };
 
 Sim.prototype.draw = function() {
@@ -1320,28 +1327,13 @@ Sim.prototype.updateFX = function() {
 };
 
 Sim.prototype.bounceThings = function() {
-	for(var i in model.things) {
-		if(model.things[i].canBounce) {
-			var p = model.things[i].pos;
-			var v = model.things[i].vel;
-			var r = model.things[i].rad;
+	for(var i in model.everything) {
+		if(model.everything[i].canBounce) {
+			var p = model.everything[i].pos;
+			var v = model.everything[i].vel;
+			var r = model.everything[i].rad;
 			if((p.x < r && v.x < 0) || (p.x > canvas.width-r && v.x > 0)) v.x = 0 - v.x;
 			if((p.y < r && v.y < 0) || (p.y > canvas.height-r && v.y > 0)) v.y = 0 - v.y;
-		}
-	}
-	for(var i in model.players) {
-		var pl = model.players[i];
-		var p = pl.pos;
-		var v = pl.vel;
-		var r = pl.rad * 2;
-		if(p.x < r && v.x < 0) {
-			pl.setCourse("e");
-		} else if(p.x > canvas.width-r && v.x > 0) {
-			pl.setCourse("w");
-		} else if(p.y < r && v.y < 0) {
-			pl.setCourse("s");
-		} else if(p.y > canvas.height-r && v.y > 0) {
-			pl.setCourse("n");
 		}
 	}
 };
@@ -1510,20 +1502,6 @@ window.addEventListener("keydown", function(e) {
 		var char = String.fromCharCode(e.keyCode);
 		if(isLetter(char)) {
 			state.newInput(char);
-		}
-		switch(e.keyCode) {
-			case 37:
-				course = "w";
-				break;
-			case 38:
-				course = "n";
-				break;
-			case 39:
-				course = "e";
-				break;
-			case 40:
-				course = "s";
-				break;
 		}
 	}
 }, false);
