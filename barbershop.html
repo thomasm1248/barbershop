@@ -132,7 +132,8 @@ var Projectile,
 		Zap,
 		PoisonCloud,
 		Shield,
-		Float;
+		Float,
+		Obstacle;
 
 var Sword;
 
@@ -337,10 +338,10 @@ projectile => <projectileName>(<playerName>,<pos>,<dir>)
 */
 magic = {
 	
-	// Teleport to mouse
-	"TP": {
-		mana: 50,
-		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
+	// Move
+	"MV": {
+		mana: 0,
+		code: "var p=model.players[0];var v=vTo(p.pos,getMouse());v=scaleV(v,1/config.framesperround);p.vel=v;"
 	},
 	
 	// Fireball towards mouse
@@ -349,9 +350,15 @@ magic = {
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
+	// Teleport to mouse
+	"TP": {
+		mana: 45,
+		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
+	},
+	
 	// Heal self
 	"HE": {
-		mana: 60,
+		mana: 55,
 		code: "model.player[0].heal(20)"
 	},
 	
@@ -393,19 +400,19 @@ magic = {
 	
 	// Disappear thing closest to mouse
 	"DP": {
-		mana: 45,
+		mana: 40,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Set a player's health to 50
 	"MD": {
-		mana: 40,
+		mana: 35,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
 	"SH": {
-		mana: 50,
+		mana: 35,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
@@ -417,32 +424,44 @@ magic = {
 	
 	// Float at mouse
 	"FL": {
-		mana: 65,
+		mana: 40,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"SD": {
-		mana: 45,
+		mana: 50,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"VM": {
-		mana: 30,
+		mana: 40,
 		code: "model.players[0].heal(10);getClosest(model.players,getMouse()).hurt(10);"
-	},
-	
-	// Move
-	"MV": {
-		mana: 0,
-		code: "var p=model.players[0];var v=vTo(p.pos,getMouse());v=scaleV(v,1/config.framesperround);p.vel=v;"
 	},
 	
 	// Swap position with another player
 	"SP": {
-		mana: 40,
+		mana: 35,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
+	},
+	
+	// Blind player temporarily
+	"BL": {
+		mana: 35,
+		code: "getClosest(model.players,getMouse()).blind();"
+	},
+	
+	// Invisibility
+	"IN": {
+		mana: 30,
+		code: "model.players[0].invisible=false;"
+	},
+	
+	// Obstacle at mouse
+	"OB": {
+		mana: 20,
+		code: "model.things.push(new Obstacle(getMouse()));"
 	}
 };
 
@@ -584,6 +603,8 @@ Player = function(name) {
 	this.stunned = false;
 	this.jinxed = false;
 	this.phasing = false;
+	this.blinded = false;
+	this.invisible = false;
 	this.dead = false;
 	
 	this.grounded = true;
@@ -591,12 +612,15 @@ Player = function(name) {
 };
 
 Player.prototype.draw = function(layer) {
+	if(this.invisible) return;
+	
 	if(layer === "info") {
 		ctx.save();
 		translate(this.pos);
 		
 		// Name bar
 		ctx.fillStyle = "black";
+		if(state.blind) ctx.fillStyle = "white";
 		ctx.textAlign = "center";
 		ctx.fillText(this.name, 0, -37);
 		
@@ -681,7 +705,6 @@ Player.prototype.drawSpell = function(dir, spell) {
 	
 	ctx.save();
 	translate(this.pos);
-	ctx.fillStyle = "black";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 	ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
@@ -729,6 +752,12 @@ Player.prototype.jinx = function() {
 	model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
 };
 
+Player.prototype.blind = function() {
+	this.blinded = true;
+	
+	model.fx.push(new Info("Blinded", "blind", this.pos));
+};
+
 Player.prototype.update = function() {
 	// Add velocity to position
 	this.pos = addV(this.pos, this.vel);
@@ -762,6 +791,7 @@ Sword = function(name, pos) {
 	this.attackTimer = 0;
 	
 	this.canBounce = true;
+	this.canBeReflected = true;
 	
 	this.dead = false;
 };
@@ -822,6 +852,7 @@ Sword.prototype.update = function() {
 // Projectile prototype
 Projectile = function() {
 	this.canBounce = true;
+	this.canBeReflected = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
 
@@ -1049,6 +1080,56 @@ Shield.prototype.draw = function(layer) {
 Shield.prototype.update = function() {
 	for(var i in model.everything) {
 		var t = model.everything[i];
+		if(t.canBeReflected) {
+			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+				var norm = normalize(vTo(this.pos, t.pos));
+				var vel = dot(t.vel, norm);
+				if(vel < 0) {
+					t.vel = addV(t.vel, scaleV(norm, vel * -2));
+				}
+			}
+		}
+	}
+};
+
+
+
+// Obstacle
+Obstacle = function(pos) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 25;
+	
+	this.dead = false;
+};
+
+Obstacle.prototype.draw = function(layer) {
+	if(layer !== "grounded") return;
+	
+	ctx.save();
+	translate(this.pos);
+	
+	ctx.fillStyle = "grey";
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 3;
+	ctx.beginPath();
+	ctx.arc(0, 20, this.rad, 0, Math.PI);
+	ctx.arc(0, 0, this.rad, Math.PI, 2*Math.PI);
+	ctx.lineTo(this.rad, 20);
+	ctx.moveTo(this.rad, 0);
+	ctx.arc(0, 0, this.rad, 0, Math.PI);
+	ctx.fill();
+	ctx.stroke();
+	
+	ctx.restore();
+};
+
+Obstacle.prototype.update = function() {
+	for(var i in model.everything) {
+		var t = model.everything[i];
 		if(t.canBounce) {
 			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
 				var norm = normalize(vTo(this.pos, t.pos));
@@ -1056,6 +1137,9 @@ Shield.prototype.update = function() {
 				if(vel < 0) {
 					t.vel = addV(t.vel, scaleV(norm, vel * -2));
 				}
+			}
+			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+				t.pos = addV(t.pos, scaleV(normalize(vTo(this.pos, t.pos)), 4));
 			}
 		}
 	}
@@ -1127,7 +1211,8 @@ Info = function(text, type, pos) {
 		"heal": "green",
 		"stun": "red",
 		"poison": "green",
-		"jinx": "blue"
+		"jinx": "blue",
+		"blind": "red"
 	}[type];
 	
 	this.timer = 0;
@@ -1221,16 +1306,31 @@ Turn = function() {
 	this.input = "";
 	this.spellRot = 0;
 	
+	this.blind = model.players[0].blinded;
+	
 	// Current player setup
-	model.players[0].vel.x = 0;
-	model.players[0].vel.y = 0;
-	model.players[0].phasing = false;
-	model.players[0].mana += config.manaperturn;
+	var p = model.players[0];
+	p.vel.x = 0;
+	p.vel.y = 0;
+	p.phasing = false;
+	p.mana += config.manaperturn;
+	p.blinded = false;
+	p.invisible = false;
 };
 
 Turn.prototype.draw = function() {
-	model.draw();
-	model.players[0].drawSpell(this.spellRot, this.input);
+	if(this.blind) {
+		ctx.fillStyle = "black";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		model.players[0].draw("grounded");
+		ctx.fillStyle = "white";
+		model.players[0].drawSpell(this.spellRot, this.input);
+	} else {
+		model.draw();
+		ctx.fillStyle = "black";
+		model.players[0].drawSpell(this.spellRot, this.input);
+	}
+	model.players[0].draw("info");
 };
 
 Turn.prototype.newInput = function(char) {
