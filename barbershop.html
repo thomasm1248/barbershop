@@ -363,7 +363,7 @@ magic = {
 	
 	// Fireball towards mouse
 	"FB": {
-		mana: 5,
+		mana: 15,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
@@ -393,7 +393,7 @@ magic = {
 	
 	// Beam shot towards mouse + 2 radians
 	"BM": {
-		mana: 5,
+		mana: 20,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+2;model.things.push(new Beam(p.pos,r))"
 	},
 	
@@ -423,7 +423,7 @@ magic = {
 	
 	// Set a player's health to 50
 	"MD": {
-		mana: 35,
+		mana: 100,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
@@ -472,7 +472,7 @@ magic = {
 	// Invisibility
 	"IN": {
 		mana: 45,
-		code: "model.players[0].invisible=false;"
+		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
