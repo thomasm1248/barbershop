@@ -6,9 +6,15 @@
   <title>Barbershop</title>
 	<style>
 
+@font-face {
+	font-family: "OldEnglish";
+	src: url("AlteSchwabacher.ttf");
+}
+
 * {
 	margin: 0;
 	padding: 0;
+	outline: none;
 }
 
 body {
@@ -31,6 +37,7 @@ body {
 
 .overlay div h1 {
 	margin-bottom: 10px;
+	font-family: "OldEnglish";
 }
 
 .overlay div {
@@ -38,16 +45,38 @@ body {
 	text-align: center;
 }
 
+.menu-button {
+	border: none;
+	background-color: transparent;
+	font-family: "OldEnglish";
+	font-size: 24px;
+	margin: 5px;
+}
+
+.menu-button:hover {
+	font-size: 30px;
+	margin: 1.5px;
+}
+
 #main-menu-container textarea {
 	width: 200px;
 	height: 200px;
+	border: 2px inset grey;
 	font-size: 20px;
+	border-radius: 5px;
+	resize: none;
+	padding: 5px;
+	background-color: #e4e8c7;
 }
 
 #setup-container #setup-name-box {
 	width: 200px;
 	height: 30px;
+	border: 2px inset grey;
 	font-size: 20px;
+	border-radius: 5px;
+	padding: 5px;
+	background-color: #e4e8c7;
 }
 
 #setup-container #setup-spells {
@@ -62,20 +91,19 @@ body {
 	<div class="overlay" id="main-menu-overlay">
 		<div id="main-menu-container">
 			<h1>Barbershop</h1>
-			<p>Enter player names here:</p>
-			<textarea id="name-input-box"></textarea>
+			<textarea id="name-input-box" placeholder="Player Names"></textarea>
 			<br>
-			<input id="start-game" type="button" value="START GAME!!!" onclick="state.start()">
-			<input id="player-setup-button" type="button" value="Player Setup" onclick="state = new Setup();">
+			<input id="start-game" class="menu-button" type="button" value="Start" onclick="state.start()">
+			<br>
+			<input id="player-setup-button" class="menu-button" type="button" value="Player Setup" onclick="state = new Setup();">
 		</div>
 	</div>
 	<div class="overlay" id="setup-overlay">
 		<div id="setup-container">
 			<h1>Player Setup</h1>
-			<p>Enter player name here:</p>
-			<input id="setup-name-box" type="text">
+			<input id="setup-name-box" type="text" placeholder="Player Name">
 			<br>
-			<input id="back-to-menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<input id="back-to-menu-button" class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 			<div id="setup-spells"></div>
 		</div>
 	</div>
@@ -93,7 +121,8 @@ body {
 var config = {
 	doencoding: true,
 	manaperturn: 20,
-	framesperround: 100
+	framesperround: 100,
+	walkingdistance: 200
 };
 
 
@@ -126,7 +155,8 @@ var Projectile,
 		Zap,
 		PoisonCloud,
 		Shield,
-		Float;
+		Float,
+		Obstacle;
 
 var Sword;
 
@@ -331,57 +361,57 @@ projectile => <projectileName>(<playerName>,<pos>,<dir>)
 */
 magic = {
 	
-	// Teleport to mouse
-	"TP": {
-		mana: 50,
-		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
-	},
-	
 	// Fireball towards mouse
 	"FB": {
-		mana: 5,
+		mana: 15,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
+	},
+	
+	// Teleport to mouse
+	"TP": {
+		mana: 45,
+		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
 	"HE": {
-		mana: 60,
+		mana: 55,
 		code: "model.player[0].heal(20)"
 	},
 	
 	// Stun player closest to mouse
 	"ST": {
-		mana: 40,
+		mana: 55,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
 	"JX": {
-		mana: 30,
+		mana: 70,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse + 2 radians
 	"BM": {
-		mana: 5,
+		mana: 20,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+2;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
 	"ZP": {
-		mana: 10,
+		mana: 60,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
 	"QK": {
-		mana: 40,
+		mana: 50,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
 	"PC": {
-		mana: 25,
+		mana: 65,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
@@ -393,13 +423,13 @@ magic = {
 	
 	// Set a player's health to 50
 	"MD": {
-		mana: 40,
+		mana: 100,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
 	"SH": {
-		mana: 50,
+		mana: 60,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
@@ -411,32 +441,44 @@ magic = {
 	
 	// Float at mouse
 	"FL": {
-		mana: 65,
+		mana: 40,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"SD": {
-		mana: 45,
+		mana: 50,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"VM": {
-		mana: 30,
-		code: "model.players[0].heal(10);getClosest(model.players,getMouse()).hurt(10);"
-	},
-	
-	// Move
-	"MV": {
-		mana: 0,
-		code: "var p=model.players[0];var v=vTo(p.pos,getMouse());v=scaleV(v,1/config.framesperround);p.vel=v;"
+		mana: 50,
+		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"SP": {
-		mana: 40,
+		mana: 45,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
+	},
+	
+	// Blind player temporarily
+	"BL": {
+		mana: 35,
+		code: "getClosest(model.players,getMouse()).blind();"
+	},
+	
+	// Invisibility
+	"IN": {
+		mana: 45,
+		code: "model.players[0].invisible=true;"
+	},
+	
+	// Obstacle at mouse
+	"OB": {
+		mana: 35,
+		code: "model.things.push(new Obstacle(getMouse()));"
 	}
 };
 
@@ -555,7 +597,7 @@ Player = function(name) {
 		robe: selectRandom(colors.robe)
 	};
 	
-	this.lastSpell = "";
+	this.blockSpell = "";
 	
 	this.rad = 15;
 	
@@ -578,6 +620,8 @@ Player = function(name) {
 	this.stunned = false;
 	this.jinxed = false;
 	this.phasing = false;
+	this.blinded = false;
+	this.invisible = false;
 	this.dead = false;
 	
 	this.grounded = true;
@@ -585,12 +629,15 @@ Player = function(name) {
 };
 
 Player.prototype.draw = function(layer) {
+	if(this.invisible) return;
+	
 	if(layer === "info") {
 		ctx.save();
 		translate(this.pos);
 		
 		// Name bar
 		ctx.fillStyle = "black";
+		if(state.blind) ctx.fillStyle = "white";
 		ctx.textAlign = "center";
 		ctx.fillText(this.name, 0, -37);
 		
@@ -675,7 +722,6 @@ Player.prototype.drawSpell = function(dir, spell) {
 	
 	ctx.save();
 	translate(this.pos);
-	ctx.fillStyle = "black";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 	ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
@@ -685,7 +731,6 @@ Player.prototype.drawSpell = function(dir, spell) {
 Player.prototype.useMana = function(mana) {
 	this.mana -= mana;
 	
-	if(this.mana > 100) this.mana = 100;
 	if(this.mana < 0) {
 		this.health += this.mana;
 		this.mana = 0;
@@ -723,6 +768,21 @@ Player.prototype.jinx = function() {
 	model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
 };
 
+Player.prototype.blind = function() {
+	this.blinded = true;
+	
+	model.fx.push(new Info("Blinded", "blind", this.pos));
+};
+
+Player.prototype.move = function() {
+	var v = vTo(this.pos, getMouse());
+	if(getMagOfV(v) > config.walkingdistance) {
+		v = scaleV(normalize(v), config.walkingdistance);
+	}
+	v = scaleV(v, 1/config.framesperround);
+	this.vel=v;
+};
+
 Player.prototype.update = function() {
 	// Add velocity to position
 	this.pos = addV(this.pos, this.vel);
@@ -756,6 +816,7 @@ Sword = function(name, pos) {
 	this.attackTimer = 0;
 	
 	this.canBounce = true;
+	this.canBeReflected = true;
 	
 	this.dead = false;
 };
@@ -816,6 +877,7 @@ Sword.prototype.update = function() {
 // Projectile prototype
 Projectile = function() {
 	this.canBounce = true;
+	this.canBeReflected = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
 
@@ -885,7 +947,7 @@ Beam = function(pos, dir) {
 	
 	this.rad = 5;
 	
-	var speed = 4;
+	var speed = 5;
 	this.vel = {
 		x: Math.cos(dir) * speed,
 		y: Math.sin(dir) * speed
@@ -1007,7 +1069,7 @@ PoisonCloud.prototype.update = function() {
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
 			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(2);
+				model.players[i].hurt(1);
 			}
 		}
 	}
@@ -1043,6 +1105,56 @@ Shield.prototype.draw = function(layer) {
 Shield.prototype.update = function() {
 	for(var i in model.everything) {
 		var t = model.everything[i];
+		if(t.canBeReflected) {
+			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+				var norm = normalize(vTo(this.pos, t.pos));
+				var vel = dot(t.vel, norm);
+				if(vel < 0) {
+					t.vel = addV(t.vel, scaleV(norm, vel * -2));
+				}
+			}
+		}
+	}
+};
+
+
+
+// Obstacle
+Obstacle = function(pos) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 25;
+	
+	this.dead = false;
+};
+
+Obstacle.prototype.draw = function(layer) {
+	if(layer !== "grounded") return;
+	
+	ctx.save();
+	translate(this.pos);
+	
+	ctx.fillStyle = "grey";
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 3;
+	ctx.beginPath();
+	ctx.arc(0, 20, this.rad, 0, Math.PI);
+	ctx.arc(0, 0, this.rad, Math.PI, 2*Math.PI);
+	ctx.lineTo(this.rad, 20);
+	ctx.moveTo(this.rad, 0);
+	ctx.arc(0, 0, this.rad, 0, Math.PI);
+	ctx.fill();
+	ctx.stroke();
+	
+	ctx.restore();
+};
+
+Obstacle.prototype.update = function() {
+	for(var i in model.everything) {
+		var t = model.everything[i];
 		if(t.canBounce) {
 			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
 				var norm = normalize(vTo(this.pos, t.pos));
@@ -1050,6 +1162,9 @@ Shield.prototype.update = function() {
 				if(vel < 0) {
 					t.vel = addV(t.vel, scaleV(norm, vel * -2));
 				}
+			}
+			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+				t.pos = addV(t.pos, scaleV(normalize(vTo(this.pos, t.pos)), 4));
 			}
 		}
 	}
@@ -1121,7 +1236,8 @@ Info = function(text, type, pos) {
 		"heal": "green",
 		"stun": "red",
 		"poison": "green",
-		"jinx": "blue"
+		"jinx": "blue",
+		"blind": "red"
 	}[type];
 	
 	this.timer = 0;
@@ -1180,6 +1296,7 @@ Menu.prototype.start = function() {
 	
 	l("main-menu-overlay").style.display = "none";
 	state = new Turn();
+	state.skipClick = true;
 };
 
 Menu.prototype.update = function() {
@@ -1212,19 +1329,48 @@ Setup.prototype.update = function() {
 
 // Turn
 Turn = function() {
+	this.state = "block";
 	this.input = "";
 	this.spellRot = 0;
 	
+	this.skipClick = false;
+	
+	this.blind = model.players[0].blinded;
+	
 	// Current player setup
-	model.players[0].vel.x = 0;
-	model.players[0].vel.y = 0;
-	model.players[0].phasing = false;
-	model.players[0].mana += config.manaperturn;
+	var p = model.players[0];
+	p.vel.x = 0;
+	p.vel.y = 0;
+	p.phasing = false;
+	p.mana += config.manaperturn;
+	if(p.mana > 100) p.mana = 100;
+	p.blinded = false;
+	p.invisible = false;
 };
 
 Turn.prototype.draw = function() {
-	model.draw();
-	model.players[0].drawSpell(this.spellRot, this.input);
+	var p = model.players[0];
+	
+	if(this.blind) {
+		ctx.fillStyle = "black";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		p.draw("grounded");
+		ctx.fillStyle = "white";
+		p.drawSpell(this.spellRot, this.input);
+	} else {
+		model.draw();
+		ctx.fillStyle = "black";
+		p.drawSpell(this.spellRot, this.input);
+	}
+	p.draw("info");
+	
+	if(this.state === "block") {
+		ctx.strokeStyle = "yellow";
+		ctx.beginPath();
+		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance, 0, 2*Math.PI);
+		ctx.lineWidth = 2;
+		ctx.stroke();
+	}
 };
 
 Turn.prototype.newInput = function(char) {
@@ -1233,6 +1379,18 @@ Turn.prototype.newInput = function(char) {
 	} else {
 		this.input += char;
 	}
+};
+
+Turn.prototype.blockAndMove = function() {
+	// Block
+	model.players[0].blockSpell = this.input;
+	
+	// Move
+	model.players[0].move();
+	
+	// Next state
+	this.input = "";
+	this.state = "cast";
 };
 
 Turn.prototype.cast = function() {
@@ -1244,9 +1402,8 @@ Turn.prototype.cast = function() {
 	
 	// Get spell and make sure it hasn't been used since player's last turn
 	var spell = this.input;
-	model.players[0].lastSpell = spell;
 	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].lastSpell) return;
+		if(spell === model.players[i].blockSpell) return;
 	}
 	
 	// Encode spell
@@ -1260,6 +1417,21 @@ Turn.prototype.cast = function() {
 		eval(magic[spell].code);
 	} catch(e) {
 		// Oh well
+	}
+};
+
+Turn.prototype.click = function() {
+	if(this.skipClick) {
+		this.skipClick = false;
+		return;
+	}
+	switch(this.state) {
+		case "block":
+			this.blockAndMove();
+			break;
+		case "cast":
+			this.cast();
+			break;
 	}
 };
 
@@ -1513,7 +1685,7 @@ window.addEventListener("mousemove", function(e) {
 
 window.addEventListener("click", function(e) {
 	if(state instanceof Turn) {
-		state.cast();
+		state.click();
 	}
 }, false);
 
