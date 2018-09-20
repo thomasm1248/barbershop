@@ -14,6 +14,7 @@
 * {
 	margin: 0;
 	padding: 0;
+	outline: none;
 }
 
 body {
@@ -44,16 +45,38 @@ body {
 	text-align: center;
 }
 
+.menu-button {
+	border: none;
+	background-color: transparent;
+	font-family: "OldEnglish";
+	font-size: 24px;
+	margin: 5px;
+}
+
+.menu-button:hover {
+	font-size: 30px;
+	margin: 1.5px;
+}
+
 #main-menu-container textarea {
 	width: 200px;
 	height: 200px;
+	border: 2px inset grey;
 	font-size: 20px;
+	border-radius: 5px;
+	resize: none;
+	padding: 5px;
+	background-color: #e4e8c7;
 }
 
 #setup-container #setup-name-box {
 	width: 200px;
 	height: 30px;
+	border: 2px inset grey;
 	font-size: 20px;
+	border-radius: 5px;
+	padding: 5px;
+	background-color: #e4e8c7;
 }
 
 #setup-container #setup-spells {
@@ -68,20 +91,19 @@ body {
 	<div class="overlay" id="main-menu-overlay">
 		<div id="main-menu-container">
 			<h1>Barbershop</h1>
-			<p>Enter player names here:</p>
-			<textarea id="name-input-box"></textarea>
+			<textarea id="name-input-box" placeholder="Player Names"></textarea>
 			<br>
-			<input id="start-game" type="button" value="START GAME!!!" onclick="state.start()">
-			<input id="player-setup-button" type="button" value="Player Setup" onclick="state = new Setup();">
+			<input id="start-game" class="menu-button" type="button" value="Start" onclick="state.start()">
+			<br>
+			<input id="player-setup-button" class="menu-button" type="button" value="Player Setup" onclick="state = new Setup();">
 		</div>
 	</div>
 	<div class="overlay" id="setup-overlay">
 		<div id="setup-container">
 			<h1>Player Setup</h1>
-			<p>Enter player name here:</p>
-			<input id="setup-name-box" type="text">
+			<input id="setup-name-box" type="text" placeholder="Player Name">
 			<br>
-			<input id="back-to-menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<input id="back-to-menu-button" class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 			<div id="setup-spells"></div>
 		</div>
 	</div>
