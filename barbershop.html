@@ -99,7 +99,8 @@ body {
 var config = {
 	doencoding: true,
 	manaperturn: 20,
-	framesperround: 100
+	framesperround: 100,
+	walkingdistance: 200
 };
 
 
@@ -338,12 +339,6 @@ projectile => <projectileName>(<playerName>,<pos>,<dir>)
 */
 magic = {
 	
-	// Move
-	"MV": {
-		mana: 0,
-		code: "var p=model.players[0];var v=vTo(p.pos,getMouse());v=scaleV(v,1/config.framesperround);p.vel=v;"
-	},
-	
 	// Fireball towards mouse
 	"FB": {
 		mana: 5,
@@ -364,13 +359,13 @@ magic = {
 	
 	// Stun player closest to mouse
 	"ST": {
-		mana: 40,
+		mana: 55,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
 	"JX": {
-		mana: 30,
+		mana: 70,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
@@ -382,25 +377,25 @@ magic = {
 	
 	// Zap with lightning
 	"ZP": {
-		mana: 10,
+		mana: 60,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
 	"QK": {
-		mana: 40,
+		mana: 50,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
 	"PC": {
-		mana: 25,
+		mana: 65,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
 	"DP": {
-		mana: 40,
+		mana: 45,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
@@ -412,7 +407,7 @@ magic = {
 	
 	// Shield at mouse
 	"SH": {
-		mana: 35,
+		mana: 60,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
@@ -436,13 +431,13 @@ magic = {
 	
 	// Vampire
 	"VM": {
-		mana: 40,
-		code: "model.players[0].heal(10);getClosest(model.players,getMouse()).hurt(10);"
+		mana: 50,
+		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"SP": {
-		mana: 35,
+		mana: 45,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
@@ -454,13 +449,13 @@ magic = {
 	
 	// Invisibility
 	"IN": {
-		mana: 30,
+		mana: 45,
 		code: "model.players[0].invisible=false;"
 	},
 	
 	// Obstacle at mouse
 	"OB": {
-		mana: 20,
+		mana: 35,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	}
 };
@@ -580,7 +575,7 @@ Player = function(name) {
 		robe: selectRandom(colors.robe)
 	};
 	
-	this.lastSpell = "";
+	this.blockSpell = "";
 	
 	this.rad = 15;
 	
@@ -714,7 +709,6 @@ Player.prototype.drawSpell = function(dir, spell) {
 Player.prototype.useMana = function(mana) {
 	this.mana -= mana;
 	
-	if(this.mana > 100) this.mana = 100;
 	if(this.mana < 0) {
 		this.health += this.mana;
 		this.mana = 0;
@@ -756,6 +750,15 @@ Player.prototype.blind = function() {
 	this.blinded = true;
 	
 	model.fx.push(new Info("Blinded", "blind", this.pos));
+};
+
+Player.prototype.move = function() {
+	var v = vTo(this.pos, getMouse());
+	if(getMagOfV(v) > config.walkingdistance) {
+		v = scaleV(normalize(v), config.walkingdistance);
+	}
+	v = scaleV(v, 1/config.framesperround);
+	this.vel=v;
 };
 
 Player.prototype.update = function() {
@@ -922,7 +925,7 @@ Beam = function(pos, dir) {
 	
 	this.rad = 5;
 	
-	var speed = 4;
+	var speed = 5;
 	this.vel = {
 		x: Math.cos(dir) * speed,
 		y: Math.sin(dir) * speed
@@ -1044,7 +1047,7 @@ PoisonCloud.prototype.update = function() {
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
 			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(2);
+				model.players[i].hurt(1);
 			}
 		}
 	}
@@ -1271,6 +1274,7 @@ Menu.prototype.start = function() {
 	
 	l("main-menu-overlay").style.display = "none";
 	state = new Turn();
+	state.skipClick = true;
 };
 
 Menu.prototype.update = function() {
@@ -1303,8 +1307,11 @@ Setup.prototype.update = function() {
 
 // Turn
 Turn = function() {
+	this.state = "block";
 	this.input = "";
 	this.spellRot = 0;
+	
+	this.skipClick = false;
 	
 	this.blind = model.players[0].blinded;
 	
@@ -1314,23 +1321,34 @@ Turn = function() {
 	p.vel.y = 0;
 	p.phasing = false;
 	p.mana += config.manaperturn;
+	if(p.mana > 100) p.mana = 100;
 	p.blinded = false;
 	p.invisible = false;
 };
 
 Turn.prototype.draw = function() {
+	var p = model.players[0];
+	
 	if(this.blind) {
 		ctx.fillStyle = "black";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		model.players[0].draw("grounded");
+		p.draw("grounded");
 		ctx.fillStyle = "white";
-		model.players[0].drawSpell(this.spellRot, this.input);
+		p.drawSpell(this.spellRot, this.input);
 	} else {
 		model.draw();
 		ctx.fillStyle = "black";
-		model.players[0].drawSpell(this.spellRot, this.input);
+		p.drawSpell(this.spellRot, this.input);
 	}
-	model.players[0].draw("info");
+	p.draw("info");
+	
+	if(this.state === "block") {
+		ctx.strokeStyle = "yellow";
+		ctx.beginPath();
+		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance, 0, 2*Math.PI);
+		ctx.lineWidth = 2;
+		ctx.stroke();
+	}
 };
 
 Turn.prototype.newInput = function(char) {
@@ -1339,6 +1357,18 @@ Turn.prototype.newInput = function(char) {
 	} else {
 		this.input += char;
 	}
+};
+
+Turn.prototype.blockAndMove = function() {
+	// Block
+	model.players[0].blockSpell = this.input;
+	
+	// Move
+	model.players[0].move();
+	
+	// Next state
+	this.input = "";
+	this.state = "cast";
 };
 
 Turn.prototype.cast = function() {
@@ -1350,9 +1380,8 @@ Turn.prototype.cast = function() {
 	
 	// Get spell and make sure it hasn't been used since player's last turn
 	var spell = this.input;
-	model.players[0].lastSpell = spell;
 	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].lastSpell) return;
+		if(spell === model.players[i].blockSpell) return;
 	}
 	
 	// Encode spell
@@ -1366,6 +1395,21 @@ Turn.prototype.cast = function() {
 		eval(magic[spell].code);
 	} catch(e) {
 		// Oh well
+	}
+};
+
+Turn.prototype.click = function() {
+	if(this.skipClick) {
+		this.skipClick = false;
+		return;
+	}
+	switch(this.state) {
+		case "block":
+			this.blockAndMove();
+			break;
+		case "cast":
+			this.cast();
+			break;
 	}
 };
 
@@ -1619,7 +1663,7 @@ window.addEventListener("mousemove", function(e) {
 
 window.addEventListener("click", function(e) {
 	if(state instanceof Turn) {
-		state.cast();
+		state.click();
 	}
 }, false);
 
