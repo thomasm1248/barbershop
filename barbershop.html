@@ -119,7 +119,7 @@ body {
 
 // Configuration
 var config = {
-	doencoding: true,
+	doencoding: false,
 	manaperturn: 20,
 	framesperround: 100,
 	walkingdistance: 200
@@ -161,7 +161,8 @@ var Projectile,
 
 var Sword;
 
-var Info;
+var Info,
+		Dit;
 
 var state,
 			Menu,
@@ -354,6 +355,35 @@ function translate(pos) {
 
 
 
+// Util for spells
+
+function rep(func, count) {
+	for(var i = 0; i < count; i++) {
+		func();
+	}
+}
+
+function both(a, b) {
+	var c = []; // a + b
+	for(var i in a) {
+		c.push(a[i]);
+	}
+	for(var i in b) {
+		c.push(b[i]);
+	}
+	return c;
+}
+
+function selectWith(arr, selector) {
+	var newArr = [];
+	for(var i in arr) {
+		if(selector(arr[i])) {
+			newArr.push(arr[i]);
+		}
+	}
+	return newArr;
+}
+
 /* Magic
 
 mouse => getMouse();
@@ -539,6 +569,8 @@ Model = function() {
 	this.graveyard = [];
 	
 	this.fx = [];
+	
+	this.dits = [];
 };
 
 Model.prototype.drawBackground = function() {
@@ -582,11 +614,18 @@ Model.prototype.drawLayer = function(layer) {
 	}
 };
 
+Model.prototype.drawDits = function() {
+	for(var i = 0; i < this.dits.length; i++) {
+		this.dits[i].draw();
+	}
+};
+
 Model.prototype.draw = function() {
 	this.drawBackground();
 	this.sortByDepth();
 	this.drawLayer("ground");
 	this.drawLayer("grounded");
+	this.drawDits();
 	this.drawLayer("airborn");
 	this.drawLayer("info");
 };
@@ -887,6 +926,8 @@ Projectile = function() {
 	this.canBeReflected = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
+		
+		if(Math.random() < 0.50) model.dits.push(new Dit(this.sparkType, this.pos.x, this.pos.y));
 
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
@@ -910,6 +951,8 @@ Fireball = function(pos, dir) {
 	};
 	
 	this.rad = 10;
+	
+	this.sparkType = "redSpark";
 	
 	var speed = 5;
 	this.vel = {
@@ -954,6 +997,8 @@ Beam = function(pos, dir) {
 	
 	this.rad = 7;
 	
+	this.sparkType = "blueSpark";
+	
 	var speed = 6;
 	this.vel = {
 		x: Math.cos(dir) * speed,
@@ -996,6 +1041,8 @@ Star = function(pos, dir) {
 	};
 	
 	this.rad = 5;
+	
+	this.sparkType = "whiteSpark";
 	
 	var speed = 7;
 	this.vel = {
@@ -1319,6 +1366,58 @@ Info.prototype.update = function(layer) {
 
 
 
+// Dit
+Dit = function(type, a, b, c, d) {
+	this.t = type;
+	this.d = [];
+	switch(type) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+			this.d.push(a);
+			this.d.push(b);
+			this.d.push(Math.random() * 2.0 - 1.0);
+			this.d.push(Math.random() * 2.0 - 1.0);
+			this.d.push(Math.random() * 20);
+			break;
+	}
+};
+
+Dit.prototype.draw = function() {
+	switch(this.t) {
+		case "redSpark":
+			ctx.fillStyle = "red";
+			break;
+		case "blueSpark":
+			ctx.fillStyle = "blue";
+			break;
+		case "whiteSpark":
+			ctx.fillStyle = "white";
+			break;
+	}
+	switch(this.t) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+			ctx.fillRect(this.d[0] - 3, this.d[1] - 3, 6, 6);
+			break;
+	}
+};
+
+Dit.prototype.update = function() {
+	switch(this.t) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+			this.d[0] += this.d[2];
+			this.d[1] += this.d[3];
+			this.d[4]--;
+			return this.d[4] < 0;
+	}
+};
+
+
+
 // Menu
 Menu = function() {
 	l("setup-overlay").style.display = "none";
@@ -1329,23 +1428,32 @@ Menu = function() {
 };
 
 Menu.prototype.start = function() {
+	// Get list of names
 	var list = l("name-input-box").value;
 	list = list.split("\n");
+	
+	// Filter out duplicates and blanks
+	var temp = [];
 	for(var i = 0; i < list.length; i++) {
-		if(list[i] === "") {
-			list.splice(i, 1);
-			i--;
+		if(temp.indexOf(list[i]) === -1 && list[i] !== "") {
+			temp.push(list[i]);
 		}
 	}
+	list = temp;
 	
+	// Be sure their are at least 2 names
 	if(list.length < 2) return;
 	
+	// Create game model
 	model = new Model();
 	for(var i = 0; i < list.length; i++) {
 		model.players.push(new Player(list[i]));
 	}
 	
+	// Close main menu
 	l("main-menu-overlay").style.display = "none";
+	
+	// Start game
 	state = new Turn();
 	state.skipClick = true;
 };
@@ -1545,6 +1653,13 @@ Sim.prototype.updateFX = function() {
 	for(i = 0; i < model.fx.length; i++) {
 		if(model.fx[i].dead) {
 			model.fx.splice(i, 1);
+		}
+	}
+	
+	for(i = 0; i < model.dits.length; i++) {
+		if(model.dits[i].update()) {
+			model.dits.splice(i, 1);
+			i--;
 		}
 	}
 };
