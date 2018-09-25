@@ -403,14 +403,14 @@ magic = {
 	"TP": {
 		name: "Teleport",
 		mana: 45,
-		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
+		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
 	"HE": {
 		name: "Heal",
 		mana: 55,
-		code: "model.player[0].heal(20)"
+		code: "var p=model.players[0];p.heal(20);"
 	},
 	
 	// Stun player closest to mouse
@@ -827,7 +827,9 @@ Player.prototype.heal = function(health) {
 		this.health = this.maxHealth;
 	}
 	
-	model.fx.push(new Info("+"+health, "heal", this.pos));
+	for(var i = 0; i < 10; i++) {
+		model.dits.push(new Dit("heal", this.pos));
+	}
 };
 
 Player.prototype.stun = function() {
@@ -1408,6 +1410,21 @@ Dit = function(type, a, b, c, d) {
 			this.d.push(Math.random() * 2.0 - 1.0);
 			this.d.push(Math.random() * 20);
 			break;
+		case "teleport":
+			var r = Math.random() * 2*Math.PI;
+			var d = Math.random() * 2.0;
+			this.d.push(a);
+			this.d.push(b);
+			this.d.push(Math.cos(r)*d);
+			this.d.push(1.5*Math.sin(r)*d);
+			this.d.push(Math.random() * 10 + 10);
+			break;
+		case "heal":
+			this.d.push(a.x + Math.random()*30-15);
+			this.d.push(a.y + Math.random()*40-20);
+			this.d.push(Math.random()*10+10);
+			this.d.push(Math.random()*10+this.d[2]);
+			break;
 	}
 };
 
@@ -1417,6 +1434,7 @@ Dit.prototype.draw = function() {
 			ctx.fillStyle = "red";
 			break;
 		case "blueSpark":
+		case "teleport":
 			ctx.fillStyle = "blue";
 			break;
 		case "whiteSpark":
@@ -1427,7 +1445,23 @@ Dit.prototype.draw = function() {
 		case "redSpark":
 		case "blueSpark":
 		case "whiteSpark":
+		case "teleport":
 			ctx.fillRect(this.d[0] - 3, this.d[1] - 3, 6, 6);
+			break;
+		case "heal":
+			if(this.d[3] > this.d[2]) break;
+			ctx.save();
+			ctx.translate(this.d[0], this.d[1]);
+			ctx.beginPath();
+			ctx.moveTo(-5, 0);
+			ctx.lineTo(5, 0);
+			ctx.moveTo(0, -5);
+			ctx.lineTo(0, 5);
+			ctx.strokeStyle = "#ef4040";
+			ctx.lineWidth = 3;
+			ctx.globalAlpha = this.d[3] / 10;
+			ctx.stroke();
+			ctx.restore();
 			break;
 	}
 };
@@ -1437,10 +1471,15 @@ Dit.prototype.update = function() {
 		case "redSpark":
 		case "blueSpark":
 		case "whiteSpark":
+		case "teleport":
 			this.d[0] += this.d[2];
 			this.d[1] += this.d[3];
 			this.d[4]--;
 			return this.d[4] < 0;
+		case "heal":
+			this.d[1] -= this.d[3] < this.d[2] ? 2.0 : 0;
+			this.d[3]--;
+			return this.d[3] < 0;
 	}
 };
 
