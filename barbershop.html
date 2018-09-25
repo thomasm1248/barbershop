@@ -1564,6 +1564,11 @@ Turn = function() {
 	
 	this.blind = model.players[0].blinded;
 	
+	var p = model.players[0].pos;
+	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
+	this.moveCircleGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
+	this.moveCircleGrad.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+	
 	// Current player setup
 	var p = model.players[0];
 	p.vel.x = 0;
@@ -1592,10 +1597,10 @@ Turn.prototype.draw = function() {
 	p.draw("info");
 	
 	if(this.state === "block") {
-		ctx.strokeStyle = "yellow";
+		ctx.strokeStyle = this.moveCircleGrad;
 		ctx.beginPath();
-		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance, 0, 2*Math.PI);
-		ctx.lineWidth = 2;
+		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
+		ctx.lineWidth = 20;
 		ctx.stroke();
 	}
 };
