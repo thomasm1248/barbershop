@@ -394,126 +394,147 @@ magic = {
 	
 	// Fireball towards mouse
 	"FB": {
+		name: "Fireball I",
 		mana: 20,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
 	"TP": {
+		name: "Teleport",
 		mana: 45,
 		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
 	"HE": {
+		name: "Heal",
 		mana: 55,
 		code: "model.player[0].heal(20)"
 	},
 	
 	// Stun player closest to mouse
 	"ST": {
+		name: "Stun",
 		mana: 55,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
 	"JX": {
+		name: "Jinx",
 		mana: 70,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse
 	"BM": {
+		name: "Fireball II",
 		mana: 30,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
 	"ZP": {
+		name: "Zap",
 		mana: 60,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
 	"QK": {
+		name: "Quake",
 		mana: 50,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
 	"PC": {
+		name: "Poison Cloud",
 		mana: 65,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
 	"DP": {
+		name: "Vanish",
 		mana: 45,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Set a player's health to 50
 	"MD": {
+		name: "50 Health",
 		mana: 100,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
 	"SH": {
+		name: "Shield",
 		mana: 60,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
 	"PH": {
+		name: "Phase",
 		mana: 35,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
 	"FL": {
+		name: "Floating Platform",
 		mana: 40,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"SD": {
+		name: "Enchanted Sword",
 		mana: 50,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"VM": {
+		name: "Life Steal",
 		mana: 50,
 		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"SP": {
+		name: "Ol' Switcheroo",
 		mana: 45,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
 	"BL": {
+		name: "Blind",
 		mana: 35,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
 	"IN": {
+		name: "Invisible",
 		mana: 45,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
 	"OB": {
+		name: "Stone Pillar",
 		mana: 35,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
 	
 	// Star
 	"SR": {
+		name: "Fireball III",
 		mana: 50,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
 	}
@@ -1810,8 +1831,9 @@ GameOver = function() {
 	for(i in model.graveyard) {
 		var p = model.graveyard[i];
 		var discovery = spellNames[Math.floor(Math.random() * spellNames.length)];
+		var discName = magic[discovery].name;
 		discovery = decode(discovery, p.key);
-		page.innerHTML += "<p>" + p.name + " " + discovery + "</p>";
+		page.innerHTML += "<p>" + p.name + " - " + discovery + " is " + discName + "</p>";
 	}
 	
 	// Game Over overlay display
