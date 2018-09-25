@@ -374,7 +374,7 @@ function both(a, b) {
 	return c;
 }
 
-function selectWith(arr, selector) {
+function filter(arr, selector) {
 	var newArr = [];
 	for(var i in arr) {
 		if(selector(arr[i])) {
@@ -387,7 +387,7 @@ function selectWith(arr, selector) {
 /* Magic
 
 mouse => getMouse();
-projectile => <projectileName>(<playerName>,<pos>,<dir>)
+projectile => <projectileName>(<pos>,<dir>)
 
 */
 magic = {
@@ -537,6 +537,13 @@ magic = {
 		name: "Fireball III",
 		mana: 50,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
+	},
+	
+	// Haste
+	"HS": {
+		name: "Haste",
+		mana: 20,
+		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	}
 };
 
