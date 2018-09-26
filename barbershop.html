@@ -15,6 +15,7 @@
 	margin: 0;
 	padding: 0;
 	outline: none;
+	cursor: url(cursor.cur), auto;
 }
 
 body {
@@ -55,7 +56,7 @@ body {
 
 .menu-button:hover {
 	font-size: 30px;
-	margin: 1.5px;
+	margin: 1px;
 }
 
 #main-menu-container textarea {
@@ -84,6 +85,23 @@ body {
 	margin: 0;
 }
 
+table.game_over_table_style {
+  font-family: Verdana, Geneva, sans-serif;
+  border: none;
+  background-color: #a0a0a0;
+  text-align: left;
+	margin: 30px auto 0;
+}
+table.game_over_table_style td, table.game_over_table_style th {
+  border: none;
+	background-color: #c6c6c4;
+  padding: 4px 6px;
+}
+table.game_over_table_style tbody td {
+  font-size: 13px;
+  font-weight: bold;
+}
+
 	</style>
 </head>
 <body>
@@ -103,14 +121,25 @@ body {
 			<h1>Player Setup</h1>
 			<input id="setup-name-box" type="text" placeholder="Player Name">
 			<br>
-			<input id="back-to-menu-button" class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 			<div id="setup-spells"></div>
 		</div>
 	</div>
 	<div class="overlay" id="game-over-overlay">
 		<div id="game-over-container">
 			<h1>Game Over</h1>
-			<div id="game-over-page"></div>
+			<table class="game_over_table_style">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Name</th>
+						<th colspan="2">Spell</th>
+					</tr>
+				</thead>
+				<tbody id="game-over-table">
+				</tbody>
+			</table>
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 		</div>
 	</div>
 	<script>
@@ -152,6 +181,7 @@ var Player;
 var Projectile,
 			Fireball,
 			Beam,
+			Star,
 		Zap,
 		PoisonCloud,
 		Shield,
@@ -160,7 +190,8 @@ var Projectile,
 
 var Sword;
 
-var Info;
+var Info,
+		Dit;
 
 var state,
 			Menu,
@@ -252,6 +283,21 @@ function decode(string, key) {
 		}
 	}
 	return output;
+}
+
+function addOrdinalSuf(i) {
+	var j = i % 10,
+		k = i % 100;
+	if (j == 1 && k != 11) {
+		return i + "st";
+	}
+	if (j == 2 && k != 12) {
+		return i + "nd";
+	}
+	if (j == 3 && k != 13) {
+		return i + "rd";
+	}
+	return i + "th";
 }
 
 function selectRandom(arr) {
@@ -353,132 +399,195 @@ function translate(pos) {
 
 
 
+// Util for spells
+
+function rep(func, count) {
+	for(var i = 0; i < count; i++) {
+		func();
+	}
+}
+
+function both(a, b) {
+	var c = []; // a + b
+	for(var i in a) {
+		c.push(a[i]);
+	}
+	for(var i in b) {
+		c.push(b[i]);
+	}
+	return c;
+}
+
+function filter(arr, selector) {
+	var newArr = [];
+	for(var i in arr) {
+		if(selector(arr[i])) {
+			newArr.push(arr[i]);
+		}
+	}
+	return newArr;
+}
+
 /* Magic
 
 mouse => getMouse();
-projectile => <projectileName>(<playerName>,<pos>,<dir>)
+projectile => <projectileName>(<pos>,<dir>)
 
 */
 magic = {
 	
 	// Fireball towards mouse
 	"FB": {
-		mana: 15,
+		name: "Fireball I",
+		mana: 20,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
 	"TP": {
+		name: "Teleport",
 		mana: 45,
-		code: "var p=model.players[0].pos;var m=getMouse();p.x=m.x;p.y=m.y;"
+		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
 	"HE": {
+		name: "Heal",
 		mana: 55,
-		code: "model.player[0].heal(20)"
+		code: "var p=model.players[0];p.heal(20);"
 	},
 	
 	// Stun player closest to mouse
 	"ST": {
+		name: "Stun",
 		mana: 55,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
 	"JX": {
+		name: "Jinx",
 		mana: 70,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
-	// Beam shot towards mouse + 2 radians
+	// Beam shot towards mouse
 	"BM": {
-		mana: 20,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+2;model.things.push(new Beam(p.pos,r))"
+		name: "Fireball II",
+		mana: 30,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
 	"ZP": {
+		name: "Zap",
 		mana: 60,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
 	"QK": {
+		name: "Quake",
 		mana: 50,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
 	"PC": {
+		name: "Poison Cloud",
 		mana: 65,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
 	"DP": {
+		name: "Vanish",
 		mana: 45,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Set a player's health to 50
 	"MD": {
+		name: "50 Health",
 		mana: 100,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
 	"SH": {
+		name: "Shield",
 		mana: 60,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
 	"PH": {
+		name: "Phase",
 		mana: 35,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
 	"FL": {
+		name: "Floating Platform",
 		mana: 40,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"SD": {
+		name: "Enchanted Sword",
 		mana: 50,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"VM": {
+		name: "Life Steal",
 		mana: 50,
 		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"SP": {
+		name: "Ol' Switcheroo",
 		mana: 45,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
 	"BL": {
+		name: "Blind",
 		mana: 35,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
 	"IN": {
+		name: "Invisible",
 		mana: 45,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
 	"OB": {
+		name: "Stone Pillar",
 		mana: 35,
 		code: "model.things.push(new Obstacle(getMouse()));"
+	},
+	
+	// Star
+	"SR": {
+		name: "Fireball III",
+		mana: 50,
+		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
+	},
+	
+	// Haste
+	"HS": {
+		name: "Haste",
+		mana: 20,
+		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	}
 };
 
@@ -532,6 +641,8 @@ Model = function() {
 	this.graveyard = [];
 	
 	this.fx = [];
+	
+	this.dits = [];
 };
 
 Model.prototype.drawBackground = function() {
@@ -575,11 +686,18 @@ Model.prototype.drawLayer = function(layer) {
 	}
 };
 
+Model.prototype.drawDits = function() {
+	for(var i = 0; i < this.dits.length; i++) {
+		this.dits[i].draw();
+	}
+};
+
 Model.prototype.draw = function() {
 	this.drawBackground();
 	this.sortByDepth();
 	this.drawLayer("ground");
 	this.drawLayer("grounded");
+	this.drawDits();
 	this.drawLayer("airborn");
 	this.drawLayer("info");
 };
@@ -753,7 +871,9 @@ Player.prototype.heal = function(health) {
 		this.health = this.maxHealth;
 	}
 	
-	model.fx.push(new Info("+"+health, "heal", this.pos));
+	for(var i = 0; i < 10; i++) {
+		model.dits.push(new Dit("heal", this.pos));
+	}
 };
 
 Player.prototype.stun = function() {
@@ -880,6 +1000,8 @@ Projectile = function() {
 	this.canBeReflected = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
+		
+		if(Math.random() < 0.50) model.dits.push(new Dit(this.sparkType, this.pos.x, this.pos.y));
 
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
@@ -904,7 +1026,9 @@ Fireball = function(pos, dir) {
 	
 	this.rad = 10;
 	
-	var speed = 3;
+	this.sparkType = "redSpark";
+	
+	var speed = 5;
 	this.vel = {
 		x: Math.cos(dir) * speed,
 		y: Math.sin(dir) * speed
@@ -945,9 +1069,11 @@ Beam = function(pos, dir) {
 		y: pos.y
 	};
 	
-	this.rad = 5;
+	this.rad = 7;
 	
-	var speed = 5;
+	this.sparkType = "blueSpark";
+	
+	var speed = 6;
 	this.vel = {
 		x: Math.cos(dir) * speed,
 		y: Math.sin(dir) * speed
@@ -973,6 +1099,52 @@ Beam.prototype.draw = function(layer) {
 		ctx.lineTo(0, this.rad);
 		ctx.lineTo(-2*this.rad, 0);
 		ctx.lineTo(0, -this.rad);
+		ctx.fill();
+
+		ctx.restore();
+	}
+};
+
+
+
+// Star
+Star = function(pos, dir) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 5;
+	
+	this.sparkType = "whiteSpark";
+	
+	var speed = 7;
+	this.vel = {
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
+	};
+	
+	this.pos = addV(this.pos, scaleV(this.vel, 2));
+	
+	this.damage = 70;
+	
+	this.dead = false;
+};
+Star.prototype = new Projectile();
+
+Star.prototype.draw = function(layer) {
+	if(layer === "airborn") {
+		ctx.save();
+		translate(this.pos);
+		ctx.rotate(getDir({x:0,y:0},this.vel));
+
+		ctx.fillStyle = "white";
+		ctx.beginPath();
+		ctx.moveTo(this.rad, 0);
+		ctx.lineTo(0, this.rad);
+		ctx.lineTo(-2*this.rad, 0);
+		ctx.lineTo(0, -this.rad);
+		ctx.lineTo(this.rad, 0);
 		ctx.fill();
 
 		ctx.restore();
@@ -1268,9 +1440,99 @@ Info.prototype.update = function(layer) {
 
 
 
+// Dit
+Dit = function(type, a, b, c, d) {
+	this.t = type;
+	this.d = [];
+	switch(type) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+			this.d.push(a);
+			this.d.push(b);
+			this.d.push(Math.random() * 2.0 - 1.0);
+			this.d.push(Math.random() * 2.0 - 1.0);
+			this.d.push(Math.random() * 20);
+			break;
+		case "teleport":
+			var r = Math.random() * 2*Math.PI;
+			var d = Math.random() * 2.0;
+			this.d.push(a);
+			this.d.push(b);
+			this.d.push(Math.cos(r)*d);
+			this.d.push(1.5*Math.sin(r)*d);
+			this.d.push(Math.random() * 10 + 10);
+			break;
+		case "heal":
+			this.d.push(a.x + Math.random()*30-15);
+			this.d.push(a.y + Math.random()*40-20);
+			this.d.push(Math.random()*10+10);
+			this.d.push(Math.random()*10+this.d[2]);
+			break;
+	}
+};
+
+Dit.prototype.draw = function() {
+	switch(this.t) {
+		case "redSpark":
+			ctx.fillStyle = "red";
+			break;
+		case "blueSpark":
+		case "teleport":
+			ctx.fillStyle = "blue";
+			break;
+		case "whiteSpark":
+			ctx.fillStyle = "white";
+			break;
+	}
+	switch(this.t) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+		case "teleport":
+			ctx.fillRect(this.d[0] - 3, this.d[1] - 3, 6, 6);
+			break;
+		case "heal":
+			if(this.d[3] > this.d[2]) break;
+			ctx.save();
+			ctx.translate(this.d[0], this.d[1]);
+			ctx.beginPath();
+			ctx.moveTo(-5, 0);
+			ctx.lineTo(5, 0);
+			ctx.moveTo(0, -5);
+			ctx.lineTo(0, 5);
+			ctx.strokeStyle = "#ef4040";
+			ctx.lineWidth = 3;
+			ctx.globalAlpha = this.d[3] / 10;
+			ctx.stroke();
+			ctx.restore();
+			break;
+	}
+};
+
+Dit.prototype.update = function() {
+	switch(this.t) {
+		case "redSpark":
+		case "blueSpark":
+		case "whiteSpark":
+		case "teleport":
+			this.d[0] += this.d[2];
+			this.d[1] += this.d[3];
+			this.d[4]--;
+			return this.d[4] < 0;
+		case "heal":
+			this.d[1] -= this.d[3] < this.d[2] ? 2.0 : 0;
+			this.d[3]--;
+			return this.d[3] < 0;
+	}
+};
+
+
+
 // Menu
 Menu = function() {
 	l("setup-overlay").style.display = "none";
+	l("game-over-overlay").style.display = "none";
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	
@@ -1278,23 +1540,32 @@ Menu = function() {
 };
 
 Menu.prototype.start = function() {
+	// Get list of names
 	var list = l("name-input-box").value;
 	list = list.split("\n");
+	
+	// Filter out duplicates and blanks
+	var temp = [];
 	for(var i = 0; i < list.length; i++) {
-		if(list[i] === "") {
-			list.splice(i, 1);
-			i--;
+		if(temp.indexOf(list[i]) === -1 && list[i] !== "") {
+			temp.push(list[i]);
 		}
 	}
+	list = temp;
 	
+	// Be sure their are at least 2 names
 	if(list.length < 2) return;
 	
+	// Create game model
 	model = new Model();
 	for(var i = 0; i < list.length; i++) {
 		model.players.push(new Player(list[i]));
 	}
 	
+	// Close main menu
 	l("main-menu-overlay").style.display = "none";
+	
+	// Start game
 	state = new Turn();
 	state.skipClick = true;
 };
@@ -1322,7 +1593,7 @@ Setup.prototype.update = function() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	this.player.draw("grounded");
 	
-	l("setup-spells").innerHTML = "Fireball - " + decode("FB", this.player.key) + "<br>Move - " + decode("MV", this.player.key);
+	l("setup-spells").innerHTML = "Fireball - " + decode("FB", this.player.key);
 };
 
 
@@ -1336,6 +1607,11 @@ Turn = function() {
 	this.skipClick = false;
 	
 	this.blind = model.players[0].blinded;
+	
+	var p = model.players[0].pos;
+	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
+	this.moveCircleGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
+	this.moveCircleGrad.addColorStop(1, "rgba(0, 0, 0, 0.5)");
 	
 	// Current player setup
 	var p = model.players[0];
@@ -1365,10 +1641,10 @@ Turn.prototype.draw = function() {
 	p.draw("info");
 	
 	if(this.state === "block") {
-		ctx.strokeStyle = "yellow";
+		ctx.strokeStyle = this.moveCircleGrad;
 		ctx.beginPath();
-		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance, 0, 2*Math.PI);
-		ctx.lineWidth = 2;
+		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
+		ctx.lineWidth = 20;
 		ctx.stroke();
 	}
 };
@@ -1494,6 +1770,13 @@ Sim.prototype.updateFX = function() {
 	for(i = 0; i < model.fx.length; i++) {
 		if(model.fx[i].dead) {
 			model.fx.splice(i, 1);
+		}
+	}
+	
+	for(i = 0; i < model.dits.length; i++) {
+		if(model.dits[i].update()) {
+			model.dits.splice(i, 1);
+			i--;
 		}
 	}
 };
@@ -1627,25 +1910,33 @@ Animation.prototype.update = function() {
 GameOver = function() {
 	// Dim background
 	ctx.globalAlpha = 0.5;
-	ctx.fillStyle = "black";
+	ctx.fillStyle = "white";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.globalAlpha = 1;
 	
 	// Game Over overlay setup
-	var page = l("game-over-page");
-	page.innerHTML = "";
+	var tab = l("game-over-table");
+	tab.innerHTML = "";
+	
+	// Add last player to graveyard
 	if(model.players.length > 0) {
 		model.graveyard.splice(0, 0, model.players[0]);
 	}
-	var spellNames = [];
+	
+	// Make a list of spell codes
+	var spellCodes = [];
 	for(var i in magic) {
-		spellNames.push(i);
+		spellCodes.push(i);
 	}
+	
+	// Generate table row for every player
 	for(i in model.graveyard) {
 		var p = model.graveyard[i];
-		var discovery = spellNames[Math.floor(Math.random() * spellNames.length)];
+		var discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
+		var discName = magic[discovery].name;
 		discovery = decode(discovery, p.key);
-		page.innerHTML += "<p>" + p.name + " " + discovery + "</p>";
+		
+		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td></tr>";
 	}
 	
 	// Game Over overlay display
