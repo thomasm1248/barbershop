@@ -85,6 +85,23 @@ body {
 	margin: 0;
 }
 
+table.game_over_table_style {
+  font-family: Verdana, Geneva, sans-serif;
+  border: none;
+  background-color: #a0a0a0;
+  text-align: left;
+	margin: 30px auto 0;
+}
+table.game_over_table_style td, table.game_over_table_style th {
+  border: none;
+	background-color: #c6c6c4;
+  padding: 4px 6px;
+}
+table.game_over_table_style tbody td {
+  font-size: 13px;
+  font-weight: bold;
+}
+
 	</style>
 </head>
 <body>
@@ -104,14 +121,25 @@ body {
 			<h1>Player Setup</h1>
 			<input id="setup-name-box" type="text" placeholder="Player Name">
 			<br>
-			<input id="back-to-menu-button" class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 			<div id="setup-spells"></div>
 		</div>
 	</div>
 	<div class="overlay" id="game-over-overlay">
 		<div id="game-over-container">
 			<h1>Game Over</h1>
-			<div id="game-over-page"></div>
+			<table class="game_over_table_style">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Name</th>
+						<th colspan="2">Spell</th>
+					</tr>
+				</thead>
+				<tbody id="game-over-table">
+				</tbody>
+			</table>
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 		</div>
 	</div>
 	<script>
@@ -255,6 +283,21 @@ function decode(string, key) {
 		}
 	}
 	return output;
+}
+
+function addOrdinalSuf(i) {
+	var j = i % 10,
+		k = i % 100;
+	if (j == 1 && k != 11) {
+		return i + "st";
+	}
+	if (j == 2 && k != 12) {
+		return i + "nd";
+	}
+	if (j == 3 && k != 13) {
+		return i + "rd";
+	}
+	return i + "th";
 }
 
 function selectRandom(arr) {
@@ -1489,6 +1532,7 @@ Dit.prototype.update = function() {
 // Menu
 Menu = function() {
 	l("setup-overlay").style.display = "none";
+	l("game-over-overlay").style.display = "none";
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	
@@ -1871,21 +1915,28 @@ GameOver = function() {
 	ctx.globalAlpha = 1;
 	
 	// Game Over overlay setup
-	var page = l("game-over-page");
-	page.innerHTML = "";
+	var tab = l("game-over-table");
+	tab.innerHTML = "";
+	
+	// Add last player to graveyard
 	if(model.players.length > 0) {
 		model.graveyard.splice(0, 0, model.players[0]);
 	}
-	var spellNames = [];
+	
+	// Make a list of spell codes
+	var spellCodes = [];
 	for(var i in magic) {
-		spellNames.push(i);
+		spellCodes.push(i);
 	}
+	
+	// Generate table row for every player
 	for(i in model.graveyard) {
 		var p = model.graveyard[i];
-		var discovery = spellNames[Math.floor(Math.random() * spellNames.length)];
+		var discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
 		var discName = magic[discovery].name;
 		discovery = decode(discovery, p.key);
-		page.innerHTML += "<p>" + p.name + " - " + discovery + " is " + discName + "</p>";
+		
+		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td></tr>";
 	}
 	
 	// Game Over overlay display
