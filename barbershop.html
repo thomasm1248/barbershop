@@ -42,6 +42,19 @@ body {
 	font-family: "OldEnglish";
 }
 
+.overlay div h2 {
+	margin-top: 30px;
+	font-family: "OldEnglish";
+}
+
+.overlay div p {
+	margin-top: 10px;
+	margin-left: 10px;
+	text-indent: 30px;
+	font-size: 20px;
+	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
 .overlay div {
 	padding-top: 100px;
 	text-align: center;
@@ -58,6 +71,13 @@ body {
 .menu-button:hover {
 	font-size: 30px;
 	margin: 1px;
+}
+
+#how-to-play-container h1 { text-align: center; }
+#how-to-play-container {
+	width: 500px;
+	margin: 0 auto 100px;
+	text-align: left;
 }
 
 #main-menu-container textarea {
@@ -112,14 +132,38 @@ table.game_over_table_style tbody td {
 			<h1>Barbershop</h1>
 			<textarea id="name-input-box" placeholder="Player Names"></textarea>
 			<br>
-			<input id="start-game" class="menu-button" type="button" value="Start" onclick="state.start()">
+			<input id="start-game" class="menu-button" type="button" value="Start Game" onclick="state.start()">
 			<br>
-			<input id="player-setup-button" class="menu-button" type="button" value="Player Setup" onclick="state = new Setup();">
+			<input id="player-setup-button" class="menu-button" type="button" value="Username Chooser" onclick="state = new Setup();">
+			<br>
+			<input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
+		</div>
+	</div>
+	<div class="overlay" id="how-to-play-overlay">
+		<div id="how-to-play-container">
+			
+			<h1>How To Play</h1>
+			
+			<h2>What is this?</h2>
+			<p>Barbershop is a multiplayer wizard battle game where everyone plays on one computer. Each person takes a turn casting a spell, with a short amount of time elapsing in between each turn. Spells are cast by typing their corresponding two-letter code, then clicking anywhere on the screen. You start with a fireball spell, then move on from there by remembering/recording the new spells revealed to you at the end of every game. Every spell revealed to you is specific to your username so remember to use the same one every time.</p>
+			
+			<h2>Setup</h2>
+			<p>To begin a game, have each player type their name into the box. Spaces, Capitalization and everything else MATTERS! So be careful. After all the names have been entered, go ahead and press the start button!</p>
+			
+			<h2>Your turn</h2>
+			<p>When it comes time for you to take a turn, a big circle is drawn around you. This represents the furthest distance you can walk before your next turn. Click somewhere on the screen to decide where you want to go.</p>
+			<p>After deciding where to move, you must type two letters. Clicking will cast the spell corresponding to those letters, then end your turn.</p>
+			
+			<h2>Winning</h2>
+			<p>When there's only one wizard left, the game ends and the line to the barbershop is displayed. Next to each wizard's name, there's a random spell to add to their collection.</p>
+			
+			<br>
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 		</div>
 	</div>
 	<div class="overlay" id="setup-overlay">
 		<div id="setup-container">
-			<h1>Player Setup</h1>
+			<h1>Username Chooser</h1>
 			<input id="setup-name-box" type="text" placeholder="Player Name">
 			<br>
 			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
@@ -132,9 +176,12 @@ table.game_over_table_style tbody td {
 			<table class="game_over_table_style">
 				<thead>
 					<tr>
+						<th colspan="4">The Line to the Barbershop is:</th>
+					</tr>
+					<tr>
 						<th>#</th>
 						<th>Name</th>
-						<th colspan="2">Spell</th>
+						<th colspan="2">Discovery</th>
 					</tr>
 				</thead>
 				<tbody id="game-over-table">
@@ -196,6 +243,7 @@ var Info,
 
 var state,
 			Menu,
+				HowToPlay,
 				Setup,
 				Turn, 
 					Animation,
@@ -1532,6 +1580,7 @@ Dit.prototype.update = function() {
 
 // Menu
 Menu = function() {
+	l("how-to-play-overlay").style.display = "none";
 	l("setup-overlay").style.display = "none";
 	l("game-over-overlay").style.display = "none";
 	l("name-input-box").value = "";
@@ -1572,6 +1621,18 @@ Menu.prototype.start = function() {
 };
 
 Menu.prototype.update = function() {
+};
+
+
+
+// How To Play
+HowToPlay = function() {
+	l("main-menu-overlay").style.display = "none";
+	l("how-to-play-overlay").style.display = "block";
+	l("how-to-play-overlay").scrollTop = 0;
+};
+
+HowToPlay.prototype.update = function() {
 };
 
 
