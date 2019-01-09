@@ -28,6 +28,12 @@ body {
 	overflow: hidden;
 }
 
+#load-runic-font {
+	font-family: "Runic";
+	visibility: hidden;
+	height: 0;
+}
+
 #game-canvas {
 	background-color: #96f779;
 	font-family: "Runic";
@@ -132,6 +138,7 @@ table.game_over_table_style tbody td {
 	</style>
 </head>
 <body>
+	<div id="load-runic-font"></div>
 	<canvas id="game-canvas">Canvas not supported</canvas>
 	<div class="overlay" id="main-menu-overlay">
 		<div id="main-menu-container">
