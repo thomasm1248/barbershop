@@ -11,6 +11,11 @@
 	font-family: "OldEnglish";
 	src: url("AlteSchwabacher.ttf");
 }
+		
+@font-face {
+	font-family: "Runic";
+	src: url("Norse-Bold.ttf");
+}
 
 * {
 	margin: 0;
@@ -891,6 +896,7 @@ Player.prototype.drawSpell = function(dir, spell) {
 	translate(this.pos);
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
+	ctx.font = "Runic";
 	ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
 	ctx.restore();
 };
