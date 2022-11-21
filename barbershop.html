@@ -1760,16 +1760,18 @@ Turn.prototype.cast = function() {
 	// End turn
 	state = new Sim();
 	
-	// Get spell and make sure it hasn't been used since player's last turn
+	// Get spell and make sure it hasn't been blocked since player's last turn
 	var spell = this.input;
+	var blocked = false;
 	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].blockSpell) return;
+		if(spell === model.players[i].blockSpell) blocked = true;
 	}
 	
 	// Encode spell
 	if(config.doencoding) {
 		spell = encode(spell, model.players[0].key);
 	}
+	if(spell != "FB" && blocked) return; // Only Fireball I can't be blocked
 	
 	// Cast spell
 	try {
