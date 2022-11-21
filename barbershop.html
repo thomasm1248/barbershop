@@ -643,6 +643,13 @@ magic = {
 		name: "Haste",
 		mana: 20,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
+	},
+
+	// Burst of fire
+	"KA": {
+		name: "Burst of Fire",
+		mana: 100,
+		code: "var p=model.players[0];for(var d=0;d<12;d++){model.things.push(new Fireball(p.pos,Math.PI*2/12*d));}"
 	}
 };
 
