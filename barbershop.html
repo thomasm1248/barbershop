@@ -1311,7 +1311,7 @@ PoisonCloud.prototype.update = function() {
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
 			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(1);
+				model.players[i].hurt(5);
 			}
 		}
 	}
