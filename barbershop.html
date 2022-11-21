@@ -203,7 +203,7 @@ table.game_over_table_style tbody td {
 // Configuration
 var config = {
 	doencoding: true,
-	manaperturn: 20,
+	manaperturn: 4,
 	framesperround: 100,
 	walkingdistance: 200
 };
@@ -494,168 +494,168 @@ magic = {
 	// Fireball towards mouse
 	"FB": {
 		name: "Fireball I",
-		mana: 20,
+		mana: 4,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
 	"TP": {
 		name: "Teleport",
-		mana: 45,
+		mana: 9,
 		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
 	"HE": {
 		name: "Heal",
-		mana: 55,
+		mana: 11,
 		code: "var p=model.players[0];p.heal(20);"
 	},
 	
 	// Stun player closest to mouse
 	"ST": {
 		name: "Stun",
-		mana: 55,
+		mana: 11,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
 	"JX": {
 		name: "Jinx",
-		mana: 70,
+		mana: 14,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse
 	"BM": {
 		name: "Fireball II",
-		mana: 30,
+		mana: 6,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
 	"ZP": {
 		name: "Zap",
-		mana: 50,
+		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
 	"QK": {
 		name: "Quake",
-		mana: 50,
+		mana: 10,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
 	"PC": {
 		name: "Poison Cloud",
-		mana: 65,
+		mana: 13,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
 	"DP": {
 		name: "Vanish",
-		mana: 45,
+		mana: 9,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Set a player's health to 50
 	"MD": {
 		name: "50 Health",
-		mana: 100,
+		mana: 20,
 		code: "getClosest(model.players,getMouse()).health=50;"
 	},
 	
 	// Shield at mouse
 	"SH": {
 		name: "Shield",
-		mana: 60,
+		mana: 12,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
 	"PH": {
 		name: "Phase",
-		mana: 35,
+		mana: 7,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
 	"FL": {
 		name: "Floating Platform",
-		mana: 40,
+		mana: 8,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"SD": {
 		name: "Enchanted Sword",
-		mana: 50,
+		mana: 10,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"VM": {
 		name: "Vampire",
-		mana: 60,
+		mana: 12,
 		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"SP": {
 		name: "Ol' Switcheroo",
-		mana: 45,
+		mana: 9,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
 	"BL": {
 		name: "Blind",
-		mana: 35,
+		mana: 7,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
 	"IN": {
 		name: "Invisible",
-		mana: 45,
+		mana: 9,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
 	"OB": {
 		name: "Stone Pillar",
-		mana: 35,
+		mana: 7,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
 	
 	// Star
 	"SR": {
 		name: "Fireball III",
-		mana: 50,
+		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
 	},
 	
 	// Haste
 	"HS": {
 		name: "Haste",
-		mana: 20,
+		mana: 4,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	},
 
 	// Burst of fire
 	"KA": {
 		name: "Burst of Fire",
-		mana: 100,
+		mana: 20,
 		code: "var p=model.players[0];for(var d=0;d<12;d++){model.things.push(new Fireball(p.pos,Math.PI*2/12*d));}"
 	},
 
 	// Steer Fireball
 	"CJ": {
 		name: "Steer Fireball",
-		mana: 45,
+		mana: 9,
 		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
 	}
 };
@@ -801,7 +801,7 @@ Player = function(name) {
 		y: 0
 	};
 	
-	this.health = 100;
+	this.health = 20;
 	this.mana = 0;
 	
 	this.stunned = false;
@@ -1055,7 +1055,7 @@ Sword.prototype.update = function() {
 			var p = model.players[i];
 			if(this.name === p.name) continue;
 			if(getDist(this.pos, p.pos) < this.rad + p.rad) {
-				p.hurt(5);
+				p.hurt(1);
 				this.attackTimer = -20;
 			}
 		}
@@ -1106,7 +1106,7 @@ Fireball = function(pos, dir) {
 	
 	this.pos = addV(this.pos, scaleV(this.vel, 8));
 	
-	this.damage = 25;
+	this.damage = 5;
 	
 	this.dead = false;
 };
@@ -1151,7 +1151,7 @@ Beam = function(pos, dir) {
 	
 	this.pos = addV(this.pos, scaleV(this.vel, 5));
 	
-	this.damage = 50;
+	this.damage = 10;
 	
 	this.dead = false;
 };
@@ -1196,7 +1196,7 @@ Star = function(pos, dir) {
 	
 	this.pos = addV(this.pos, scaleV(this.vel, 2));
 	
-	this.damage = 70;
+	this.damage = 14;
 	
 	this.dead = false;
 };
@@ -1248,7 +1248,7 @@ Zap = function(posFrom, posTo) {
 	
 	for(i in model.players) {
 		if(model.players[i].phasing) continue;
-		if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(15);
+		if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(3);
 	}
 	
 	this.dead = false;
@@ -1311,7 +1311,7 @@ PoisonCloud.prototype.update = function() {
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
 			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(5);
+				model.players[i].hurt(1);
 			}
 		}
 	}
@@ -1710,7 +1710,7 @@ Turn = function() {
 	p.vel.y = 0;
 	p.phasing = false;
 	p.mana += config.manaperturn;
-	if(p.mana > 100) p.mana = 100;
+	if(p.mana > 20) p.mana = 20; // todo continue
 	p.blinded = false;
 	p.invisible = false;
 };
