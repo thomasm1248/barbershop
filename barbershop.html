@@ -538,6 +538,55 @@ magic = {
 		code: "var p=model.players[0];p.heal(4);"
 	},
 	
+	// Stun player closest to mouse
+	"IKN": {
+		name: "Stun",
+		mana: 11,
+		code: "getClosest(model.players,getMouse()).stun()"
+	},
+	
+	// Jinx player closest to mouse
+	"VZR": {
+		name: "Jinx",
+		mana: 14,
+		code: "getClosest(model.players,getMouse()).jinx()"
+	},
+	
+	// Beam shot towards mouse
+	"IJN": {
+		name: "Fireball II",
+		mana: 6,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
+	},
+	
+	// Zap with lightning
+	"FUU": {
+		name: "Zap",
+		mana: 10,
+		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
+	},
+	
+	// Swap Four Corners
+	"CCG": {
+		name: "Quake",
+		mana: 10,
+		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
+	},
+	
+	// Poison Cloud at mouse
+	"JOV": {
+		name: "Poison Cloud",
+		mana: 13,
+		code: "model.things.push(new PoisonCloud(getMouse()));"
+	},
+	
+	// Disappear thing closest to mouse
+	"CZS": {
+		name: "Vanish",
+		mana: 9,
+		code: "getClosest(model.things,getMouse()).dead=true;"
+	},
+	
 	// Life balance
 	"ZEG": {
 		name: "Life Balance",
