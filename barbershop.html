@@ -1815,11 +1815,12 @@ Turn.prototype.blockAndMove = function() {
 };
 
 Turn.prototype.cast = function() {
+	// End turn
+	state = new Sim();
+	
 	// Only cast if spell has been entered
 	if(this.input.length !== 3) return;
 	
-	// End turn
-	state = new Sim();
 	
 	// Get spell and make sure it hasn't been blocked since player's last turn
 	var spell = this.input;
