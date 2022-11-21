@@ -350,6 +350,22 @@ function decode(string, key) {
 	return output;
 }
 
+function encodeSpell(spell, player) {
+	var out = "";
+	out += encode(spell[0], player.firstKey);
+	out += encode(spell[1], genKey(player.name + out[0]));
+	out += encode(spell[2], genKey(player.name + out[1]));
+	return out;
+}
+
+function decodeSpell(spell, player) {
+	var out = "";
+	out += decode(spell[0], player.firstKey);
+	out += decode(spell[1], genKey(player.name + spell[0]));
+	out += decode(spell[2], genKey(player.name + spell[1]));
+	return out;
+}
+
 function addOrdinalSuf(i) {
 	var j = i % 10,
 		k = i % 100;
@@ -502,168 +518,119 @@ projectile => <projectileName>(<pos>,<dir>)
 magic = {
 	
 	// Fireball towards mouse
-	"FB": {
+	"RFQ": {
 		name: "Fireball I",
 		mana: 4,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
-	"TP": {
+	"PIY": {
 		name: "Teleport",
 		mana: 9,
 		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
-	"HE": {
+	"VYX": {
 		name: "Heal",
 		mana: 11,
-		code: "var p=model.players[0];p.heal(20);"
+		code: "var p=model.players[0];p.heal(20);" // todo change to 10
 	},
 	
-	// Stun player closest to mouse
-	"ST": {
-		name: "Stun",
-		mana: 11,
-		code: "getClosest(model.players,getMouse()).stun()"
-	},
-	
-	// Jinx player closest to mouse
-	"JX": {
-		name: "Jinx",
-		mana: 14,
-		code: "getClosest(model.players,getMouse()).jinx()"
-	},
-	
-	// Beam shot towards mouse
-	"BM": {
-		name: "Fireball II",
-		mana: 6,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
-	},
-	
-	// Zap with lightning
-	"ZP": {
-		name: "Zap",
-		mana: 10,
-		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
-	},
-	
-	// Swap Four Corners
-	"QK": {
-		name: "Quake",
-		mana: 10,
-		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
-	},
-	
-	// Poison Cloud at mouse
-	"PC": {
-		name: "Poison Cloud",
-		mana: 13,
-		code: "model.things.push(new PoisonCloud(getMouse()));"
-	},
-	
-	// Disappear thing closest to mouse
-	"DP": {
-		name: "Vanish",
-		mana: 9,
-		code: "getClosest(model.things,getMouse()).dead=true;"
-	},
-	
-	// Set a player's health to 50
-	"MD": {
-		name: "50 Health",
+	// 50 health // todo change to 10
+	"ZEG": {
+		name: "50 Health", // todo change to 10
 		mana: 20,
-		code: "getClosest(model.players,getMouse()).health=50;"
+		code: "getClosest(model.players,getMouse()).health=50;" // todo change to 10
 	},
 	
 	// Shield at mouse
-	"SH": {
+	"FDI": {
 		name: "Shield",
 		mana: 12,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
-	"PH": {
+	"QTV": {
 		name: "Phase",
 		mana: 7,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
-	"FL": {
+	"AQX": {
 		name: "Floating Platform",
 		mana: 8,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
-	"SD": {
+	"BCI": {
 		name: "Enchanted Sword",
 		mana: 10,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
-	"VM": {
+	"ZCO": {
 		name: "Vampire",
 		mana: 12,
 		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
-	"SP": {
+	"KOC": {
 		name: "Ol' Switcheroo",
 		mana: 9,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
-	"BL": {
+	"ZRT": {
 		name: "Blind",
 		mana: 7,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
-	"IN": {
+	"AAP": {
 		name: "Invisible",
 		mana: 9,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
-	"OB": {
+	"DTK": {
 		name: "Stone Pillar",
 		mana: 7,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
 	
 	// Star
-	"SR": {
+	"GUQ": {
 		name: "Fireball III",
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
 	},
 	
 	// Haste
-	"HS": {
+	"MSP": {
 		name: "Haste",
 		mana: 4,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	},
 
 	// Burst of fire
-	"KA": {
+	"FNK": {
 		name: "Burst of Fire",
 		mana: 20,
 		code: "var p=model.players[0];for(var d=0;d<12;d++){model.things.push(new Fireball(p.pos,Math.PI*2/12*d));}"
 	},
 
 	// Steer Fireball
-	"CJ": {
+	"EFH": {
 		name: "Steer Fireball",
 		mana: 9,
 		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
@@ -786,7 +753,7 @@ Model.prototype.draw = function() {
 // Player
 Player = function(name) {
 	this.name = name;
-	this.key = genKey(name);
+	this.firstKey = genKey(name);
 	this.skin = {
 		hat: selectRandom(colors.hat),
 		head: selectRandom(colors.head),
@@ -913,7 +880,7 @@ Player.prototype.draw = function(layer) {
 };
 
 Player.prototype.drawSpell = function(dir, spell) {
-	while(spell.length !== 2) {
+	while(spell.length !== 3) {
 		spell = "#" + spell;
 	}
 	
@@ -1707,7 +1674,7 @@ Setup.prototype.update = function() {
 		return;
 	} else {
 		l("setup-name-too-long").style.display = "none";
-		l("setup-spells").innerHTML = "Fireball - " + decode("FB", this.player.key);
+		l("setup-spells").innerHTML = "Fireball - " + decodeSpell("RFQ", this.player);
 	}
 };
 
@@ -1772,8 +1739,8 @@ Turn.prototype.draw = function() {
 };
 
 Turn.prototype.newInput = function(char) {
-	if(this.input.length === 2) {
-		this.input = this.input[1] + char;
+	if(this.input.length === 3) {
+		this.input = this.input[1] + this.input[2] + char;
 	} else {
 		this.input += char;
 	}
@@ -1781,7 +1748,7 @@ Turn.prototype.newInput = function(char) {
 
 Turn.prototype.blockAndMove = function() {
 	// Block
-	if(this.input.length != 2) {
+	if(this.input.length != 3) {
 		model.players[0].blockSpell = "";
 	} else if(model.players[0].blockSpell === this.input) {
 		model.players[0].blockSpell = "";
@@ -1800,7 +1767,7 @@ Turn.prototype.blockAndMove = function() {
 
 Turn.prototype.cast = function() {
 	// Only cast if spell has been entered
-	if(this.input.length !== 2) return;
+	if(this.input.length !== 3) return;
 	
 	// End turn
 	state = new Sim();
@@ -1814,9 +1781,9 @@ Turn.prototype.cast = function() {
 	
 	// Encode spell
 	if(config.doencoding) {
-		spell = encode(spell, model.players[0].key);
+		spell = encodeSpell(spell, model.players[0]);
 	}
-	if(spell != "FB" && blocked) return; // Only Fireball I can't be blocked
+	if(spell != "RFQ" && blocked) return; // Only Fireball I can't be blocked
 	
 	// Cast spell
 	try {
@@ -2066,7 +2033,7 @@ GameOver = function() {
 		var discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
 		var discName = magic[discovery].name;
 		var discCost = magic[discovery].mana;
-		discovery = decode(discovery, p.key);
+		discovery = decodeSpell(discovery, p);
 		
 		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
 	}
