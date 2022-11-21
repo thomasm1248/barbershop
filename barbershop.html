@@ -181,12 +181,13 @@ table.game_over_table_style tbody td {
 			<table class="game_over_table_style">
 				<thead>
 					<tr>
-						<th colspan="4">The Line to the Barbershop is:</th>
+						<th colspan="5">The Line to the Barbershop is:</th>
 					</tr>
 					<tr>
 						<th>#</th>
 						<th>Name</th>
 						<th colspan="2">Discovery</th>
+						<th>Mana Cost</th>
 					</tr>
 				</thead>
 				<tbody id="game-over-table">
@@ -642,6 +643,20 @@ magic = {
 		name: "Haste",
 		mana: 20,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
+	},
+
+	// Burst of fire
+	"KA": {
+		name: "Burst of Fire",
+		mana: 100,
+		code: "var p=model.players[0];for(var d=0;d<12;d++){model.things.push(new Fireball(p.pos,Math.PI*2/12*d));}"
+	},
+
+	// Steer Fireball
+	"CJ": {
+		name: "Steer Fireball",
+		mana: 45,
+		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
 	}
 };
 
@@ -1296,7 +1311,7 @@ PoisonCloud.prototype.update = function() {
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
 			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(1);
+				model.players[i].hurt(5);
 			}
 		}
 	}
@@ -1464,7 +1479,8 @@ Info = function(text, type, pos) {
 		"stun": "red",
 		"poison": "green",
 		"jinx": "blue",
-		"blind": "red"
+		"blind": "red",
+		"alertproblem": "red"
 	}[type];
 	
 	this.timer = 0;
@@ -1734,7 +1750,14 @@ Turn.prototype.newInput = function(char) {
 
 Turn.prototype.blockAndMove = function() {
 	// Block
-	model.players[0].blockSpell = this.input;
+	if(this.input.length != 2) {
+		model.players[0].blockSpell = "";
+	} else if(model.players[0].blockSpell === this.input) {
+		model.players[0].blockSpell = "";
+		model.fx.push(new Info("You did that last time", "alertproblem", model.players[0].pos));
+	} else {
+		model.players[0].blockSpell = this.input;
+	}
 	
 	// Move
 	model.players[0].move();
@@ -1751,16 +1774,18 @@ Turn.prototype.cast = function() {
 	// End turn
 	state = new Sim();
 	
-	// Get spell and make sure it hasn't been used since player's last turn
+	// Get spell and make sure it hasn't been blocked since player's last turn
 	var spell = this.input;
+	var blocked = false;
 	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].blockSpell) return;
+		if(spell === model.players[i].blockSpell) blocked = true;
 	}
 	
 	// Encode spell
 	if(config.doencoding) {
 		spell = encode(spell, model.players[0].key);
 	}
+	if(spell != "FB" && blocked) return; // Only Fireball I can't be blocked
 	
 	// Cast spell
 	try {
@@ -2009,9 +2034,10 @@ GameOver = function() {
 		var p = model.graveyard[i];
 		var discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
 		var discName = magic[discovery].name;
+		var discCost = magic[discovery].mana;
 		discovery = decode(discovery, p.key);
 		
-		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td></tr>";
+		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
 	}
 	
 	// Game Over overlay display
