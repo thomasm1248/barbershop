@@ -589,7 +589,7 @@ magic = {
 	
 	// Life balance
 	"ZEG": {
-		name: "Life Balance",
+		name: "Balance Life",
 		mana: 20,
 		code: "getClosest(model.players,getMouse()).health=10;"
 	},
@@ -603,35 +603,35 @@ magic = {
 	
 	// Phase until next turn
 	"QTV": {
-		name: "Phase",
+		name: "Ghost Walk",
 		mana: 7,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
 	"AQX": {
-		name: "Floating Platform",
+		name: "Shifting Earth",
 		mana: 8,
 		code: "model.things.push(new Float(getMouse()));"
 	},
 	
 	// Sword mob at mouse
 	"BCI": {
-		name: "Enchanted Sword",
+		name: "Magic Sword",
 		mana: 10,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
 	"ZCO": {
-		name: "Vampire",
+		name: "Life Suck",
 		mana: 12,
 		code: "model.players[0].heal(6);getClosest(model.players,getMouse()).hurt(10);"
 	},
 	
 	// Swap position with another player
 	"KOC": {
-		name: "Ol' Switcheroo",
+		name: "Swap",
 		mana: 9,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
@@ -645,14 +645,14 @@ magic = {
 	
 	// Invisibility
 	"AAP": {
-		name: "Invisible",
+		name: "Invisibility",
 		mana: 9,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
 	"DTK": {
-		name: "Stone Pillar",
+		name: "Pillar of Stone",
 		mana: 7,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
@@ -1815,11 +1815,12 @@ Turn.prototype.blockAndMove = function() {
 };
 
 Turn.prototype.cast = function() {
+	// End turn
+	state = new Sim();
+	
 	// Only cast if spell has been entered
 	if(this.input.length !== 3) return;
 	
-	// End turn
-	state = new Sim();
 	
 	// Get spell and make sure it hasn't been blocked since player's last turn
 	var spell = this.input;
