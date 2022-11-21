@@ -535,14 +535,14 @@ magic = {
 	"VYX": {
 		name: "Heal",
 		mana: 11,
-		code: "var p=model.players[0];p.heal(20);" // todo change to 10
+		code: "var p=model.players[0];p.heal(4);"
 	},
 	
-	// 50 health // todo change to 10
+	// Life balance
 	"ZEG": {
-		name: "50 Health", // todo change to 10
+		name: "Life Balance",
 		mana: 20,
-		code: "getClosest(model.players,getMouse()).health=50;" // todo change to 10
+		code: "getClosest(model.players,getMouse()).health=10;"
 	},
 	
 	// Shield at mouse
@@ -1708,7 +1708,7 @@ Turn = function() {
 	p.vel.y = 0;
 	p.phasing = false;
 	p.mana += config.manaperturn;
-	if(p.mana > 20) p.mana = 20; // todo continue
+	if(p.mana > 20) p.mana = 20;
 	p.blinded = false;
 	p.invisible = false;
 };
