@@ -239,6 +239,10 @@ var animator =
 
 var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+var global = {
+	rememberedNames: ""
+};
+
 var magic, colors;
 
 var Model, model;
@@ -608,7 +612,7 @@ magic = {
 	// Shield at mouse
 	"FDI": {
 		name: "Shield",
-		mana: 18,
+		mana: 16,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
@@ -1656,6 +1660,8 @@ Menu = function() {
 	l("main-menu-overlay").style.display = "block";
 	l("menu-error").style.display = "none";
 	l("name-input-box").focus();
+
+	l("name-input-box").value = global.rememberedNames;
 	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
@@ -1663,6 +1669,7 @@ Menu = function() {
 Menu.prototype.start = function() {
 	// Get list of names
 	var list = l("name-input-box").value;
+	global.rememberedNames = list;
 	list = list.split("\n");
 	
 	// Filter out duplicates and blanks
@@ -1682,17 +1689,20 @@ Menu.prototype.start = function() {
 	}
 	list = temp;
 	
-	// Be sure their are at least 2 names
+	// Be sure there are at least 2 names
 	if(list.length < 2) {
 		l("menu-error").innerHTML = "You must enter at least two unique names.";
 		l("menu-error").style.display = "block";
 		return;
 	}
 	
-	// Create game model
+	// Create game model, add players to it in random order
 	model = new Model();
-	for(var i = 0; i < list.length; i++) {
-		model.players.push(new Player(list[i]));
+	var players = [];
+	while(list.length > 0) {
+		var which = Math.floor(Math.random() * list.length);
+		model.players.push(new Player(list[which]));
+		list.splice(which, 1);
 	}
 	
 	// Space players out from each other
