@@ -694,30 +694,6 @@ magic = {
 	}
 };
 
-function foo() {
-	model.things.push({
-		rad:0,
-		wand:getDir(model.players[0].pos,getMouse()),
-		grounded:true,
-		canBounce:true,
-		pos:model.players[0].pos,
-		vel:model.players[0].vel,
-		draw:x=>0,
-		dead:false,
-		num:8,
-		timer:0,
-		update:function(){
-			this.pos = addV(this.pos,this.vel);
-			this.timer--;
-			if(this.timer<1){
-				this.timer=5;
-				model.things.push(new Beam(this.pos,this.wand+(Math.random()*1-0.5)));
-				this.num--;
-				if(this.num<1)this.dead=true;
-			}
-		}});
-}
-
 // Avatar colors
 colors = {
 	hat: [
