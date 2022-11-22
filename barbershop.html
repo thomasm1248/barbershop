@@ -684,8 +684,39 @@ magic = {
 		name: "Steer Fireball",
 		mana: 9,
 		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
+	},
+
+	// Dragon Breath
+	"DMO": {
+		name: "Dragon Breath",
+		mana: 20,
+		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*1-0.5)));this.num--;if(this.num<1)this.dead=true;}}})" // todo
 	}
 };
+
+function foo() {
+	model.things.push({
+		rad:0,
+		wand:getDir(model.players[0].pos,getMouse()),
+		grounded:true,
+		canBounce:true,
+		pos:model.players[0].pos,
+		vel:model.players[0].vel,
+		draw:x=>0,
+		dead:false,
+		num:8,
+		timer:0,
+		update:function(){
+			this.pos = addV(this.pos,this.vel);
+			this.timer--;
+			if(this.timer<1){
+				this.timer=5;
+				model.things.push(new Beam(this.pos,this.wand+(Math.random()*1-0.5)));
+				this.num--;
+				if(this.num<1)this.dead=true;
+			}
+		}});
+}
 
 // Avatar colors
 colors = {
@@ -1429,6 +1460,8 @@ Obstacle.prototype.update = function() {
 	for(var i in model.everything) {
 		var t = model.everything[i];
 		if(t.canBounce) {
+			if(t instanceof Player && t.phasing) break; // Don't bounce phasing players
+
 			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
 				var norm = normalize(vTo(this.pos, t.pos));
 				var vel = dot(t.vel, norm);
@@ -1678,6 +1711,34 @@ Menu.prototype.start = function() {
 		model.players.push(new Player(list[i]));
 	}
 
+	// Space players out from each other
+	for(var i = 0; i < 100; i++) {
+		for(var j = 0; j < model.players.length; j++) {
+			var p = getClosest(filter(model.players, p=>p!=model.players[j]), model.players[j].pos);
+			var d = getDist(model.players[j].pos, p.pos);
+			var norm = vTo(model.players[j].pos, p.pos);
+			norm = scaleV(normalize(norm), -1);
+			p = model.players[j];
+			if(p.pos.x < d) {
+				d = p.pos.x;
+				norm = {x: 1, y: 0};
+			}
+			if(canvas.width - p.pos.x < d) {
+				d = canvas.width - p.pos.x;
+				norm = {x: -1, y: 0};
+			}
+			if(p.pos.y < d) {
+				d = p.pos.y;
+				norm = {x: 0, y: 1};
+			}
+			if(canvas.hight - p.pos < d) {
+				d = canvas.height - p.pos.y;
+				norm = {x: 0, y: -1};
+			}
+			p.pos = addV(p.pos, scaleV(norm, 5));
+		}
+	}
+
 	// Close main menu
 	l("main-menu-overlay").style.display = "none";
 
@@ -1919,6 +1980,7 @@ Sim.prototype.updateThings = function() {
 	for(i = 0; i < model.things.length; i++) {
 		if(model.things[i].dead) {
 			model.things.splice(i, 1);
+			i--;
 		}
 	}
 };
@@ -1930,6 +1992,7 @@ Sim.prototype.updateFX = function() {
 	for(i = 0; i < model.fx.length; i++) {
 		if(model.fx[i].dead) {
 			model.fx.splice(i, 1);
+			i--;
 		}
 	}
 	
@@ -2080,7 +2143,7 @@ GameOver = function() {
 	
 	// Add last player to graveyard
 	if(model.players.length > 0) {
-		model.graveyard.splice(0, 0, model.players[0]);
+		model.graveyard.push(model.players[0]);
 	}
 	
 	// Make a list of spell codes
@@ -2090,14 +2153,15 @@ GameOver = function() {
 	}
 	
 	// Generate table row for every player
-	for(i in model.graveyard) {
+	for(var i = model.graveyard.length-1; i >= 0; i--) {
 		var p = model.graveyard[i];
-		var discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
+		var discovery = "RFQ";
+		while(discovery == "RFQ") discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
 		var discName = magic[discovery].name;
 		var discCost = magic[discovery].mana;
 		discovery = decodeSpell(discovery, p);
 		
-		tab.innerHTML += "<tr><td>"+addOrdinalSuf(i*1+1)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
+		tab.innerHTML += "<tr><td>"+addOrdinalSuf(model.graveyard.length - i)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
 	}
 	
 	// Game Over overlay display
