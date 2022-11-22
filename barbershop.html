@@ -212,7 +212,7 @@ table.game_over_table_style tbody td {
 
 // Configuration
 var config = {
-	doencoding: true,
+	doencoding: false, // todo this is for testing
 	manaperturn: 5,
 	framesperround: 100,
 	walkingdistance: 200,
@@ -510,8 +510,17 @@ function filter(arr, selector) {
 	return newArr;
 }
 
+function player() {
+	return model.players[0];
+}
+
+function stayStill() {
+	player().vel = {x:0,y:0};
+}
+
 /* Magic
 
+player => player()
 mouse => getMouse();
 projectile => <projectileName>(<pos>,<dir>)
 
@@ -827,7 +836,6 @@ Player = function(name) {
 	};
 	
 	this.course = "s";
-	this.speed = 0.5;
 	this.vel = {
 		x: 0,
 		y: 0
@@ -1759,7 +1767,6 @@ Setup.prototype.update = function() {
 
 // Turn
 Turn = function() {
-	this.state = "move";
 	this.input = "";
 	this.spellRot = 0;
 	
@@ -1805,25 +1812,22 @@ Turn.prototype.draw = function() {
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		p.draw("grounded");
 		ctx.fillStyle = "white";
-		if(this.state != "move") p.drawSpell(this.spellRot, this.input);
+		p.drawSpell(this.spellRot, this.input);
 	} else {
 		model.draw();
 		ctx.fillStyle = "black";
-		if(this.state != "move") p.drawSpell(this.spellRot, this.input);
+		p.drawSpell(this.spellRot, this.input);
 	}
 	p.draw("info");
 	
-	if(this.state === "move") {
-		ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
-		ctx.beginPath();
-		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
-		ctx.lineWidth = 20;
-		ctx.stroke();
-	}
+	ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
+	ctx.beginPath();
+	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
+	ctx.lineWidth = 20;
+	ctx.stroke();
 };
 
 Turn.prototype.newInput = function(char) {
-	if(this.state === "move") return;
 	if(this.input.length === 3) {
 		this.input = this.input[1] + this.input[2] + char;
 	} else {
@@ -1831,19 +1835,19 @@ Turn.prototype.newInput = function(char) {
 	}
 };
 
-Turn.prototype.move = function() {
-	// Move
-	model.players[0].move();
-	
-	// Next state
-	this.state = "cast";
-};
+Turn.prototype.click = function() {
+	if(this.skipClick) {
+		this.skipClick = false;
+		return;
+	}
 
-Turn.prototype.cast = function() {
 	// End turn
 	state = new Sim();
+
+	// Move the player
+	model.players[0].move();
 	
-	// Only cast if spell has been entered
+	// Only continue casting if a spell has been entered
 	if(this.input.length !== 3) return;
 	
 	// Get spell
@@ -1860,21 +1864,6 @@ Turn.prototype.cast = function() {
 		eval(magic[spell].code);
 	} catch(e) {
 		// Oh well
-	}
-};
-
-Turn.prototype.click = function() {
-	if(this.skipClick) {
-		this.skipClick = false;
-		return;
-	}
-	switch(this.state) {
-		case "move":
-			this.move();
-			break;
-		case "cast":
-			this.cast();
-			break;
 	}
 };
 
