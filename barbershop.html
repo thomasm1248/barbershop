@@ -1715,27 +1715,15 @@ Menu.prototype.start = function() {
 	for(var i = 0; i < 100; i++) {
 		for(var j = 0; j < model.players.length; j++) {
 			var p = getClosest(filter(model.players, p=>p!=model.players[j]), model.players[j].pos);
-			var d = getDist(model.players[j].pos, p.pos);
 			var norm = vTo(model.players[j].pos, p.pos);
-			norm = scaleV(normalize(norm), -1);
+			norm = scaleV(normalize(norm), -5);
 			p = model.players[j];
-			if(p.pos.x < d) {
-				d = p.pos.x;
-				norm = {x: 1, y: 0};
-			}
-			if(canvas.width - p.pos.x < d) {
-				d = canvas.width - p.pos.x;
-				norm = {x: -1, y: 0};
-			}
-			if(p.pos.y < d) {
-				d = p.pos.y;
-				norm = {x: 0, y: 1};
-			}
-			if(canvas.hight - p.pos < d) {
-				d = canvas.height - p.pos.y;
-				norm = {x: 0, y: -1};
-			}
-			p.pos = addV(p.pos, scaleV(norm, 5));
+			p.pos = addV(p.pos, norm);
+			margin = 50;
+			if(p.pos.x < margin) p.pos.x = margin;
+			if(p.pos.x > canvas.width - margin) p.pos.x = canvas.width - margin;
+			if(p.pos.y < margin) p.pos.y = margin;
+			if(p.pos.y > canvas.height - margin) p.pos.y = canvas.height - margin;
 		}
 	}
 
