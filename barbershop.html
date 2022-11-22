@@ -1360,8 +1360,8 @@ PoisonCloud.prototype.update = function() {
 // Shield
 Shield = function(pos) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+   		y: pos.y
 	};
 
 	this.rad = 75;
@@ -1402,8 +1402,8 @@ Shield.prototype.update = function() {
 // Obstacle
 Obstacle = function(pos) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+   		y: pos.y
 	};
 
 	this.rad = 25;
@@ -1457,12 +1457,12 @@ Obstacle.prototype.update = function() {
 // Float
 Float = function(pos) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+   		y: pos.y
 	};
 	this.vel = {
-x: Math.random() * 6 - 3,
-   y: Math.random() * 6 - 3
+		x: Math.random() * 6 - 3,
+   		y: Math.random() * 6 - 3
 	};
 
 	this.rad = 60;
@@ -1509,8 +1509,8 @@ Float.prototype.update = function() {
 Info = function(text, type, pos) {
 	this.text = text;
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+   		y: pos.y
 	};
 
 	this.color = {
