@@ -80,7 +80,7 @@ body {
 
 .menu-button:hover {
 	font-size: 30px;
-	margin: 1px;
+	margin: 1.5px;
 }
 
 #how-to-play-container h1 { text-align: center; }
@@ -139,14 +139,14 @@ table.game_over_table_style tbody td {
 	<canvas id="game-canvas">Canvas not supported</canvas>
 	<div class="overlay" id="main-menu-overlay">
 		<div id="main-menu-container">
-			<h1>Barbershop</h1>
-			<textarea id="name-input-box" placeholder="Player Names"></textarea>
+			<h1>Welcome to the Barbershop, Wizards</h1>
+			<textarea id="name-input-box" placeholder="Who's Playing?"></textarea>
 			<br>
 			<p class="error-msg" id="menu-error"></p>
 			<br>
 			<input id="start-game" class="menu-button" type="button" value="Start Game" onclick="state.start()">
 			<br>
-			<input id="player-setup-button" class="menu-button" type="button" value="Username Chooser" onclick="state = new Setup();">
+			<input id="player-setup-button" class="menu-button" type="button" value="New Wizard" onclick="state = new Setup();">
 			<br>
 			<input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
 		</div>
@@ -157,15 +157,16 @@ table.game_over_table_style tbody td {
 			<h1>How To Play</h1>
 			
 			<h2>What is this?</h2>
-			<p>Barbershop is a multiplayer wizard battle game where everyone plays on one computer. Each person takes a turn casting a spell, with a short amount of time elapsing in between each turn. Spells are cast by typing their corresponding two-letter code, then clicking anywhere on the screen. You start with a fireball spell, then move on from there by remembering/recording the new spells revealed to you at the end of every game. Every spell revealed to you is specific to your username so remember to use the same username each time.</p>
+			<p>What happens when wizards all arrive at the same barbershop at the same time? They fight an epic battle to determine who gets to have their beard trimmed first!</p>
+			<p>Barbershop is a multiplayer wizard battle game where everyone plays together on the same computer or laptop. Each person takes a turn casting a spell, with a short amount of time elapsing between each turn. Each player starts with a basic fireball spell, then moves on from there by writing down the new spells revealed to them at the end of every game. Every spell revealed to you is specific to your username so remember to use the same username each time.</p>
+			<p>When you play a game with your friends, I recommend making it a rule that you can't look at your notes while playing. True wizards have their spells memorized by heart!</p>
 			
 			<h2>Setup</h2>
-			<p>New players need to choose a username using the username chooser. It will tell them the two letters they need to type to cast a fireball.</p> 
 			<p>To begin a game, have each player type their username into the box. Spaces, Capitalization and everything else MATTERS! So be careful to type your username exactly the same way every time. After all the names have been entered, go ahead and press the start button!</p>
 			
 			<h2>Your turn</h2>
-			<p>When it comes time for you to take a turn, a big circle is drawn around you. This represents the furthest distance you can walk before your next turn. Click somewhere on the screen to decide where you want to go. If you want to prevent someone from casting a specific spell, you can type their spell before clicking where you want to move. You can't block the same spell twice in a row, and you can't block Fireball I because it's the spell everyone starts with.</p>
-			<p>After deciding where to move, you must type two letters. Clicking will cast the spell corresponding to those letters, then end your turn.</p>
+			<p>You click somewhere on the map to tell your wizard where to go. The farther away from your wizard you click, the faster it will run. The big circle drawn around your wizard helps you know how far your wizard can run before your next turn begins. If you type a spell before you click, your wizard will cast that spell.</p>
+			<p>Each spell costs a specific amount of mana. You get 5 mana each turn, but you can't have more than 20. If you cast a spell, and don't have enough mana for it, the missing mana will be taken from your health.</p>
 			
 			<h2>Winning</h2>
 			<p>When there's only one wizard left, the game ends and the line to the barbershop is displayed. Next to each wizard's name, there's a random spell to add to their collection.</p>
@@ -177,7 +178,7 @@ table.game_over_table_style tbody td {
 	<div class="overlay" id="setup-overlay">
 		<div id="setup-container">
 			<h1>Username Chooser</h1>
-			<input id="setup-name-box" type="text" placeholder="Player Name">
+			<input id="setup-name-box" type="text" placeholder="What is your name?">
 			<br>
 			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 			<br>
@@ -237,6 +238,10 @@ var animator =
 	window.webkitRequestAnimationFrame;
 
 var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+var global = {
+	rememberedNames: ""
+};
 
 var magic, colors;
 
@@ -510,8 +515,17 @@ function filter(arr, selector) {
 	return newArr;
 }
 
+function player() {
+	return model.players[0];
+}
+
+function stayStill() {
+	player().vel = {x:0,y:0};
+}
+
 /* Magic
 
+player => player()
 mouse => getMouse();
 projectile => <projectileName>(<pos>,<dir>)
 
@@ -598,7 +612,7 @@ magic = {
 	// Shield at mouse
 	"FDI": {
 		name: "Shield",
-		mana: 18,
+		mana: 16,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
@@ -818,8 +832,6 @@ Player = function(name) {
 		robe: selectRandom(colors.robe)
 	};
 	
-	this.blockSpell = "";
-	
 	this.rad = 15;
 	
 	var margin = 50;
@@ -829,7 +841,6 @@ Player = function(name) {
 	};
 	
 	this.course = "s";
-	this.speed = 0.5;
 	this.vel = {
 		x: 0,
 		y: 0
@@ -1648,6 +1659,9 @@ Menu = function() {
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	l("menu-error").style.display = "none";
+	l("name-input-box").focus();
+
+	l("name-input-box").value = global.rememberedNames;
 	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
@@ -1655,6 +1669,7 @@ Menu = function() {
 Menu.prototype.start = function() {
 	// Get list of names
 	var list = l("name-input-box").value;
+	global.rememberedNames = list;
 	list = list.split("\n");
 	
 	// Filter out duplicates and blanks
@@ -1674,17 +1689,20 @@ Menu.prototype.start = function() {
 	}
 	list = temp;
 	
-	// Be sure their are at least 2 names
+	// Be sure there are at least 2 names
 	if(list.length < 2) {
 		l("menu-error").innerHTML = "You must enter at least two unique names.";
 		l("menu-error").style.display = "block";
 		return;
 	}
 	
-	// Create game model
+	// Create game model, add players to it in random order
 	model = new Model();
-	for(var i = 0; i < list.length; i++) {
-		model.players.push(new Player(list[i]));
+	var players = [];
+	while(list.length > 0) {
+		var which = Math.floor(Math.random() * list.length);
+		model.players.push(new Player(list[which]));
+		list.splice(which, 1);
 	}
 	
 	// Space players out from each other
@@ -1734,6 +1752,7 @@ Setup = function() {
 	l("setup-name-box").value = "";
 	l("setup-overlay").style.display = "block";
 	l("setup-name-too-long").style.display = "none";
+	l("setup-name-box").focus();
 	
 	this.player = new Player("");
 };
@@ -1753,7 +1772,7 @@ Setup.prototype.update = function() {
 		return;
 	} else {
 		l("setup-name-too-long").style.display = "none";
-		l("setup-spells").innerHTML = "Fireball - " + decodeSpell("RFQ", this.player);
+		l("setup-spells").innerHTML = "To cast a basic Fireball,<br>you must type:<br>" + decodeSpell("RFQ", this.player);
 	}
 };
 
@@ -1761,7 +1780,6 @@ Setup.prototype.update = function() {
 
 // Turn
 Turn = function() {
-	this.state = "block";
 	this.input = "";
 	this.spellRot = 0;
 	
@@ -1815,13 +1833,11 @@ Turn.prototype.draw = function() {
 	}
 	p.draw("info");
 	
-	if(this.state === "block") {
-		ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
-		ctx.beginPath();
-		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
-		ctx.lineWidth = 20;
-		ctx.stroke();
-	}
+	ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
+	ctx.beginPath();
+	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
+	ctx.lineWidth = 20;
+	ctx.stroke();
 };
 
 Turn.prototype.newInput = function(char) {
@@ -1832,45 +1848,28 @@ Turn.prototype.newInput = function(char) {
 	}
 };
 
-Turn.prototype.blockAndMove = function() {
-	// Block
-	if(this.input.length != 3) {
-		model.players[0].blockSpell = "";
-	} else if(model.players[0].blockSpell === this.input) {
-		model.players[0].blockSpell = "";
-		model.fx.push(new Info("You did that last time", "alertproblem", model.players[0].pos));
-	} else {
-		model.players[0].blockSpell = this.input;
+Turn.prototype.click = function() {
+	if(this.skipClick) {
+		this.skipClick = false;
+		return;
 	}
-	
-	// Move
-	model.players[0].move();
-	
-	// Next state
-	this.input = "";
-	this.state = "cast";
-};
 
-Turn.prototype.cast = function() {
 	// End turn
 	state = new Sim();
+
+	// Move the player
+	model.players[0].move();
 	
-	// Only cast if spell has been entered
+	// Only continue casting if a spell has been entered
 	if(this.input.length !== 3) return;
 	
-	
-	// Get spell and make sure it hasn't been blocked since player's last turn
+	// Get spell
 	var spell = this.input;
-	var blocked = false;
-	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].blockSpell) blocked = true;
-	}
 	
 	// Encode spell
 	if(config.doencoding) {
 		spell = encodeSpell(spell, model.players[0]);
 	}
-	if(spell != "RFQ" && blocked) return; // Only Fireball I can't be blocked
 	
 	// Cast spell
 	try {
@@ -1878,21 +1877,6 @@ Turn.prototype.cast = function() {
 		eval(magic[spell].code);
 	} catch(e) {
 		// Oh well
-	}
-};
-
-Turn.prototype.click = function() {
-	if(this.skipClick) {
-		this.skipClick = false;
-		return;
-	}
-	switch(this.state) {
-		case "block":
-			this.blockAndMove();
-			break;
-		case "cast":
-			this.cast();
-			break;
 	}
 };
 
