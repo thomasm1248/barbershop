@@ -1051,24 +1051,24 @@ Sword = function(name, pos) {
 
 Sword.prototype.draw = function(layer) {
 	if(layer !== "airborn") return;
-
+	
 	ctx.save();
 	translate(this.pos);
 	ctx.rotate(getDir({x:0,y:0}, this.vel));
-
+	
 	ctx.strokeStyle = "grey";
 	ctx.beginPath();
 	ctx.moveTo(-30, 0);
 	ctx.lineTo(20, 0);
 	ctx.lineWidth = 5;
 	ctx.stroke();
-
+	
 	ctx.strokeStyle = "black";
 	ctx.beginPath();
 	ctx.moveTo(-20, -5);
 	ctx.lineTo(-20, 5);
 	ctx.stroke();
-
+	
 	ctx.restore();
 };
 
