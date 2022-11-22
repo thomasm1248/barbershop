@@ -818,8 +818,6 @@ Player = function(name) {
 		robe: selectRandom(colors.robe)
 	};
 	
-	this.blockSpell = "";
-	
 	this.rad = 15;
 	
 	var margin = 50;
@@ -1761,7 +1759,7 @@ Setup.prototype.update = function() {
 
 // Turn
 Turn = function() {
-	this.state = "block";
+	this.state = "move";
 	this.input = "";
 	this.spellRot = 0;
 	
@@ -1807,15 +1805,15 @@ Turn.prototype.draw = function() {
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		p.draw("grounded");
 		ctx.fillStyle = "white";
-		p.drawSpell(this.spellRot, this.input);
+		if(this.state != "move") p.drawSpell(this.spellRot, this.input);
 	} else {
 		model.draw();
 		ctx.fillStyle = "black";
-		p.drawSpell(this.spellRot, this.input);
+		if(this.state != "move") p.drawSpell(this.spellRot, this.input);
 	}
 	p.draw("info");
 	
-	if(this.state === "block") {
+	if(this.state === "move") {
 		ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
 		ctx.beginPath();
 		ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
@@ -1825,6 +1823,7 @@ Turn.prototype.draw = function() {
 };
 
 Turn.prototype.newInput = function(char) {
+	if(this.state === "move") return;
 	if(this.input.length === 3) {
 		this.input = this.input[1] + this.input[2] + char;
 	} else {
@@ -1832,22 +1831,11 @@ Turn.prototype.newInput = function(char) {
 	}
 };
 
-Turn.prototype.blockAndMove = function() {
-	// Block
-	if(this.input.length != 3) {
-		model.players[0].blockSpell = "";
-	} else if(model.players[0].blockSpell === this.input) {
-		model.players[0].blockSpell = "";
-		model.fx.push(new Info("You did that last time", "alertproblem", model.players[0].pos));
-	} else {
-		model.players[0].blockSpell = this.input;
-	}
-	
+Turn.prototype.move = function() {
 	// Move
 	model.players[0].move();
 	
 	// Next state
-	this.input = "";
 	this.state = "cast";
 };
 
@@ -1858,19 +1846,13 @@ Turn.prototype.cast = function() {
 	// Only cast if spell has been entered
 	if(this.input.length !== 3) return;
 	
-	
-	// Get spell and make sure it hasn't been blocked since player's last turn
+	// Get spell
 	var spell = this.input;
-	var blocked = false;
-	for(var i = 1; i < model.players.length; i++) {
-		if(spell === model.players[i].blockSpell) blocked = true;
-	}
 	
 	// Encode spell
 	if(config.doencoding) {
 		spell = encodeSpell(spell, model.players[0]);
 	}
-	if(spell != "RFQ" && blocked) return; // Only Fireball I can't be blocked
 	
 	// Cast spell
 	try {
@@ -1887,8 +1869,8 @@ Turn.prototype.click = function() {
 		return;
 	}
 	switch(this.state) {
-		case "block":
-			this.blockAndMove();
+		case "move":
+			this.move();
 			break;
 		case "cast":
 			this.cast();
