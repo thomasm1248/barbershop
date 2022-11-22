@@ -846,47 +846,47 @@ Player = function(name) {
 	this.blindTimer = 0;
 	this.invisible = false;
 	this.dead = false;
-
+	
 	this.grounded = true;
 	this.canBounce = true;
 };
 
 Player.prototype.draw = function(layer) {
 	if(this.invisible) return;
-
+	
 	if(layer === "info") {
 		ctx.save();
 		translate(this.pos);
-
+		
 		// Name bar
 		ctx.fillStyle = "black";
 		if(state.blind) ctx.fillStyle = "white";
 		ctx.textAlign = "center";
 		ctx.fillText(this.name, 0, -37);
-
+		
 		ctx.fillStyle = "green";
 		ctx.textAlign = "right";
 		ctx.fillText(this.health, -3, -27);
-
+		
 		ctx.fillStyle = "blue";
 		ctx.textAlign = "left";
 		ctx.fillText(this.mana, 3, -27);
-
+		
 		ctx.restore();
 	}
-
+	
 	if(layer !== "grounded") return;
 	ctx.save();
 	translate(this.pos);
-
+	
 	if(this.phasing) ctx.globalAlpha = 0.5;
-
+	
 	// Head
 	ctx.beginPath();
 	ctx.arc(0, -4, 10, 0, 2*Math.PI);
 	ctx.fillStyle = this.skin.head;
 	ctx.fill();
-
+	
 	// Robe
 	ctx.beginPath();
 	ctx.moveTo(7, 3);
@@ -895,7 +895,7 @@ Player.prototype.draw = function(layer) {
 	ctx.lineTo(-7, 3);
 	ctx.fillStyle = this.skin.robe;
 	ctx.fill();
-
+	
 	// Beard
 	ctx.beginPath();
 	if(this.course === "s") {
@@ -914,7 +914,7 @@ Player.prototype.draw = function(layer) {
 	}
 	ctx.fillStyle = this.skin.beard;
 	ctx.fill();
-
+	
 	// Hat
 	ctx.beginPath();
 	ctx.moveTo(5, -13);
@@ -934,7 +934,7 @@ Player.prototype.draw = function(layer) {
 	}
 	ctx.fillStyle = this.skin.hat;
 	ctx.fill();
-
+	
 	ctx.restore();
 };
 
@@ -942,7 +942,7 @@ Player.prototype.drawSpell = function(dir, spell) {
 	while(spell.length !== 3) {
 		spell = "#" + spell;
 	}
-
+	
 	ctx.save();
 	translate(this.pos);
 	ctx.textAlign = "center";
@@ -954,7 +954,7 @@ Player.prototype.drawSpell = function(dir, spell) {
 
 Player.prototype.useMana = function(mana) {
 	this.mana -= mana;
-
+	
 	if(this.mana < 0) {
 		this.health += this.mana;
 		this.mana = 0;
@@ -967,7 +967,7 @@ Player.prototype.hurt = function(damage) {
 	if(this.health <= 0) {
 		this.dead = true;
 	}
-
+	
 	model.fx.push(new Info("-"+damage, "damage", this.pos));
 };
 
@@ -976,7 +976,7 @@ Player.prototype.heal = function(health) {
 	if(this.health > config.maxhealth) {
 		this.health = config.maxhealth;
 	}
-
+	
 	for(var i = 0; i < 10; i++) {
 		model.dits.push(new Dit("heal", this.pos));
 	}
@@ -984,7 +984,7 @@ Player.prototype.heal = function(health) {
 
 Player.prototype.stun = function() {
 	this.stunned = true;
-
+	
 	model.fx.push(new Info("Stunned", "stun", this.pos));
 };
 
@@ -1014,7 +1014,7 @@ Player.prototype.move = function() {
 Player.prototype.update = function() {
 	// Add velocity to position
 	this.pos = addV(this.pos, this.vel);
-
+	
 	// Control the direction player is facing
 	this.course = "s";
 	if(getMagOfV(this.vel) > 0) {
@@ -1031,21 +1031,21 @@ Player.prototype.update = function() {
 Sword = function(name, pos) {
 	this.name = name;
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+		y: pos.y
 	};
 	this.vel = {
-x: Math.random() * 6 - 3,
-   y: Math.random() * 6 - 3
+		x: Math.random() * 6 - 3,
+		y: Math.random() * 6 - 3
 	};
 	this.accel = 0.05;
-
+	
 	this.rad = 20;
 	this.attackTimer = 0;
-
+	
 	this.canBounce = true;
 	this.canBeReflected = true;
-
+	
 	this.dead = false;
 };
 
@@ -1082,10 +1082,10 @@ Sword.prototype.update = function() {
 	if(this.name !== goalPlayer.name) {
 		this.vel = addV(this.vel, scaleV(vTo(this.pos, goalPlayer.pos), this.accel / getDist(this.pos, goalPlayer.pos)));
 	}
-
+	
 	// Apply velocity to position
 	this.pos = addV(this.pos, this.vel);
-
+	
 	// Hurt players
 	this.attackTimer++;
 	if(this.attackTimer > 0) {
@@ -1108,7 +1108,7 @@ Projectile = function() {
 	this.canBeReflected = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
-
+		
 		if(Math.random() < 0.50) model.dits.push(new Dit(this.sparkType, this.pos.x, this.pos.y));
 
 		for(var i in model.players) {
@@ -1128,24 +1128,24 @@ Projectile = function() {
 // Fireball
 Fireball = function(pos, dir) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+		y: pos.y
 	};
-
+	
 	this.rad = 10;
-
+	
 	this.sparkType = "redSpark";
-
+	
 	var speed = 5;
 	this.vel = {
-x: Math.cos(dir) * speed,
-   y: Math.sin(dir) * speed
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
 	};
-
+	
 	this.pos = addV(this.pos, scaleV(this.vel, 8));
-
+	
 	this.damage = 5;
-
+	
 	this.dead = false;
 };
 Fireball.prototype = new Projectile();
@@ -1155,7 +1155,7 @@ Fireball.prototype.draw = function(layer) {
 		ctx.save();
 		translate(this.pos);
 		ctx.rotate(getDir({x:0,y:0},this.vel));
-
+		
 		ctx.fillStyle = "red";
 		ctx.beginPath();
 		ctx.moveTo(this.rad, 0);
@@ -1163,7 +1163,7 @@ Fireball.prototype.draw = function(layer) {
 		ctx.lineTo(-2*this.rad, 0);
 		ctx.lineTo(0, -this.rad);
 		ctx.fill();
-
+		
 		ctx.restore();
 	}
 };
@@ -1173,24 +1173,24 @@ Fireball.prototype.draw = function(layer) {
 // Beam
 Beam = function(pos, dir) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+		y: pos.y
 	};
-
+	
 	this.rad = 7;
-
+	
 	this.sparkType = "blueSpark";
-
+	
 	var speed = 6;
 	this.vel = {
-x: Math.cos(dir) * speed,
-   y: Math.sin(dir) * speed
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
 	};
-
+	
 	this.pos = addV(this.pos, scaleV(this.vel, 5));
-
+	
 	this.damage = 10;
-
+	
 	this.dead = false;
 };
 Beam.prototype = new Projectile();
@@ -1218,24 +1218,24 @@ Beam.prototype.draw = function(layer) {
 // Star
 Star = function(pos, dir) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+		y: pos.y
 	};
-
+	
 	this.rad = 5;
-
+	
 	this.sparkType = "whiteSpark";
-
+	
 	var speed = 7;
 	this.vel = {
-x: Math.cos(dir) * speed,
-   y: Math.sin(dir) * speed
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
 	};
-
+	
 	this.pos = addV(this.pos, scaleV(this.vel, 2));
-
+	
 	this.damage = 14;
-
+	
 	this.dead = false;
 };
 Star.prototype = new Projectile();
@@ -1265,8 +1265,8 @@ Star.prototype.draw = function(layer) {
 Zap = function(posFrom, posTo) {
 	this.pos = posTo;
 	this.pArr = [{
-x: posFrom.x,
-	   y: posFrom.y
+		x: posFrom.x,
+		y: posFrom.y
 	}];
 	var dist = getDist(posFrom, posTo);
 	var dir = getDir(posFrom, posTo);
@@ -1275,21 +1275,21 @@ x: posFrom.x,
 	for(var i = step; i < dist; i += step) {
 		var angle = range/2 - Math.random()*range;
 		this.pArr.push({
-x: posFrom.x + Math.cos(dir+angle) * i,
-y: posFrom.y + Math.sin(dir+angle) * i
-});
-}
-this.pArr.push({
-x: posTo.x,
-y: posTo.y
-});
-
-for(i in model.players) {
-	if(model.players[i].phasing) continue;
-	if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(3);
-}
-
-this.dead = false;
+			x: posFrom.x + Math.cos(dir+angle) * i,
+			y: posFrom.y + Math.sin(dir+angle) * i
+		});
+	}
+	this.pArr.push({
+		x: posTo.x,
+		y: posTo.y
+	});
+	
+	for(i in model.players) {
+		if(model.players[i].phasing) continue;
+		if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(3);
+	}
+	
+	this.dead = false;
 };
 
 Zap.prototype.draw = function(layer) {
@@ -1317,15 +1317,15 @@ Zap.prototype.update = function() {
 // Poison Cloud
 PoisonCloud = function(pos) {
 	this.pos = {
-x: pos.x,
-   y: pos.y
+		x: pos.x,
+		y: pos.y
 	};
-
+	
 	this.rad = 75;
-
+	
 	this.timerSet = 20;
 	this.timer = this.timerSet;
-
+	
 	this.dead = false;
 }
 
@@ -1361,11 +1361,11 @@ PoisonCloud.prototype.update = function() {
 Shield = function(pos) {
 	this.pos = {
 		x: pos.x,
-   		y: pos.y
+		y: pos.y
 	};
-
+	
 	this.rad = 75;
-
+	
 	this.dead = false;
 }
 
@@ -1403,20 +1403,20 @@ Shield.prototype.update = function() {
 Obstacle = function(pos) {
 	this.pos = {
 		x: pos.x,
-   		y: pos.y
+		y: pos.y
 	};
-
+	
 	this.rad = 25;
-
+	
 	this.dead = false;
 };
 
 Obstacle.prototype.draw = function(layer) {
 	if(layer !== "grounded") return;
-
+	
 	ctx.save();
 	translate(this.pos);
-
+	
 	ctx.fillStyle = "grey";
 	ctx.strokeStyle = "black";
 	ctx.lineWidth = 3;
@@ -1428,7 +1428,7 @@ Obstacle.prototype.draw = function(layer) {
 	ctx.arc(0, 0, this.rad, 0, Math.PI);
 	ctx.fill();
 	ctx.stroke();
-
+	
 	ctx.restore();
 };
 
@@ -1458,29 +1458,29 @@ Obstacle.prototype.update = function() {
 Float = function(pos) {
 	this.pos = {
 		x: pos.x,
-   		y: pos.y
+		y: pos.y
 	};
 	this.vel = {
 		x: Math.random() * 6 - 3,
-   		y: Math.random() * 6 - 3
+		y: Math.random() * 6 - 3
 	};
-
+	
 	this.rad = 60;
-
+	
 	this.dead = false;
 };
 
 Float.prototype.draw = function(layer) {
 	if(layer !== "ground") return;
-
+	
 	ctx.save();
 	translate(this.pos);
-
+	
 	ctx.fillStyle = "#74d557";
 	ctx.beginPath();
 	ctx.arc(0, 0, this.rad, 0, 2*Math.PI);
 	ctx.fill();
-
+	
 	ctx.restore();
 };
 
@@ -1488,10 +1488,10 @@ Float.prototype.update = function() {
 	// Bounce off sides
 	if((this.vel.x < 0 && this.pos.x < this.rad) || (this.vel.x > 0 && this.pos.x > canvas.width - this.rad)) this.vel.x *= -1;
 	if((this.vel.y < 0 && this.pos.y < this.rad) || (this.vel.y > 0 && this.pos.y > canvas.height - this.rad)) this.vel.y *= -1;
-
+	
 	// Move self
 	this.pos = addV(this.pos, this.vel);
-
+	
 	// Move anything grounded
 	for(var i in model.everything) {
 		var thing = model.everything[i];
@@ -1510,9 +1510,9 @@ Info = function(text, type, pos) {
 	this.text = text;
 	this.pos = {
 		x: pos.x,
-   		y: pos.y
+		y: pos.y
 	};
-
+	
 	this.color = {
 		"damage": "red",
 		"heal": "green",
@@ -1522,25 +1522,25 @@ Info = function(text, type, pos) {
 		"blind": "red",
 		"alertproblem": "red"
 	}[type];
-
+	
 	this.timer = 0;
 	this.deadTime = 30;
-
+	
 	this.dead = false;
 };
 
 Info.prototype.draw = function(layer) {
 	if(layer !== "info") return;
-
+	
 	ctx.save();
 	translate(this.pos);
-
+	
 	ctx.globalAlpha = 1 - this.timer / this.deadTime;
-
+	
 	ctx.fillStyle = this.color;
 	ctx.textAlign = "center";
 	ctx.fillText(this.text, 0, -50 - Math.sqrt(this.timer));
-
+	
 	ctx.restore();
 };
 
@@ -1648,7 +1648,7 @@ Menu = function() {
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	l("menu-error").style.display = "none";
-
+	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
@@ -1656,7 +1656,7 @@ Menu.prototype.start = function() {
 	// Get list of names
 	var list = l("name-input-box").value;
 	list = list.split("\n");
-
+	
 	// Filter out duplicates and blanks
 	var temp = [];
 	for(var i = 0; i < list.length; i++) {
@@ -1673,20 +1673,20 @@ Menu.prototype.start = function() {
 		}
 	}
 	list = temp;
-
+	
 	// Be sure their are at least 2 names
 	if(list.length < 2) {
 		l("menu-error").innerHTML = "You must enter at least two unique names.";
 		l("menu-error").style.display = "block";
 		return;
 	}
-
+	
 	// Create game model
 	model = new Model();
 	for(var i = 0; i < list.length; i++) {
 		model.players.push(new Player(list[i]));
 	}
-
+	
 	// Space players out from each other
 	for(var i = 0; i < 100; i++) {
 		for(var j = 0; j < model.players.length; j++) {
@@ -1705,7 +1705,7 @@ Menu.prototype.start = function() {
 
 	// Close main menu
 	l("main-menu-overlay").style.display = "none";
-
+	
 	// Start game
 	state = new Turn();
 	state.skipClick = true;
@@ -1734,19 +1734,19 @@ Setup = function() {
 	l("setup-name-box").value = "";
 	l("setup-overlay").style.display = "block";
 	l("setup-name-too-long").style.display = "none";
-
+	
 	this.player = new Player("");
 };
 
 Setup.prototype.update = function() {
 	this.player = new Player(l("setup-name-box").value);
 	this.player.pos = {
-x: canvas.width / 2,
-   y: canvas.height / 4 * 3
+		x: canvas.width / 2,
+		y: canvas.height / 4 * 3
 	};
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	this.player.draw("grounded");
-
+	
 	if(this.player.name.length > 16) {
 		l("setup-name-too-long").style.display = "block";
 		l("setup-spells").innerHTML = "";
