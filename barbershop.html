@@ -535,7 +535,7 @@ magic = {
 	// Fireball towards mouse
 	"RFQ": {
 		name: "Fireball I",
-		mana: 3,
+		mana: 2,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
@@ -690,7 +690,7 @@ magic = {
 	"FNK": {
 		name: "Burst of Fire",
 		mana: 20,
-		code: "var p=model.players[0];for(var d=0;d<12;d++){model.things.push(new Fireball(p.pos,Math.PI*2/12*d));}"
+		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:12,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=2;model.things.push(new Fireball(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 
 	// Steer Fireball
@@ -704,7 +704,14 @@ magic = {
 	"DMO": {
 		name: "Dragon Breath",
 		mana: 20,
-		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*1-0.5)));this.num--;if(this.num<1)this.dead=true;}}})"
+		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
+	},
+
+	// Reverse Fireball
+	"RPO": {
+		name: "Reverse Fireball",
+		mana: 3,
+		code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
 	}
 };
 
