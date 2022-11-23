@@ -256,7 +256,7 @@ var Projectile,
 		Zap,
 		PoisonCloud,
 		Shield,
-		Float,
+		Whirlwind,
 		Obstacle;
 
 var Sword;
@@ -592,7 +592,7 @@ magic = {
 	// Poison Cloud at mouse
 	"JOV": {
 		name: "Poison Cloud",
-		mana: 13,
+		mana: 13, // todo reduce cost of poison cloud
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
@@ -625,10 +625,10 @@ magic = {
 	},
 	
 	// Float at mouse
-	"AQX": {
-		name: "Shifting Earth",
-		mana: 4,
-		code: "model.things.push(new Float(getMouse()));"
+	"VXW": {
+		name: "Whirlwind",
+		mana: 12,
+		code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
 	},
 	
 	// Sword mob at mouse
@@ -875,6 +875,7 @@ Player = function(name) {
 	
 	this.grounded = true;
 	this.canBounce = true;
+	this.canBeSweptUp = true;
 };
 
 Player.prototype.draw = function(layer) {
@@ -1072,6 +1073,7 @@ Sword = function(name, pos) {
 	
 	this.canBounce = true;
 	this.canBeReflected = true;
+	this.canBeSweptUp = true;
 	
 	this.dead = false;
 };
@@ -1133,6 +1135,7 @@ Sword.prototype.update = function() {
 Projectile = function() {
 	this.canBounce = true;
 	this.canBeReflected = true;
+	this.canBeSweptUp = true;
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
 		
@@ -1556,49 +1559,82 @@ Obstacle.prototype.update = function() {
 
 
 // Float
-Float = function(pos) {
-	this.pos = {
+Whirlwind = function(pos, dir) {
+	this.pos = { // todo spawn ahead of player
 		x: pos.x,
 		y: pos.y
 	};
+
+	this.speed = 5;
 	this.vel = {
-		x: Math.random() * 6 - 3,
-		y: Math.random() * 6 - 3
+		x: Math.cos(dir) * this.speed,
+		y: Math.sin(dir) * this.speed
 	};
 	
 	this.rad = 60;
+	this.spinSpeed = 0.2;
+	this.rot = 0;
+	this.lines = [];
+	for(var i = 0; i < 10; i++) {
+		this.lines.push({
+			start: Math.random() * Math.PI * 2,
+			rad: Math.random() * this.rad / 2 + this.rad / 2
+		});
+		this.lines[i].end = this.lines[i].start + Math.random() * Math.PI * 0.7 + 1;
+		this.lines[i].startPos = {
+			x: Math.cos(this.lines[i].start) * this.lines[i].rad,
+			y: Math.sin(this.lines[i].start) * this.lines[i].rad
+		}
+	}
+
+	var headStart = scaleV(this.vel, this.rad / this.speed + 4);
+	this.pos = addV(this.pos, headStart);
 	
 	this.dead = false;
 };
 
-Float.prototype.draw = function(layer) {
+Whirlwind.prototype.draw = function(layer) {
 	if(layer !== "ground") return;
 	
 	ctx.save();
 	translate(this.pos);
+	ctx.rotate(this.rot);
 	
-	ctx.fillStyle = "#74d557";
+	ctx.strokeStyle = "#93d6ea";
 	ctx.beginPath();
-	ctx.arc(0, 0, this.rad, 0, 2*Math.PI);
-	ctx.fill();
+	for(var i = 0; i < this.lines.length; i++) {
+		ctx.moveTo(this.lines[i].startPos.x, this.lines[i].startPos.y);
+		ctx.arc(0, 0, this.lines[i].rad, this.lines[i].start, this.lines[i].end);
+	}
+	ctx.lineCap = "round";
+	ctx.lineWidth = 3;
+	ctx.stroke();
 	
 	ctx.restore();
 };
 
-Float.prototype.update = function() {
+Whirlwind.prototype.update = function() {
 	// Bounce off sides
-	if((this.vel.x < 0 && this.pos.x < this.rad) || (this.vel.x > 0 && this.pos.x > canvas.width - this.rad)) this.vel.x *= -1;
-	if((this.vel.y < 0 && this.pos.y < this.rad) || (this.vel.y > 0 && this.pos.y > canvas.height - this.rad)) this.vel.y *= -1;
+	if((this.pos.x < this.rad) || (this.pos.x > canvas.width - this.rad)) this.dead = true;
+	if((this.pos.y < this.rad) || (this.pos.y > canvas.height - this.rad)) this.dead = true;
 	
 	// Move self
 	this.pos = addV(this.pos, this.vel);
+	this.rot += this.spinSpeed;
 	
-	// Move anything grounded
+	// Move anything grounded, and suck things in
 	for(var i in model.everything) {
 		var thing = model.everything[i];
-		if(thing.grounded) {
+		if(thing.canBeSweptUp != undefined && thing.canBeSweptUp) { // todo target projectiles and players and swords and.. not pillars
 			if(getDist(thing.pos, this.pos) < this.rad) {
+				// Bring things with it
 				thing.pos = addV(thing.pos, this.vel);
+
+				// Suck things in
+				if(getDist(this.pos, thing.pos) != 0) {
+					thing.vel = scaleV(thing.vel, 0.96);
+					thing.vel = addV(thing.vel, scaleV(normalize(vTo(thing.pos, this.pos)), 0.16));
+				}
 			}
 		}
 	}
