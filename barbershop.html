@@ -592,7 +592,7 @@ magic = {
 	// Poison Cloud at mouse
 	"JOV": {
 		name: "Poison Cloud",
-		mana: 13, // todo reduce cost of poison cloud
+		mana: 7,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
@@ -1560,7 +1560,7 @@ Obstacle.prototype.update = function() {
 
 // Float
 Whirlwind = function(pos, dir) {
-	this.pos = { // todo spawn ahead of player
+	this.pos = {
 		x: pos.x,
 		y: pos.y
 	};
@@ -1625,7 +1625,7 @@ Whirlwind.prototype.update = function() {
 	// Move anything grounded, and suck things in
 	for(var i in model.everything) {
 		var thing = model.everything[i];
-		if(thing.canBeSweptUp != undefined && thing.canBeSweptUp) { // todo target projectiles and players and swords and.. not pillars
+		if(thing.canBeSweptUp != undefined && thing.canBeSweptUp) {
 			if(getDist(thing.pos, this.pos) < this.rad) {
 				// Bring things with it
 				thing.pos = addV(thing.pos, this.vel);
