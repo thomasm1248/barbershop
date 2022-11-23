@@ -1010,6 +1010,7 @@ Player.prototype.heal = function(health) {
 
 Player.prototype.stun = function() {
 	this.stunned = true;
+	this.vel = {x:0,y:0};
 	
 	model.fx.push(new Info("Stunned", "stun", this.pos));
 };
