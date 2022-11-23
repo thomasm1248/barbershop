@@ -252,6 +252,7 @@ var Projectile,
 			Fireball,
 			Beam,
 			Star,
+			GreatBallOfFire,
 		Zap,
 		PoisonCloud,
 		Shield,
@@ -712,6 +713,13 @@ magic = {
 		name: "Reverse Fireball",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
+	},
+	
+	// Fireball X towards mouse
+	"WKD": {
+		name: "Fireball X",
+		mana: 30,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
 	}
 };
 
@@ -1127,7 +1135,13 @@ Projectile = function() {
 	this.update = function() {
 		this.pos = addV(this.pos, this.vel);
 		
-		if(Math.random() < 0.50) model.dits.push(new Dit(this.sparkType, this.pos.x, this.pos.y));
+		var dist = getMagOfV(this.vel);
+		dist = -dist*dist*dist/100;
+		for(var i = 0; i < 3; i++) {
+			var shift = {x:Math.random()*2-1,y:Math.random()*2-1};
+			shift = scaleV(shift, this.rad/2);
+			if(Math.random() < this.sparkChance) model.dits.push(new Dit(this.sparkType, this.pos.x+this.vel.x*dist+shift.x, this.pos.y+this.vel.y*dist+shift.y));
+		}
 
 		for(var i in model.players) {
 			if(model.players[i].phasing) continue;
@@ -1153,6 +1167,7 @@ Fireball = function(pos, dir) {
 	this.rad = 10;
 	
 	this.sparkType = "redSpark";
+	this.sparkChance = 0.5;
 	
 	var speed = 5;
 	this.vel = {
@@ -1198,6 +1213,7 @@ Beam = function(pos, dir) {
 	this.rad = 7;
 	
 	this.sparkType = "blueSpark";
+	this.sparkChance = 0.5;
 	
 	var speed = 6;
 	this.vel = {
@@ -1243,6 +1259,7 @@ Star = function(pos, dir) {
 	this.rad = 5;
 	
 	this.sparkType = "whiteSpark";
+	this.sparkChance = 0.5;
 	
 	var speed = 7;
 	this.vel = {
@@ -1273,6 +1290,71 @@ Star.prototype.draw = function(layer) {
 		ctx.lineTo(this.rad, 0);
 		ctx.fill();
 
+		ctx.restore();
+	}
+};
+
+
+
+// Great Ball of Fire
+GreatBallOfFire = function(pos, dir) {
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	
+	this.rad = 80;
+	this.rad2 = this.rad * 0.6;
+	this.rad3 = this.rad * 0.2;
+	
+	this.sparkType = "redSpark";
+	this.sparkChance = 1;
+	
+	var speed = 10;
+	this.vel = {
+		x: Math.cos(dir) * speed,
+		y: Math.sin(dir) * speed
+	};
+	
+	this.pos = addV(this.pos, scaleV(this.vel, 10));
+	
+	this.damage = 19;
+	
+	this.dead = false;
+};
+GreatBallOfFire.prototype = new Projectile();
+
+GreatBallOfFire.prototype.draw = function(layer) {
+	if(layer === "airborn") {
+		ctx.save();
+		translate(this.pos);
+		ctx.rotate(getDir({x:0,y:0},this.vel));
+		
+		ctx.fillStyle = "red";
+		ctx.beginPath();
+		ctx.moveTo(this.rad, 0);
+		ctx.lineTo(0, this.rad);
+		ctx.lineTo(-2*this.rad, 0);
+		ctx.lineTo(0, -this.rad);
+		ctx.fill();
+
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(this.rad2, 0);
+		ctx.lineTo(0, this.rad2);
+		ctx.lineTo(-2*this.rad2, 0);
+		ctx.lineTo(0, -this.rad2);
+		ctx.fill();
+
+		ctx.fillStyle = "yellow";
+		ctx.beginPath();
+		ctx.moveTo(this.rad3, 0);
+		ctx.lineTo(0, this.rad3);
+		ctx.lineTo(-2*this.rad3, 0);
+		ctx.lineTo(0, -this.rad3);
+		ctx.lineTo(this.rad3, 0);
+		ctx.fill();
+		
 		ctx.restore();
 	}
 };
