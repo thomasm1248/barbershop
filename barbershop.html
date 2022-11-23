@@ -648,7 +648,7 @@ magic = {
 	// Swap position with another player
 	"KOC": {
 		name: "Swap",
-		mana: 9,
+		mana: 11,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
@@ -697,8 +697,8 @@ magic = {
 	// Steer Fireball
 	"EFH": {
 		name: "Steer Fireball",
-		mana: 9,
-		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
+		mana: 11,
+		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
 	},
 
 	// Dragon Breath
