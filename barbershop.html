@@ -261,6 +261,9 @@ var Projectile,
 
 var Sword;
 
+var Drop,
+		ManaDrop;
+
 var Info,
 		Dit;
 
@@ -1128,6 +1131,54 @@ Sword.prototype.update = function() {
 			}
 		}
 	}
+};
+
+
+
+// Drop prototype
+Drop = function() {
+	// this.pos
+	// this.rad
+	// this.dead
+	// todo add properties
+	// todo figure out which catagory they should be in
+};
+
+Drop.prototype.findSpotAwayFromPlayers = function() {
+	// todo return vector
+};
+
+Drop.prototype.update = function() {
+	for(var i = 0; i < model.players.length; i++) {
+		if(getDist(this.pos, model.players[i].pos) < this.rad + model.players[i].rad) {
+			this.effect(model.players[i]);
+			this.dead = true;
+			return;
+		}
+	}
+};
+
+// Drop.prototype.draw
+
+// Drop.prototype.effect
+
+
+
+// ManaDrop prototype
+ManaDrop = function() {
+	this.pos = this.findSpotAwayFromPlayers();
+	this.rad = 20;
+	this.dead = false;
+};
+ManaDrop.prototype = new Drop();
+
+ManaDrop.prototype.draw = function(layer) {
+	// todo draw
+	// todo find what layer
+};
+
+ManaDrop.prototype.effect = function(player) {
+	player.mana += 5;
 };
 
 
