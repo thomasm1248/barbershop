@@ -739,6 +739,20 @@ magic = {
 		name: "Left Flame",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
+	},
+
+	// Star Shot
+	"GZV": {
+		name: "Star Shot",
+		mana: 20,
+		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:3,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Star(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
+	},
+	
+	// The Firework
+	"QWE": {
+		name: "The Firework",
+		mana: 16,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
 	}
 };
 
