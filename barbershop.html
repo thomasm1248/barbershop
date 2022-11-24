@@ -217,7 +217,8 @@ var config = {
 	manaperturn: 5,
 	framesperround: 100,
 	walkingdistance: 200,
-	maxhealth: 20
+	maxhealth: 20,
+	droptimer: 500
 };
 
 
@@ -260,6 +261,9 @@ var Projectile,
 		Obstacle;
 
 var Sword;
+
+var Drop,
+		ManaDrop;
 
 var Info,
 		Dit;
@@ -409,11 +413,12 @@ function getDir(posFrom, posTo) {
 	return Math.atan2(diff.y, diff.x);
 }
 
+function getDistSquared(pos1, pos2) {
+	return Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2);
+}
+
 function getDist(pos1, pos2) {
-	return Math.sqrt(
-		Math.pow(pos1.x - pos2.x, 2) +
-		Math.pow(pos1.y - pos2.y, 2)
-	);
+	return Math.sqrt(getDistSquared(pos1, pos2));
 }
 
 function getClosest(arr, pos) {
@@ -763,7 +768,7 @@ colors = {
 
 
 
-// Model
+// Model prototype
 Model = function() {
 	this.players = [];
 	this.mobs = [];
@@ -775,6 +780,8 @@ Model = function() {
 	this.fx = [];
 	
 	this.dits = [];
+
+	this.dropTimer = config.droptimer;
 };
 
 Model.prototype.drawBackground = function() {
@@ -836,7 +843,7 @@ Model.prototype.draw = function() {
 
 
 
-// Player
+// Player prototype
 Player = function(name) {
 	this.name = name;
 	this.firstKey = genKey(name);
@@ -1128,6 +1135,100 @@ Sword.prototype.update = function() {
 			}
 		}
 	}
+};
+
+
+
+// Drop prototype
+Drop = function() {
+	// this.pos
+	// this.rad
+	// this.dead
+	// this.vel
+
+	this.grounded = true;
+	this.canBeSweptUp = true;
+
+	// put in model.things
+};
+
+Drop.prototype.findSpotAwayFromPlayers = function() {
+	// Try 100 times to find a point farther away from any players
+	var point = {
+		x: 0,
+		y: 0
+	};
+	var greatestDistSoFar = 0
+	for(var i = 0; i < 100; i++) {
+		var newPoint = {
+			x: Math.random() * canvas.width,
+			y: Math.random() * canvas.height
+		};
+		var closestDist = 10000000000000;
+		for(var j = 0; j < model.players.length; j++) {
+			var dist = getDistSquared(point, newPoint);
+			if(dist < closestDist) closestDist = dist;
+		}
+		if(closestDist > greatestDistSoFar) {
+			greatestDistSoFar = closestDist;
+			point = newPoint;
+		}
+	}
+
+	return point; // todo test
+};
+
+Drop.prototype.update = function() {
+	// This is just in case it is given some momentum by something
+	this.vel = scaleV(this.vel, 0.9);
+	this.pos = addV(this.pos, this.vel);
+
+	// Check if this is being collected by a player yet
+	for(var i = 0; i < model.players.length; i++) {
+		if(getDist(this.pos, model.players[i].pos) < this.rad + model.players[i].rad) {
+			this.effect(model.players[i]);
+			this.dead = true;
+			return;
+		}
+	}
+};
+
+// Drop.prototype.draw
+
+// Drop.prototype.effect
+
+
+
+// ManaDrop prototype
+ManaDrop = function() {
+	this.pos = this.findSpotAwayFromPlayers();
+	this.vel = {
+		x: 0,
+		y: 0
+	};
+	this.rad = 10;
+	this.dead = false;
+};
+ManaDrop.prototype = new Drop();
+
+ManaDrop.prototype.draw = function(layer) {
+	if(layer != "grounded") return;
+
+	ctx.save();
+	translate(this.pos);
+
+	ctx.strokeStyle = "blue";
+	ctx.beginPath();
+	ctx.arc(0, 0, this.rad-2, 0, Math.PI * 2);
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.restore();
+};
+
+ManaDrop.prototype.effect = function(player) {
+	player.mana += 5;
+	// todo add effect
 };
 
 
@@ -1908,7 +2009,7 @@ Setup.prototype.update = function() {
 
 
 
-// Turn
+// Turn prototype
 Turn = function() {
 	this.input = "";
 	this.spellRot = 0;
@@ -1934,8 +2035,8 @@ Turn = function() {
 	p.vel.x = 0;
 	p.vel.y = 0;
 	p.phasing = false;
-	p.mana += config.manaperturn;
-	if(p.mana > 20) p.mana = 20;
+	if(p.mana < 20 - config.manaperturn) p.mana += config.manaperturn;
+	else if(p.mana < 20) p.mana = 20;
 	if(p.blindTimer > 0) {
 		p.blindTimer--;
 		if(p.blindTimer == 0) p.blinded = false;
@@ -2017,7 +2118,7 @@ Turn.prototype.update = function() {
 
 
 
-// Sim
+// Sim prototype
 Sim = function() {
 	this.timer = config.framesperround / model.players.length;
 };
@@ -2104,6 +2205,13 @@ Sim.prototype.update = function() {
 	if(model.players.length < 2) {
 		state = new GameOver();
 		return;
+	}
+
+	// Regularly add a mana drop to the map
+	model.dropTimer--;
+	if(model.dropTimer < 0) {
+		model.dropTimer = config.droptimer;
+		model.things.push(new ManaDrop());
 	}
 	
 	this.timer--;
