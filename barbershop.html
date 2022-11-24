@@ -412,11 +412,12 @@ function getDir(posFrom, posTo) {
 	return Math.atan2(diff.y, diff.x);
 }
 
+function getDistSquared(pos1, pos2) {
+	return Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2);
+}
+
 function getDist(pos1, pos2) {
-	return Math.sqrt(
-		Math.pow(pos1.x - pos2.x, 2) +
-		Math.pow(pos1.y - pos2.y, 2)
-	);
+	return Math.sqrt(getDistSquared(pos1, pos2));
 }
 
 function getClosest(arr, pos) {
@@ -766,7 +767,7 @@ colors = {
 
 
 
-// Model
+// Model prototype
 Model = function() {
 	this.players = [];
 	this.mobs = [];
@@ -839,7 +840,7 @@ Model.prototype.draw = function() {
 
 
 
-// Player
+// Player prototype
 Player = function(name) {
 	this.name = name;
 	this.firstKey = genKey(name);
@@ -1140,15 +1141,46 @@ Drop = function() {
 	// this.pos
 	// this.rad
 	// this.dead
-	// todo add properties
-	// todo figure out which catagory they should be in
+	// this.vel
+
+	this.grounded = true;
+	this.canBeSweptUp = true;
+
+	// put in model.things
 };
 
 Drop.prototype.findSpotAwayFromPlayers = function() {
-	// todo return vector
+	// Try 100 times to find a point farther away from any players
+	var point = {
+		x: 0,
+		y: 0
+	};
+	var greatestDistSoFar = 0
+	for(var i = 0; i < 100; i++) {
+		var newPoint = {
+			x: Math.random() * canvas.width,
+			y: Math.random() * canvas.height
+		};
+		var closestDist = 10000000000000;
+		for(var j = 0; j < model.players.length; j++) {
+			var dist = getDistSquared(point, newPoint);
+			if(dist < closestDist) closestDist = dist;
+		}
+		if(closestDist > greatestDistSoFar) {
+			greatestDistSoFar = closestDist;
+			point = newPoint;
+		}
+	}
+
+	return point; // todo test
 };
 
 Drop.prototype.update = function() {
+	// This is just in case it is given some momentum by something
+	this.vel = scaleV(this.vel, 0.9);
+	this.pos = addV(this.pos, this.vel);
+
+	// Check if this is being collected by a player yet
 	for(var i = 0; i < model.players.length; i++) {
 		if(getDist(this.pos, model.players[i].pos) < this.rad + model.players[i].rad) {
 			this.effect(model.players[i]);
@@ -1173,12 +1205,22 @@ ManaDrop = function() {
 ManaDrop.prototype = new Drop();
 
 ManaDrop.prototype.draw = function(layer) {
-	// todo draw
-	// todo find what layer
+	if(layer != "grounded") return;
+
+	ctx.save();
+	translate(this.pos);
+
+	ctx.fillStyle = "blue";
+	ctx.beginPath();
+	ctx.arc(0, 0, this.rad, 0, Math.PI * 2);
+	ctx.fill();
+
+	ctx.restore();
 };
 
 ManaDrop.prototype.effect = function(player) {
 	player.mana += 5;
+	// todo add effect
 };
 
 
@@ -2068,7 +2110,7 @@ Turn.prototype.update = function() {
 
 
 
-// Sim
+// Sim prototype
 Sim = function() {
 	this.timer = config.framesperround / model.players.length;
 };
