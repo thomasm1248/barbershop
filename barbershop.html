@@ -217,7 +217,8 @@ var config = {
 	manaperturn: 5,
 	framesperround: 100,
 	walkingdistance: 200,
-	maxhealth: 20
+	maxhealth: 20,
+	droptimer: 500
 };
 
 
@@ -779,6 +780,8 @@ Model = function() {
 	this.fx = [];
 	
 	this.dits = [];
+
+	this.dropTimer = config.droptimer;
 };
 
 Model.prototype.drawBackground = function() {
@@ -1199,7 +1202,11 @@ Drop.prototype.update = function() {
 // ManaDrop prototype
 ManaDrop = function() {
 	this.pos = this.findSpotAwayFromPlayers();
-	this.rad = 20;
+	this.vel = {
+		x: 0,
+		y: 0
+	};
+	this.rad = 10;
 	this.dead = false;
 };
 ManaDrop.prototype = new Drop();
@@ -1210,10 +1217,11 @@ ManaDrop.prototype.draw = function(layer) {
 	ctx.save();
 	translate(this.pos);
 
-	ctx.fillStyle = "blue";
+	ctx.strokeStyle = "blue";
 	ctx.beginPath();
-	ctx.arc(0, 0, this.rad, 0, Math.PI * 2);
-	ctx.fill();
+	ctx.arc(0, 0, this.rad-2, 0, Math.PI * 2);
+	ctx.lineWidth = 4;
+	ctx.stroke();
 
 	ctx.restore();
 };
@@ -2001,7 +2009,7 @@ Setup.prototype.update = function() {
 
 
 
-// Turn
+// Turn prototype
 Turn = function() {
 	this.input = "";
 	this.spellRot = 0;
@@ -2027,8 +2035,8 @@ Turn = function() {
 	p.vel.x = 0;
 	p.vel.y = 0;
 	p.phasing = false;
-	p.mana += config.manaperturn;
-	if(p.mana > 20) p.mana = 20;
+	if(p.mana < 20 - config.manaperturn) p.mana += config.manaperturn;
+	else if(p.mana < 20) p.mana = 20;
 	if(p.blindTimer > 0) {
 		p.blindTimer--;
 		if(p.blindTimer == 0) p.blinded = false;
@@ -2197,6 +2205,13 @@ Sim.prototype.update = function() {
 	if(model.players.length < 2) {
 		state = new GameOver();
 		return;
+	}
+
+	// Regularly add a mana drop to the map
+	model.dropTimer--;
+	if(model.dropTimer < 0) {
+		model.dropTimer = config.droptimer;
+		model.things.push(new ManaDrop());
 	}
 	
 	this.timer--;
