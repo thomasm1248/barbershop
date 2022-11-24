@@ -1574,13 +1574,13 @@ Whirlwind = function(pos, dir) {
 	};
 	
 	this.rad = 60;
-	this.spinSpeed = 0.2;
+	this.spinSpeed = 8;
 	this.rot = 0;
 	this.lines = [];
 	for(var i = 0; i < 10; i++) {
 		this.lines.push({
 			start: Math.random() * Math.PI * 2,
-			rad: Math.random() * this.rad / 2 + this.rad / 2
+			rad: Math.random() * this.rad * 0.75 + this.rad / 4
 		});
 		this.lines[i].end = this.lines[i].start + Math.random() * Math.PI * 0.7 + 1;
 		this.lines[i].startPos = {
@@ -1600,13 +1600,15 @@ Whirlwind.prototype.draw = function(layer) {
 	
 	ctx.save();
 	translate(this.pos);
-	ctx.rotate(this.rot);
 	
 	ctx.strokeStyle = "#93d6ea";
 	ctx.beginPath();
 	for(var i = 0; i < this.lines.length; i++) {
+		ctx.save();
+		ctx.rotate(this.rot / this.lines[i].rad);
 		ctx.moveTo(this.lines[i].startPos.x, this.lines[i].startPos.y);
 		ctx.arc(0, 0, this.lines[i].rad, this.lines[i].start, this.lines[i].end);
+		ctx.restore();
 	}
 	ctx.lineCap = "round";
 	ctx.lineWidth = 3;
