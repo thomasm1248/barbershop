@@ -725,6 +725,20 @@ magic = {
 		name: "Fireball X",
 		mana: 30,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
+	},
+	
+	// Fireball to the right
+	"OZO": {
+		name: "Right Flame",
+		mana: 3,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r+Math.PI/2));"
+	},
+	
+	// Fireball to the left
+	"JWP": {
+		name: "Left Flame",
+		mana: 3,
+		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
 	}
 };
 
