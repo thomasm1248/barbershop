@@ -584,8 +584,8 @@ magic = {
 	
 	// Swap Four Corners
 	"CCG": {
-		name: "Quake",
-		mana: 10,
+		name: "Shifting Earth",
+		mana: 15,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
@@ -627,7 +627,7 @@ magic = {
 	// Float at mouse
 	"VXW": {
 		name: "Whirlwind",
-		mana: 12,
+		mana: 10,
 		code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
 	},
 	
@@ -1121,6 +1121,7 @@ Sword.prototype.update = function() {
 		for(var i in model.players) {
 			var p = model.players[i];
 			if(this.name === p.name) continue;
+			if(p.phasing) continue;
 			if(getDist(this.pos, p.pos) < this.rad + p.rad) {
 				p.hurt(1);
 				this.attackTimer = -20;
@@ -1388,9 +1389,10 @@ Zap = function(posFrom, posTo) {
 		y: posTo.y
 	});
 	
+	var rad = 20;
 	for(i in model.players) {
 		if(model.players[i].phasing) continue;
-		if(getDist(model.players[i].pos,posTo) < model.players[i].rad) model.players[i].hurt(3);
+		if(getDist(model.players[i].pos,posTo) < model.players[i].rad + rad) model.players[i].hurt(3);
 	}
 	
 	this.dead = false;
