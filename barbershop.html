@@ -853,6 +853,12 @@ Model.prototype.drawLayer = function(layer) {
 	}
 };
 
+Model.prototype.drawDead = function() {
+	for(var i = 0; i < this.graveyard.length; i++) {
+		this.graveyard[i].draw1("dead");
+	}
+}
+
 Model.prototype.drawDits = function() {
 	for(var i = 0; i < this.dits.length; i++) {
 		this.dits[i].draw();
@@ -863,6 +869,7 @@ Model.prototype.draw = function() {
 	this.drawBackground();
 	this.sortByDepth();
 	this.drawLayer("ground");
+	this.drawDead();
 	this.drawLayer("grounded");
 	this.drawDits();
 	this.drawLayer("airborn");
@@ -915,6 +922,39 @@ Player = function(name) {
 
 Player.prototype.draw = function(layer) {
 	if(this.invisible) return;
+
+	if(layer === "dead") {
+		ctx.save();
+		translate(this.pos);
+
+		// Dark outline
+		ctx.fillStyle = "rgba(0,0,0,0.5)";
+		ctx.beginPath();
+		ctx.arc(0, 0, 11, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.fillRect(-7, 7, 14, 7);
+
+		// Cranium and upper jaw
+		ctx.fillStyle = "white";
+		ctx.beginPath();
+		ctx.arc(0, 0, 10, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.fillRect(-6, 7, 12, 6);
+
+		// Eyes
+		ctx.fillStyle = "black";
+		ctx.beginPath();
+		ctx.arc(-4, 2, 3, 0, Math.PI * 2);
+		ctx.arc(4, 2, 3, 0, Math.PI * 2);
+		ctx.fill();
+
+		// Nose
+		ctx.fillRect(-1.5, 5, 1, 2);
+		ctx.fillRect(0.5, 5, 1, 2);
+
+		ctx.restore();
+		return;
+	}
 	
 	if(layer === "info") {
 		ctx.save();
@@ -1210,7 +1250,7 @@ Drop.prototype.findSpotAwayFromPlayers = function() {
 		}
 	}
 
-	return point; // todo test
+	return point;
 };
 
 Drop.prototype.update = function() {
