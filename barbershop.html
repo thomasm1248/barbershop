@@ -2049,14 +2049,14 @@ Turn = function() {
 	var p = model.players[0].pos;
 	
 	// Move circle gradient (Positive)
-	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
-	this.moveCircleGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
-	this.moveCircleGrad.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+	this.moveCircleGrad.addColorStop(0, "rgba(50, 50, 255, 0)");
+	this.moveCircleGrad.addColorStop(1, "rgba(50, 50, 255, 0.1)");
 	
 	// Move circle gradient (Negative)
-	this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
-	this.moveCircleGradNeg.addColorStop(0, "rgba(255, 255, 255, 0)");
-	this.moveCircleGradNeg.addColorStop(1, "rgba(255, 255, 255, 0.5)");
+	this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+	this.moveCircleGradNeg.addColorStop(0, "rgba(150, 150, 255, 0)");
+	this.moveCircleGradNeg.addColorStop(1, "rgba(150, 150, 255, 0.3)");
 	
 	// Current player setup
 	var p = model.players[0];
@@ -2094,8 +2094,8 @@ Turn.prototype.draw = function() {
 	
 	ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
 	ctx.beginPath();
-	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
-	ctx.lineWidth = 20;
+	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 30, 0, 2*Math.PI);
+	ctx.lineWidth = 60;
 	ctx.stroke();
 };
 
