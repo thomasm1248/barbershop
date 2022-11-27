@@ -83,8 +83,8 @@ body {
 	margin: 1.5px;
 }
 
-#how-to-play-container h1 { text-align: center; }
-#how-to-play-container {
+#how-to-play-container h1, #whats-new-container h1 { text-align: center; }
+#how-to-play-container, #whats-new-container {
 	width: 500px;
 	margin: 0 auto 100px;
 	text-align: left;
@@ -149,10 +149,15 @@ table.game_over_table_style tbody td {
 			<input id="player-setup-button" class="menu-button" type="button" value="New Wizard" onclick="state = new Setup();">
 			<br>
 			<input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
+			<br>
+			<input id="whats-new-button" class="menu-button" type="button" value="What's New" onclick="state = new WhatsNew();">
 		</div>
 	</div>
 	<div class="overlay" id="how-to-play-overlay">
 		<div id="how-to-play-container">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<br>
+			<br>
 			
 			<h1>How To Play</h1>
 			
@@ -204,6 +209,28 @@ table.game_over_table_style tbody td {
 				<tbody id="game-over-table">
 				</tbody>
 			</table>
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+		</div>
+	</div>
+	<div class="overlay" id="whats-new-overlay">
+		<div id="whats-new-container">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<br>
+			<br>
+			
+			<h1>What's New</h1>
+			
+			<h2>Nov 26, 2022</h2>
+			<ul>
+				<li>The Balance Life spell now sets a wizards health to 13 instead of 10.</li>
+				<li>When a spell is being typed, the backspace key will delete letters. Pressing the backspace key three times will clear the spell entirely.</li>
+				<li>When a spell hasn't been typed yet, three dashes will orbit the player's wizard instead of three hashtag characters.</li>
+				<li>The appearance of the movement circle has been altered slightly.</li>
+				<li>From now on, if you try to cast a spell that you don't have enough mana or health to cast without dying, the spell will fail because your wizard is too weak.</li>
+				<li>When wizards die, they drop a skull that remains on the map for the rest of the game.</li>
+			</ul>
+
+			<br>
 			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 		</div>
 	</div>
@@ -272,6 +299,7 @@ var state,
 			Menu,
 				HowToPlay,
 				Setup,
+				WhatsNew,
 				Turn, 
 					Animation,
 					Sim;
@@ -1963,6 +1991,7 @@ Menu = function() {
 	l("how-to-play-overlay").style.display = "none";
 	l("setup-overlay").style.display = "none";
 	l("game-over-overlay").style.display = "none";
+	l("whats-new-overlay").style.display = "none";
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	l("menu-error").style.display = "none";
@@ -2049,6 +2078,18 @@ HowToPlay = function() {
 };
 
 HowToPlay.prototype.update = function() {
+};
+
+
+
+// How To Play
+WhatsNew = function() {
+	l("main-menu-overlay").style.display = "none";
+	l("whats-new-overlay").style.display = "block";
+	l("whats-new-overlay").scrollTop = 0;
+};
+
+WhatsNew.prototype.update = function() {
 };
 
 
