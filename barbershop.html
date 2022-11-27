@@ -1015,13 +1015,20 @@ Player.prototype.drawSpell = function(dir, spell) {
 };
 
 Player.prototype.useMana = function(mana) {
+	// You can't use mana if doing so would kill you
+	if(this.mana + this.health - 1 < mana) return false;
+
+	// Subract the mana cost from the player's mana
 	this.mana -= mana;
 	
+	// Use health as mana if there isn't enough mana
 	if(this.mana < 0) {
 		this.health += this.mana;
 		this.mana = 0;
 	}
-	if(this.health <= 0) this.dead = true;
+
+	// Report that there was sufficient health and mana to pay the cost
+	return true;
 };
 
 Player.prototype.hurt = function(damage) {
@@ -1790,7 +1797,8 @@ Info = function(text, type, pos) {
 		"poison": "green",
 		"jinx": "blue",
 		"blind": "red",
-		"alertproblem": "red"
+		"alertproblem": "red",
+		"weak": "red"
 	}[type];
 	
 	this.timer = 0;
@@ -2137,8 +2145,10 @@ Turn.prototype.click = function() {
 	
 	// Cast spell
 	try {
-		model.players[0].useMana(magic[spell].mana);
-		eval(magic[spell].code);
+		if(model.players[0].useMana(magic[spell].mana))
+			eval(magic[spell].code);
+		else
+			model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
 	} catch(e) {
 		// Oh well
 	}
