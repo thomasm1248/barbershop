@@ -83,8 +83,8 @@ body {
 	margin: 1.5px;
 }
 
-#how-to-play-container h1 { text-align: center; }
-#how-to-play-container {
+#how-to-play-container h1, #whats-new-container h1 { text-align: center; }
+#how-to-play-container, #whats-new-container {
 	width: 500px;
 	margin: 0 auto 100px;
 	text-align: left;
@@ -149,10 +149,15 @@ table.game_over_table_style tbody td {
 			<input id="player-setup-button" class="menu-button" type="button" value="New Wizard" onclick="state = new Setup();">
 			<br>
 			<input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
+			<br>
+			<input id="whats-new-button" class="menu-button" type="button" value="What's New" onclick="state = new WhatsNew();">
 		</div>
 	</div>
 	<div class="overlay" id="how-to-play-overlay">
 		<div id="how-to-play-container">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<br>
+			<br>
 			
 			<h1>How To Play</h1>
 			
@@ -204,6 +209,28 @@ table.game_over_table_style tbody td {
 				<tbody id="game-over-table">
 				</tbody>
 			</table>
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+		</div>
+	</div>
+	<div class="overlay" id="whats-new-overlay">
+		<div id="whats-new-container">
+			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+			<br>
+			<br>
+			
+			<h1>What's New</h1>
+			
+			<h2>Nov 26, 2022</h2>
+			<ul>
+				<li>The Balance Life spell now sets a wizards health to 13 instead of 10.</li>
+				<li>When a spell is being typed, the backspace key will delete letters. Pressing the backspace key three times will clear the spell entirely.</li>
+				<li>When a spell hasn't been typed yet, three dashes will orbit the player's wizard instead of three hashtag characters.</li>
+				<li>The appearance of the movement circle has been altered slightly.</li>
+				<li>From now on, if you try to cast a spell that you don't have enough mana or health to cast without dying, the spell will fail because your wizard is too weak.</li>
+				<li>When wizards die, they drop a skull that remains on the map for the rest of the game.</li>
+			</ul>
+
+			<br>
 			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
 		</div>
 	</div>
@@ -272,6 +299,7 @@ var state,
 			Menu,
 				HowToPlay,
 				Setup,
+				WhatsNew,
 				Turn, 
 					Animation,
 					Sim;
@@ -612,7 +640,7 @@ magic = {
 	"ZEG": {
 		name: "Balance Life",
 		mana: 20,
-		code: "getClosest(model.players,getMouse()).health=10;"
+		code: "getClosest(model.players,getMouse()).health=13;"
 	},
 	
 	// Shield at mouse
@@ -853,6 +881,12 @@ Model.prototype.drawLayer = function(layer) {
 	}
 };
 
+Model.prototype.drawDead = function() {
+	for(var i = 0; i < this.graveyard.length; i++) {
+		this.graveyard[i].draw1("dead");
+	}
+}
+
 Model.prototype.drawDits = function() {
 	for(var i = 0; i < this.dits.length; i++) {
 		this.dits[i].draw();
@@ -863,6 +897,7 @@ Model.prototype.draw = function() {
 	this.drawBackground();
 	this.sortByDepth();
 	this.drawLayer("ground");
+	this.drawDead();
 	this.drawLayer("grounded");
 	this.drawDits();
 	this.drawLayer("airborn");
@@ -915,6 +950,39 @@ Player = function(name) {
 
 Player.prototype.draw = function(layer) {
 	if(this.invisible) return;
+
+	if(layer === "dead") {
+		ctx.save();
+		translate(this.pos);
+
+		// Dark outline
+		ctx.fillStyle = "rgba(0,0,0,0.5)";
+		ctx.beginPath();
+		ctx.arc(0, 0, 11, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.fillRect(-7, 7, 14, 7);
+
+		// Cranium and upper jaw
+		ctx.fillStyle = "white";
+		ctx.beginPath();
+		ctx.arc(0, 0, 10, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.fillRect(-6, 7, 12, 6);
+
+		// Eyes
+		ctx.fillStyle = "black";
+		ctx.beginPath();
+		ctx.arc(-4, 2, 3, 0, Math.PI * 2);
+		ctx.arc(4, 2, 3, 0, Math.PI * 2);
+		ctx.fill();
+
+		// Nose
+		ctx.fillRect(-1.5, 5, 1, 2);
+		ctx.fillRect(0.5, 5, 1, 2);
+
+		ctx.restore();
+		return;
+	}
 	
 	if(layer === "info") {
 		ctx.save();
@@ -1002,7 +1070,7 @@ Player.prototype.draw = function(layer) {
 
 Player.prototype.drawSpell = function(dir, spell) {
 	while(spell.length !== 3) {
-		spell = "#" + spell;
+		spell = "-" + spell;
 	}
 	
 	ctx.save();
@@ -1015,13 +1083,20 @@ Player.prototype.drawSpell = function(dir, spell) {
 };
 
 Player.prototype.useMana = function(mana) {
+	// You can't use mana if doing so would kill you
+	if(this.mana + this.health - 1 < mana) return false;
+
+	// Subract the mana cost from the player's mana
 	this.mana -= mana;
 	
+	// Use health as mana if there isn't enough mana
 	if(this.mana < 0) {
 		this.health += this.mana;
 		this.mana = 0;
 	}
-	if(this.health <= 0) this.dead = true;
+
+	// Report that there was sufficient health and mana to pay the cost
+	return true;
 };
 
 Player.prototype.hurt = function(damage) {
@@ -1203,7 +1278,7 @@ Drop.prototype.findSpotAwayFromPlayers = function() {
 		}
 	}
 
-	return point; // todo test
+	return point;
 };
 
 Drop.prototype.update = function() {
@@ -1790,7 +1865,8 @@ Info = function(text, type, pos) {
 		"poison": "green",
 		"jinx": "blue",
 		"blind": "red",
-		"alertproblem": "red"
+		"alertproblem": "red",
+		"weak": "red"
 	}[type];
 	
 	this.timer = 0;
@@ -1915,6 +1991,7 @@ Menu = function() {
 	l("how-to-play-overlay").style.display = "none";
 	l("setup-overlay").style.display = "none";
 	l("game-over-overlay").style.display = "none";
+	l("whats-new-overlay").style.display = "none";
 	l("name-input-box").value = "";
 	l("main-menu-overlay").style.display = "block";
 	l("menu-error").style.display = "none";
@@ -2005,6 +2082,18 @@ HowToPlay.prototype.update = function() {
 
 
 
+// How To Play
+WhatsNew = function() {
+	l("main-menu-overlay").style.display = "none";
+	l("whats-new-overlay").style.display = "block";
+	l("whats-new-overlay").scrollTop = 0;
+};
+
+WhatsNew.prototype.update = function() {
+};
+
+
+
 // Setup
 Setup = function() {
 	l("main-menu-overlay").style.display = "none";
@@ -2049,14 +2138,14 @@ Turn = function() {
 	var p = model.players[0].pos;
 	
 	// Move circle gradient (Positive)
-	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
-	this.moveCircleGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
-	this.moveCircleGrad.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+	this.moveCircleGrad.addColorStop(0, "rgba(50, 50, 255, 0)");
+	this.moveCircleGrad.addColorStop(1, "rgba(50, 50, 255, 0.1)");
 	
 	// Move circle gradient (Negative)
-	this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 20, p.x, p.y, config.walkingdistance);
-	this.moveCircleGradNeg.addColorStop(0, "rgba(255, 255, 255, 0)");
-	this.moveCircleGradNeg.addColorStop(1, "rgba(255, 255, 255, 0.5)");
+	this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+	this.moveCircleGradNeg.addColorStop(0, "rgba(150, 150, 255, 0)");
+	this.moveCircleGradNeg.addColorStop(1, "rgba(150, 150, 255, 0.3)");
 	
 	// Current player setup
 	var p = model.players[0];
@@ -2094,8 +2183,8 @@ Turn.prototype.draw = function() {
 	
 	ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
 	ctx.beginPath();
-	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 10, 0, 2*Math.PI);
-	ctx.lineWidth = 20;
+	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 30, 0, 2*Math.PI);
+	ctx.lineWidth = 60;
 	ctx.stroke();
 };
 
@@ -2105,6 +2194,11 @@ Turn.prototype.newInput = function(char) {
 	} else {
 		this.input += char;
 	}
+};
+
+Turn.prototype.backspaceKeyPressed = function() {
+	if(this.input.length == 0) return;
+	this.input = this.input.substring(0, this.input.length - 1);
 };
 
 Turn.prototype.click = function() {
@@ -2132,8 +2226,10 @@ Turn.prototype.click = function() {
 	
 	// Cast spell
 	try {
-		model.players[0].useMana(magic[spell].mana);
-		eval(magic[spell].code);
+		if(model.players[0].useMana(magic[spell].mana))
+			eval(magic[spell].code);
+		else
+			model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
 	} catch(e) {
 		// Oh well
 	}
@@ -2404,6 +2500,8 @@ window.addEventListener("keydown", function(e) {
 		var char = String.fromCharCode(e.keyCode);
 		if(isLetter(char)) {
 			state.newInput(char);
+		} else if(e.keyCode == 8) {
+			state.backspaceKeyPressed();
 		}
 	}
 }, false);
