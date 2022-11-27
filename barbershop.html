@@ -2107,6 +2107,11 @@ Turn.prototype.newInput = function(char) {
 	}
 };
 
+Turn.prototype.backspaceKeyPressed = function() {
+	if(this.input.length == 0) return;
+	this.input = this.input.substring(0, this.input.length - 1);
+};
+
 Turn.prototype.click = function() {
 	if(this.skipClick) {
 		this.skipClick = false;
@@ -2404,6 +2409,8 @@ window.addEventListener("keydown", function(e) {
 		var char = String.fromCharCode(e.keyCode);
 		if(isLetter(char)) {
 			state.newInput(char);
+		} else if(e.keyCode == 8) {
+			state.backspaceKeyPressed();
 		}
 	}
 }, false);
