@@ -781,6 +781,13 @@ magic = {
 		name: "The Firework",
 		mana: 16,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
+	},
+
+	// Arcane Aid
+	"TAP": {
+		name: "Arcane Aid",
+		mana: 0,
+		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
 	}
 };
 
