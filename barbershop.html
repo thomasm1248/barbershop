@@ -393,7 +393,7 @@ function encodeSpell(spell, player) {
 	var out = "";
 	out += encode(spell[0], player.firstKey);
 	out += encode(spell[1], genKey(player.name + out[0]));
-	out += encode(spell[2], genKey(player.name + out[1]));
+	out += encode(spell[2], genKey(player.name + out[0] + out[1]));
 	return out;
 }
 
@@ -401,7 +401,7 @@ function decodeSpell(spell, player) {
 	var out = "";
 	out += decode(spell[0], player.firstKey);
 	out += decode(spell[1], genKey(player.name + spell[0]));
-	out += decode(spell[2], genKey(player.name + spell[1]));
+	out += decode(spell[2], genKey(player.name + spell[0] + spell[1]));
 	return out;
 }
 
@@ -567,224 +567,224 @@ projectile => <projectileName>(<pos>,<dir>)
 magic = {
 	
 	// Fireball towards mouse
-	"RFQ": {
+	"AAA": {
 		name: "Fireball I",
 		mana: 2,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
-	"PIY": {
+	"BAA": {
 		name: "Teleport",
 		mana: 9,
 		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
-	"VYX": {
+	"CAA": {
 		name: "Heal",
 		mana: 11,
 		code: "var p=model.players[0];p.heal(4);"
 	},
 	
 	// Stun player closest to mouse
-	"IKN": {
+	"DAA": {
 		name: "Stun",
 		mana: 11,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
-	"VZR": {
+	"EAA": {
 		name: "Jinx",
 		mana: 14,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse
-	"IJN": {
+	"FAA": {
 		name: "Fireball II",
 		mana: 6,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
-	"FUU": {
+	"GAA": {
 		name: "Zap",
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
-	"CCG": {
+	"HAA": {
 		name: "Shifting Earth",
 		mana: 15,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
-	"JOV": {
+	"IAA": {
 		name: "Poison Cloud",
 		mana: 7,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
-	"CZS": {
+	"JAA": {
 		name: "Vanish",
 		mana: 9,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Life balance
-	"ZEG": {
+	"KAA": {
 		name: "Balance Life",
 		mana: 20,
 		code: "getClosest(model.players,getMouse()).health=13;"
 	},
 	
 	// Shield at mouse
-	"FDI": {
+	"LAA": {
 		name: "Shield",
 		mana: 16,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
-	"QTV": {
+	"MAA": {
 		name: "Ghost Walk",
 		mana: 7,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
-	"VXW": {
+	"NAA": {
 		name: "Whirlwind",
 		mana: 10,
 		code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
 	},
 	
 	// Sword mob at mouse
-	"BCI": {
+	"OAA": {
 		name: "Magic Sword",
 		mana: 10,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
-	"ZCO": {
+	"PAA": {
 		name: "Life Suck",
 		mana: 12,
 		code: "model.players[0].heal(2);getClosest(model.players,getMouse()).hurt(3);"
 	},
 	
 	// Swap position with another player
-	"KOC": {
+	"QAA": {
 		name: "Swap",
 		mana: 11,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
-	"ZRT": {
+	"RAA": {
 		name: "Blind",
 		mana: 7,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
-	"AAP": {
+	"SAA": {
 		name: "Invisibility",
 		mana: 9,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
-	"DTK": {
+	"TAA": {
 		name: "Pillar of Stone",
 		mana: 7,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
 	
 	// Star
-	"GUQ": {
+	"UAA": {
 		name: "Fireball III",
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
 	},
 	
 	// Haste
-	"MSP": {
+	"VAA": {
 		name: "Haste",
 		mana: 4,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	},
 
 	// Burst of fire
-	"FNK": {
+	"WAA": {
 		name: "Burst of Fire",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:12,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=2;model.things.push(new Fireball(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 
 	// Steer Fireball
-	"EFH": {
+	"XAA": {
 		name: "Steer Fireball",
 		mana: 11,
 		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
 	},
 
 	// Dragon Breath
-	"DMO": {
+	"YAA": {
 		name: "Dragon Breath",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 
 	// Reverse Fireball
-	"RPO": {
+	"ZAA": {
 		name: "Reverse Fireball",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Fireball X towards mouse
-	"WKD": {
+	"ABA": {
 		name: "Fireball X",
 		mana: 30,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
 	},
 	
 	// Fireball to the right
-	"OZO": {
+	"BBA": {
 		name: "Right Flame",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r+Math.PI/2));"
 	},
 	
 	// Fireball to the left
-	"JWP": {
+	"CBA": {
 		name: "Left Flame",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
 	},
 
 	// Star Shot
-	"GZV": {
+	"DBA": {
 		name: "Star Shot",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:3,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Star(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 	
 	// The Firework
-	"QWE": {
+	"EBA": {
 		name: "The Firework",
 		mana: 16,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
 	},
 
 	// Arcane Aid
-	"TAP": {
+	"FBA": {
 		name: "Arcane Aid",
 		mana: 0,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
