@@ -2066,6 +2066,19 @@ Menu.prototype.start = function() {
 		}
 	}
 
+	// Randomly spawn obstacles
+	var numObstacles = canvas.width/2 * canvas.height/2 / (200 * 200); // Spawn 1 for every 200x200 pixel area
+	var padding = 10;
+	for(var i = 0; i < numObstacles; i++) {
+		var x = (canvas.width / 2 - padding * 2) * Math.random() + padding;
+		var y = (canvas.height / 2 - padding * 2) * Math.random() + padding;
+		// Spawn 4 in a symetric pattern
+		model.things.push(new Obstacle({x: x, y: y}));
+		model.things.push(new Obstacle({x: x, y: canvas.height - y}));
+		model.things.push(new Obstacle({x: canvas.width - x, y: y}));
+		model.things.push(new Obstacle({x: canvas.width - x, y: canvas.height - y}));
+	}
+
 	// Close main menu
 	l("main-menu-overlay").style.display = "none";
 	
