@@ -799,6 +799,8 @@ magic = {
 };
 
 backfires = [
+	// Summon a whirlwind
+	"model.things.push(new Whirlwind(player().pos, Math.random() * Math.PI * 2, false));",
 	// Reset mana to 0
 	"player().mana = 0;",
 	// Stay put
@@ -1800,7 +1802,7 @@ Obstacle.prototype.update = function() {
 
 
 // Float
-Whirlwind = function(pos, dir) {
+Whirlwind = function(pos, dir, startWithHeadStart) {
 	this.pos = {
 		x: pos.x,
 		y: pos.y
@@ -1828,8 +1830,10 @@ Whirlwind = function(pos, dir) {
 		}
 	}
 
-	var headStart = scaleV(this.vel, this.rad / this.speed + 4);
-	this.pos = addV(this.pos, headStart);
+	if(startWithHeadStart === undefined || startWithHeadStart) {
+		var headStart = scaleV(this.vel, this.rad / this.speed + 4);
+		this.pos = addV(this.pos, headStart);
+	}
 	
 	this.dead = false;
 };
