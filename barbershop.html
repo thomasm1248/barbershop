@@ -273,7 +273,7 @@ var global = {
 	rememberedNames: ""
 };
 
-var magic, colors;
+var magic, backfires, colors;
 
 var Model, model;
 var Player;
@@ -559,6 +559,11 @@ function stayStill() {
 	player().vel = {x:0,y:0};
 }
 
+function randomSpell() {
+	var spells = Object.values(magic);
+	return spells[Math.floor(Math.random()*spells.length)];
+}
+
 /* Magic
 
 player => player()
@@ -792,6 +797,27 @@ magic = {
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
 	}
 };
+
+backfires = [
+	// Reset mana to 0
+	"player().mana = 0;",
+	// Stay put
+	"stayStill();",
+	// Stun
+	"player().stun();",
+	// Jinx
+	"player().jinx();",
+	// Blind
+	"player().blind();",
+	// Go opposite direction
+	"var v = player().vel; v.x*=-1; v.y*=-1;",
+	// Cast a random spell
+	"try{eval(randomSpell().code);}catch(e){};",
+	// Lose health
+	"player().hurt(1);",
+	// Lose more health
+	"player().hurt(2);"
+];
 
 // Avatar colors
 colors = {
@@ -2246,14 +2272,29 @@ Turn.prototype.click = function() {
 		spell = encodeSpell(spell, model.players[0]);
 	}
 	
-	// Cast spell
+	// Attempt to get spell
+	spell = magic[spell]; // retrieve spell from spell book
+	if(spell === undefined) {
+		// The spell wasn't found in the spellbook
+		// cast a random backfire
+		backfire = backfires[Math.floor(Math.random() * backfires.length)];
+		try {
+			eval(backfire);
+		} catch(e) {
+			// backfire failed somehow
+			// do nothing
+		}
+		return;
+	}
+	// Cast the spell if player has enough mana
 	try {
-		if(model.players[0].useMana(magic[spell].mana))
-			eval(magic[spell].code);
+		if(model.players[0].useMana(spell.mana))
+			eval(spell.code);
 		else
 			model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
 	} catch(e) {
-		// Oh well
+		// The spell failed somehow
+		// do nothing
 	}
 };
 
