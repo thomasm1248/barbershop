@@ -34,7 +34,9 @@ body {
 }
 
 #game-canvas {
-	background-color: #96f779;
+	/*background-color: #96f779;*/
+	background-image: url("assets/grass.jpg");
+	background-repeat: repeat;
 }
 
 .overlay {
@@ -219,6 +221,16 @@ table.game_over_table_style tbody td {
 			<br>
 			
 			<h1>What's New</h1>
+
+			<h2>May 13, 2024</h2>
+			<ul>
+				<li>There's now a what's new page!</li>
+				<li>The Arcane Aid spell has been added. Casting it gives half of your mana to the player nearest to your wand.</li>
+				<li>The way the spells are organized in the source code has been updated. This makes future development easier, but it also resets any spells you may have learned. Sorry! It probably won't happen again.</li>
+				<li>The plain green background has been replaced with a grass texture.</li>
+				<li>Each game now starts with a bunch of randomly placed obstacles to make the map more interesting.</li>
+				<li>If you type a spell incorrectly, a random side-effect will be selected from a list. It could be anything from being unable to move, to being carried away by a whirlwind, or to casting a random spell. Be careful!</li>
+			</ul>
 			
 			<h2>Nov 26, 2022</h2>
 			<ul>
@@ -271,7 +283,7 @@ var global = {
 	rememberedNames: ""
 };
 
-var magic, colors;
+var magic, backfires, colors;
 
 var Model, model;
 var Player;
@@ -393,7 +405,7 @@ function encodeSpell(spell, player) {
 	var out = "";
 	out += encode(spell[0], player.firstKey);
 	out += encode(spell[1], genKey(player.name + out[0]));
-	out += encode(spell[2], genKey(player.name + out[1]));
+	out += encode(spell[2], genKey(player.name + out[0] + out[1]));
 	return out;
 }
 
@@ -401,7 +413,7 @@ function decodeSpell(spell, player) {
 	var out = "";
 	out += decode(spell[0], player.firstKey);
 	out += decode(spell[1], genKey(player.name + spell[0]));
-	out += decode(spell[2], genKey(player.name + spell[1]));
+	out += decode(spell[2], genKey(player.name + spell[0] + spell[1]));
 	return out;
 }
 
@@ -557,6 +569,11 @@ function stayStill() {
 	player().vel = {x:0,y:0};
 }
 
+function randomSpell() {
+	var spells = Object.values(magic);
+	return spells[Math.floor(Math.random()*spells.length)];
+}
+
 /* Magic
 
 player => player()
@@ -567,222 +584,252 @@ projectile => <projectileName>(<pos>,<dir>)
 magic = {
 	
 	// Fireball towards mouse
-	"RFQ": {
+	"AAA": {
 		name: "Fireball I",
 		mana: 2,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Teleport to mouse
-	"PIY": {
+	"BAA": {
 		name: "Teleport",
 		mana: 9,
 		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
 	},
 	
 	// Heal self
-	"VYX": {
+	"CAA": {
 		name: "Heal",
 		mana: 11,
 		code: "var p=model.players[0];p.heal(4);"
 	},
 	
 	// Stun player closest to mouse
-	"IKN": {
+	"DAA": {
 		name: "Stun",
 		mana: 11,
 		code: "getClosest(model.players,getMouse()).stun()"
 	},
 	
 	// Jinx player closest to mouse
-	"VZR": {
+	"EAA": {
 		name: "Jinx",
 		mana: 14,
 		code: "getClosest(model.players,getMouse()).jinx()"
 	},
 	
 	// Beam shot towards mouse
-	"IJN": {
+	"FAA": {
 		name: "Fireball II",
 		mana: 6,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
 	},
 	
 	// Zap with lightning
-	"FUU": {
+	"GAA": {
 		name: "Zap",
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
 	},
 	
 	// Swap Four Corners
-	"CCG": {
+	"HAA": {
 		name: "Shifting Earth",
 		mana: 15,
 		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
 	},
 	
 	// Poison Cloud at mouse
-	"JOV": {
+	"IAA": {
 		name: "Poison Cloud",
 		mana: 7,
 		code: "model.things.push(new PoisonCloud(getMouse()));"
 	},
 	
 	// Disappear thing closest to mouse
-	"CZS": {
+	"JAA": {
 		name: "Vanish",
 		mana: 9,
 		code: "getClosest(model.things,getMouse()).dead=true;"
 	},
 	
 	// Life balance
-	"ZEG": {
+	"KAA": {
 		name: "Balance Life",
 		mana: 20,
 		code: "getClosest(model.players,getMouse()).health=13;"
 	},
 	
 	// Shield at mouse
-	"FDI": {
+	"LAA": {
 		name: "Shield",
 		mana: 16,
 		code: "model.things.push(new Shield(getMouse()));"
 	},
 	
 	// Phase until next turn
-	"QTV": {
+	"MAA": {
 		name: "Ghost Walk",
 		mana: 7,
 		code: "model.players[0].phasing=true;"
 	},
 	
 	// Float at mouse
-	"VXW": {
+	"NAA": {
 		name: "Whirlwind",
 		mana: 10,
 		code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
 	},
 	
 	// Sword mob at mouse
-	"BCI": {
+	"OAA": {
 		name: "Magic Sword",
 		mana: 10,
 		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
 	},
 	
 	// Vampire
-	"ZCO": {
+	"PAA": {
 		name: "Life Suck",
 		mana: 12,
 		code: "model.players[0].heal(2);getClosest(model.players,getMouse()).hurt(3);"
 	},
 	
 	// Swap position with another player
-	"KOC": {
+	"QAA": {
 		name: "Swap",
 		mana: 11,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
 	},
 	
 	// Blind player temporarily
-	"ZRT": {
+	"RAA": {
 		name: "Blind",
 		mana: 7,
 		code: "getClosest(model.players,getMouse()).blind();"
 	},
 	
 	// Invisibility
-	"AAP": {
+	"SAA": {
 		name: "Invisibility",
 		mana: 9,
 		code: "model.players[0].invisible=true;"
 	},
 	
 	// Obstacle at mouse
-	"DTK": {
+	"TAA": {
 		name: "Pillar of Stone",
 		mana: 7,
 		code: "model.things.push(new Obstacle(getMouse()));"
 	},
 	
 	// Star
-	"GUQ": {
+	"UAA": {
 		name: "Fireball III",
 		mana: 10,
 		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
 	},
 	
 	// Haste
-	"MSP": {
+	"VAA": {
 		name: "Haste",
 		mana: 4,
 		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
 	},
 
 	// Burst of fire
-	"FNK": {
+	"WAA": {
 		name: "Burst of Fire",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:12,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=2;model.things.push(new Fireball(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 
 	// Steer Fireball
-	"EFH": {
+	"XAA": {
 		name: "Steer Fireball",
 		mana: 11,
 		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
 	},
 
 	// Dragon Breath
-	"DMO": {
+	"YAA": {
 		name: "Dragon Breath",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 
 	// Reverse Fireball
-	"RPO": {
+	"ZAA": {
 		name: "Reverse Fireball",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
 	},
 	
 	// Fireball X towards mouse
-	"WKD": {
+	"ABA": {
 		name: "Fireball X",
 		mana: 30,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
 	},
 	
 	// Fireball to the right
-	"OZO": {
+	"BBA": {
 		name: "Right Flame",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r+Math.PI/2));"
 	},
 	
 	// Fireball to the left
-	"JWP": {
+	"CBA": {
 		name: "Left Flame",
 		mana: 3,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
 	},
 
 	// Star Shot
-	"GZV": {
+	"DBA": {
 		name: "Star Shot",
 		mana: 20,
 		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:3,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Star(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
 	},
 	
 	// The Firework
-	"QWE": {
+	"EBA": {
 		name: "The Firework",
 		mana: 16,
 		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
+	},
+
+	// Arcane Aid
+	"FBA": {
+		name: "Arcane Aid",
+		mana: 0,
+		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
 	}
 };
+
+backfires = [
+	// Summon a whirlwind
+	"model.things.push(new Whirlwind(player().pos, Math.random() * Math.PI * 2, false));",
+	// Reset mana to 0
+	"player().mana = 0;",
+	// Stay put
+	"stayStill();",
+	// Stun
+	"player().stun();",
+	// Jinx
+	"player().jinx();",
+	// Blind
+	"player().blind();",
+	// Go opposite direction
+	"var v = player().vel; v.x*=-1; v.y*=-1;",
+	// Cast a random spell
+	"try{eval(randomSpell().code);}catch(e){};",
+	// Lose health
+	"player().hurt(1);",
+	// Lose more health
+	"player().hurt(2);"
+];
 
 // Avatar colors
 colors = {
@@ -1765,7 +1812,7 @@ Obstacle.prototype.update = function() {
 
 
 // Float
-Whirlwind = function(pos, dir) {
+Whirlwind = function(pos, dir, startWithHeadStart) {
 	this.pos = {
 		x: pos.x,
 		y: pos.y
@@ -1793,8 +1840,10 @@ Whirlwind = function(pos, dir) {
 		}
 	}
 
-	var headStart = scaleV(this.vel, this.rad / this.speed + 4);
-	this.pos = addV(this.pos, headStart);
+	if(startWithHeadStart === undefined || startWithHeadStart) {
+		var headStart = scaleV(this.vel, this.rad / this.speed + 4);
+		this.pos = addV(this.pos, headStart);
+	}
 	
 	this.dead = false;
 };
@@ -2057,6 +2106,19 @@ Menu.prototype.start = function() {
 		}
 	}
 
+	// Randomly spawn obstacles
+	var numObstacles = canvas.width/2 * canvas.height/2 / (200 * 200); // Spawn 1 for every 200x200 pixel area
+	var padding = 10;
+	for(var i = 0; i < numObstacles; i++) {
+		var x = (canvas.width / 2 - padding * 2) * Math.random() + padding;
+		var y = (canvas.height / 2 - padding * 2) * Math.random() + padding;
+		// Spawn 4 in a symetric pattern
+		model.things.push(new Obstacle({x: x, y: y}));
+		model.things.push(new Obstacle({x: x, y: canvas.height - y}));
+		model.things.push(new Obstacle({x: canvas.width - x, y: y}));
+		model.things.push(new Obstacle({x: canvas.width - x, y: canvas.height - y}));
+	}
+
 	// Close main menu
 	l("main-menu-overlay").style.display = "none";
 	
@@ -2224,14 +2286,29 @@ Turn.prototype.click = function() {
 		spell = encodeSpell(spell, model.players[0]);
 	}
 	
-	// Cast spell
+	// Attempt to get spell
+	spell = magic[spell]; // retrieve spell from spell book
+	if(spell === undefined) {
+		// The spell wasn't found in the spellbook
+		// cast a random backfire
+		backfire = backfires[Math.floor(Math.random() * backfires.length)];
+		try {
+			eval(backfire);
+		} catch(e) {
+			// backfire failed somehow
+			// do nothing
+		}
+		return;
+	}
+	// Cast the spell if player has enough mana
 	try {
-		if(model.players[0].useMana(magic[spell].mana))
-			eval(magic[spell].code);
+		if(model.players[0].useMana(spell.mana))
+			eval(spell.code);
 		else
 			model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
 	} catch(e) {
-		// Oh well
+		// The spell failed somehow
+		// do nothing
 	}
 };
 
