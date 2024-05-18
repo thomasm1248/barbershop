@@ -561,6 +561,13 @@ function filter(arr, selector) {
 	return newArr;
 }
 
+function forEach(arr, func) {
+	for(var i = 0; i < arr.length; i++) {
+		func(arr[i]);
+	}
+	return arr;
+}
+
 function player() {
 	return model.players[0];
 }
@@ -805,6 +812,13 @@ magic = {
 		name: "Arcane Aid",
 		mana: 0,
 		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
+	},
+
+	// Push Fire
+	"GBA": {
+		name: "Push Fire",
+		mana: 14,
+		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));a=filter(a,function(f){return getDist(f.pos,getMouse())<100;});forEach(a,function(f){var s=getMagOfV(f.vel);var d=getDir(getMouse(),f.pos);f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};});"
 	}
 };
 
