@@ -299,6 +299,7 @@ var Projectile,
     PoisonCloud,
     Shield,
     Whirlwind,
+    DarkWall,
     Obstacle;
 
 var Sword;
@@ -604,7 +605,7 @@ magic = {
   "BAA": {
     name: "Teleport",
     mana: 9,
-    code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
+    code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;p.vel.x=0;p.vel.y=0;"
   },
   
   // Heal self
@@ -822,6 +823,13 @@ magic = {
     name: "Push Fire",
     mana: 14,
     code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));a=filter(a,function(f){return getDist(f.pos,getMouse())<100;});forEach(a,function(f){var s=getMagOfV(f.vel);var d=getDir(getMouse(),f.pos);f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};});"
+  },
+
+  // Dark Wall
+  "HBA": {
+    name: "Dark Wall",
+    mana: 30,
+    code: "model.things.push(new DarkWall(getDir(player().pos,getMouse())));"
   }
 };
 
@@ -1780,6 +1788,76 @@ Shield.prototype.update = function() {
 
 
 
+// Dark Wall
+DarkWall = function(dir) {
+  var screenSize = Math.sqrt(
+    canvas.width * canvas.width +
+    canvas.height * canvas.height);
+  var screenCenter = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+  };
+  var speed = 1;
+
+  this.pos = {
+    x: screenCenter.x - Math.cos(dir) * (screenSize/2 + 200),
+    y: screenCenter.y - Math.sin(dir) * (screenSize/2 + 200)
+  };
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  this.dir = dir;
+  this.rad = 0;
+
+  this.width = screenSize + 100;
+
+  this.dead = false;
+};
+
+DarkWall.prototype.draw = function(layer) {
+  const thickness = 50;
+  const rumbleStrength = 5;
+
+  if(layer !== "airborn") return;
+
+  ctx.save();
+  ctx.translate(this.pos.x, this.pos.y);
+  ctx.translate(
+    Math.random() * rumbleStrength * 2 - rumbleStrength,
+    Math.random() * rumbleStrength * 2 - rumbleStrength);
+  ctx.rotate(this.dir);
+  
+  ctx.fillStyle = "black";
+  ctx.fillRect(-thickness/2, -this.width/2, thickness, this.width);
+
+  ctx.restore();
+};
+
+DarkWall.prototype.update = function() {
+  this.pos = addV(this.pos, this.vel);
+
+  // Destroy players that are inside
+  model.players.forEach((player) => {
+    var normal = normalize(this.vel);
+    var dist = Math.abs(dot(normal, vTo(this.pos, player.pos)));
+    if(dist < 10) player.hurt(5); // player will die very quickly
+  });
+
+  // Particle effects
+  for(var i = 0; i < 10; i++) {
+    // TODO
+  }
+
+  // Off map?
+  const distFromCenter = getDist(this.pos, {x:canvas.width/2,y:canvas.height/2});
+  if(distFromCenter > this.width/2 + 300) {
+    this.dead = true;
+  }
+};
+
+
+
 // Obstacle
 Obstacle = function(pos) {
   this.pos = {
@@ -1998,6 +2076,8 @@ Dit = function(type, a, b, c, d) {
       this.d.push(a.y + Math.random()*40-20);
       this.d.push(Math.random()*10+10);
       this.d.push(Math.random()*10+this.d[2]);
+      break;
+    case "darkness":
       break;
   }
 };
