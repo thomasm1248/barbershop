@@ -185,10 +185,16 @@ table.game_over_table_style tbody td {
   <div class="overlay" id="setup-overlay">
     <div id="setup-container">
       <h1>Username Chooser</h1>
-      <input id="setup-name-box" type="text" placeholder="What is your name?">
-      <br>
-      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-      <br>
+      <input id="setup-name-box" type="text" placeholder="What is your name?"><br>
+      <input class="menu-button" type="button" value="Use This Name" onclick="
+        var names = document.getElementById('name-input-box');
+        var name = document.getElementById('setup-name-box');
+        if (!names.value.endsWith('\n') && names.value.length > 0) names.value += '\n';
+        names.value += name.value;
+        name.value = '';
+        name.focus();
+      "><br>
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()"><br>
       <p class="error-msg" id="setup-name-too-long">Usernames can only be 16 characters long</p>
       <div id="setup-spells"></div>
     </div>
@@ -278,10 +284,6 @@ var animator =
   window.webkitRequestAnimationFrame;
 
 var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-var global = {
-  rememberedNames: ""
-};
 
 var magic, backfires, colors;
 
@@ -572,6 +574,12 @@ function player() {
   return model.players[0];
 }
 
+function targetPlayer(allowSelf) {
+  var players = model.players;
+  if(!allowSelf) players = players.slice(1);
+  return getClosest(players, getMouse());
+}
+
 function stayStill() {
   player().vel = {x:0,y:0};
 }
@@ -581,13 +589,8 @@ function randomSpell() {
   return spells[Math.floor(Math.random()*spells.length)];
 }
 
-/* Magic
+////////// Magic
 
-player => player()
-mouse => getMouse();
-projectile => <projectileName>(<pos>,<dir>)
-
-*/
 magic = {
   
   // Fireball towards mouse
@@ -614,15 +617,15 @@ magic = {
   // Stun player closest to mouse
   "DAA": {
     name: "Stun",
-    mana: 11,
-    code: "getClosest(model.players,getMouse()).stun()"
+    mana: 13,
+    code: "targetPlayer(false).stun()"
   },
   
   // Jinx player closest to mouse
   "EAA": {
     name: "Jinx",
     mana: 14,
-    code: "getClosest(model.players,getMouse()).jinx()"
+    code: "targetPlayer(true).jinx()"
   },
   
   // Beam shot towards mouse
@@ -636,7 +639,7 @@ magic = {
   "GAA": {
     name: "Zap",
     mana: 10,
-    code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
+    code: "var p=model.players[0];model.things.push(new Zap(p.pos,targetPlayer(false).pos));"
   },
   
   // Swap Four Corners
@@ -664,7 +667,7 @@ magic = {
   "KAA": {
     name: "Balance Life",
     mana: 20,
-    code: "getClosest(model.players,getMouse()).health=13;"
+    code: "targePlayer(true).health=13;"
   },
   
   // Shield at mouse
@@ -699,28 +702,28 @@ magic = {
   "PAA": {
     name: "Life Suck",
     mana: 12,
-    code: "model.players[0].heal(2);getClosest(model.players,getMouse()).hurt(3);"
+    code: "model.players[0].heal(2);targetPlayer(false).hurt(3);"
   },
   
   // Swap position with another player
   "QAA": {
     name: "Swap",
     mana: 11,
-    code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
+    code: "var p=model.players[0];var o=targetPlayer(false);var temp=p.pos;p.pos=o.pos;o.pos=temp;p.vel.x=0;p.vel.y=0;"
   },
   
   // Blind player temporarily
   "RAA": {
     name: "Blind",
     mana: 7,
-    code: "getClosest(model.players,getMouse()).blind();"
+    code: "targetPlayer(false).blind();"
   },
   
   // Invisibility
   "SAA": {
     name: "Invisibility",
     mana: 9,
-    code: "model.players[0].invisible=true;"
+    code: "model.players[0].makeInvisible();"
   },
   
   // Obstacle at mouse
@@ -811,7 +814,7 @@ magic = {
   "FBA": {
     name: "Arcane Aid",
     mana: 0,
-    code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
+    code: "var p=model.players[0];var o=targetPlayer(false);var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
   },
 
   // Push Fire
@@ -1002,6 +1005,7 @@ Player = function(name) {
   this.blinded = false;
   this.blindTimer = 0;
   this.invisible = false;
+  this.invisibleTimer = 0;
   this.dead = false;
   
   this.grounded = true;
@@ -1200,6 +1204,11 @@ Player.prototype.blind = function() {
   this.blindTimer = 2;
 
   model.fx.push(new Info("Blinded", "blind", this.pos));
+};
+
+Player.prototype.makeInvisible = function() {
+  this.invisible = true;
+  this.invisibleTimer = 2;
 };
 
 Player.prototype.move = function() {
@@ -2056,12 +2065,9 @@ Menu = function() {
   l("setup-overlay").style.display = "none";
   l("game-over-overlay").style.display = "none";
   l("whats-new-overlay").style.display = "none";
-  l("name-input-box").value = "";
   l("main-menu-overlay").style.display = "block";
   l("menu-error").style.display = "none";
   l("name-input-box").focus();
-
-  l("name-input-box").value = global.rememberedNames;
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
@@ -2069,7 +2075,6 @@ Menu = function() {
 Menu.prototype.start = function() {
   // Get list of names
   var list = l("name-input-box").value;
-  global.rememberedNames = list;
   list = list.split("\n");
   
   // Filter out duplicates and blanks
@@ -2239,7 +2244,10 @@ Turn = function() {
     p.jinxTimer--;
     if(p.jinxTimer == 0 && p.jinxed) p.jinx();
   }
-  p.invisible = false;
+  if(p.invisibleTimer > 0) {
+    p.invisibleTimer--;
+    if(p.invisibleTimer == 0 && p.invisible) p.invisible = false;
+  }
 };
 
 Turn.prototype.draw = function() {
