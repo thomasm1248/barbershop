@@ -5,117 +5,117 @@
   <meta name="viewport" content="width=device-width">
   <link rel="icon" href="favicon.ico">
   <title>Barbershop</title>
-	<style>
+  <style>
 
 @font-face {
-	font-family: "OldEnglish";
-	src: url("AlteSchwabacher.ttf");
+  font-family: "OldEnglish";
+  src: url("AlteSchwabacher.ttf");
 }
-		
+    
 @font-face {
-	font-family: "Runic";
-	src: url("Norse-Bold.ttf");
+  font-family: "Runic";
+  src: url("Norse-Bold.ttf");
 }
 
 * {
-	margin: 0;
-	padding: 0;
-	outline: none;
-	cursor: url(cursor.cur), auto;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  cursor: url(cursor.cur), auto;
 }
 
 body {
-	overflow: hidden;
+  overflow: hidden;
 }
 
 .error-msg {
-	display: none;
-	color: red;
+  display: none;
+  color: red;
 }
 
 #game-canvas {
-	/*background-color: #96f779;*/
-	background-image: url("assets/grass.jpg");
-	background-repeat: repeat;
+  /*background-color: #96f779;*/
+  background-image: url("assets/grass.jpg");
+  background-repeat: repeat;
 }
 
 .overlay {
-	display: none;
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	overflow: scroll;
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: scroll;
 }
 
 .overlay div h1 {
-	margin-bottom: 10px;
-	font-family: "OldEnglish";
+  margin-bottom: 10px;
+  font-family: "OldEnglish";
 }
 
 .overlay div h2 {
-	margin-top: 30px;
-	font-family: "OldEnglish";
+  margin-top: 30px;
+  font-family: "OldEnglish";
 }
 
 .overlay div p {
-	margin-top: 10px;
-	margin-left: 10px;
-	text-indent: 30px;
-	font-size: 20px;
-	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  margin-top: 10px;
+  margin-left: 10px;
+  text-indent: 30px;
+  font-size: 20px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 .overlay div {
-	padding-top: 100px;
-	text-align: center;
+  padding-top: 100px;
+  text-align: center;
 }
 
 .menu-button {
-	border: none;
-	background-color: transparent;
-	font-family: "OldEnglish";
-	font-size: 24px;
-	margin: 5px;
+  border: none;
+  background-color: transparent;
+  font-family: "OldEnglish";
+  font-size: 24px;
+  margin: 5px;
 }
 
 .menu-button:hover {
-	font-size: 30px;
-	margin: 1.5px;
+  font-size: 30px;
+  margin: 1.5px;
 }
 
 #how-to-play-container h1, #whats-new-container h1 { text-align: center; }
 #how-to-play-container, #whats-new-container {
-	width: 500px;
-	margin: 0 auto 100px;
-	text-align: left;
+  width: 500px;
+  margin: 0 auto 100px;
+  text-align: left;
 }
 
 #main-menu-container textarea {
-	width: 200px;
-	height: 200px;
-	border: 2px inset grey;
-	font-size: 20px;
-	border-radius: 5px;
-	resize: none;
-	padding: 5px;
-	background-color: #e4e8c7;
+  width: 200px;
+  height: 200px;
+  border: 2px inset grey;
+  font-size: 20px;
+  border-radius: 5px;
+  resize: none;
+  padding: 5px;
+  background-color: #e4e8c7;
 }
 
 #setup-container #setup-name-box {
-	width: 200px;
-	height: 30px;
-	border: 2px inset grey;
-	font-size: 20px;
-	border-radius: 5px;
-	padding: 5px;
-	background-color: #e4e8c7;
+  width: 200px;
+  height: 30px;
+  border: 2px inset grey;
+  font-size: 20px;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #e4e8c7;
 }
 
 #setup-container #setup-spells {
-	padding: 20px;
-	margin: 0;
+  padding: 20px;
+  margin: 0;
 }
 
 table.game_over_table_style {
@@ -123,11 +123,11 @@ table.game_over_table_style {
   border: none;
   background-color: #a0a0a0;
   text-align: left;
-	margin: 30px auto 0;
+  margin: 30px auto 0;
 }
 table.game_over_table_style td, table.game_over_table_style th {
   border: none;
-	background-color: #c6c6c4;
+  background-color: #c6c6c4;
   padding: 4px 6px;
 }
 table.game_over_table_style tbody td {
@@ -135,129 +135,144 @@ table.game_over_table_style tbody td {
   font-weight: bold;
 }
 
-	</style>
+  </style>
 </head>
 <body>
-	<canvas id="game-canvas">Canvas not supported</canvas>
-	<div class="overlay" id="main-menu-overlay">
-		<div id="main-menu-container">
-			<h1>Welcome to the Barbershop, Wizards</h1>
-			<textarea id="name-input-box" placeholder="Who's Playing?"></textarea>
-			<br>
-			<p class="error-msg" id="menu-error"></p>
-			<br>
-			<input id="start-game" class="menu-button" type="button" value="Start Game" onclick="state.start()">
-			<br>
-			<input id="player-setup-button" class="menu-button" type="button" value="New Wizard" onclick="state = new Setup();">
-			<br>
-			<input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
-			<br>
-			<input id="whats-new-button" class="menu-button" type="button" value="What's New" onclick="state = new WhatsNew();">
-		</div>
-	</div>
-	<div class="overlay" id="how-to-play-overlay">
-		<div id="how-to-play-container">
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-			<br>
-			<br>
-			
-			<h1>How To Play</h1>
-			
-			<h2>What is this?</h2>
-			<p>What happens when wizards all arrive at the same barbershop at the same time? They fight an epic battle to determine who gets to have their beard trimmed first!</p>
-			<p>Barbershop is a multiplayer wizard battle game where everyone plays together on the same computer or laptop. Each person takes a turn casting a spell, with a short amount of time elapsing between each turn. Each player starts with a basic fireball spell, then moves on from there by writing down the new spells revealed to them at the end of every game. Every spell revealed to you is specific to your username so remember to use the same username each time.</p>
-			<p>When you play a game with your friends, I recommend making it a rule that you can't record any of your spells. True wizards have their spells memorized by heart!</p>
-			
-			<h2>Setup</h2>
-			<p>To begin a game, have each player type their username into the box. Spaces, capitalization, and everything else MATTERS! So be careful to type your username exactly the same way every time. After all the names have been entered, go ahead and press the start button!</p>
-			
-			<h2>Your turn</h2>
-			<p>You click somewhere on the map to tell your wizard to go there. The farther away from your wizard you click, the faster it will run. The big circle drawn around your wizard helps you know how far your wizard can run before your next turn begins. If you type a spell before you click, your wizard will cast that spell.</p>
-			<p>Each spell costs a specific amount of mana. You get 5 mana each turn, but you can't have more than 20 (normally). If you cast a spell, and don't have enough mana for it, the missing mana will be taken from your health.</p>
-			
-			<h2>Winning</h2>
-			<p>When there's only one wizard left, the game ends and the line to the barbershop is displayed. Next to each wizard's name, there's a random spell to add to their collection.</p>
-			
-			<br>
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-		</div>
-	</div>
-	<div class="overlay" id="setup-overlay">
-		<div id="setup-container">
-			<h1>Username Chooser</h1>
-			<input id="setup-name-box" type="text" placeholder="What is your name?">
-			<br>
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-			<br>
-			<p class="error-msg" id="setup-name-too-long">Usernames can only be 16 characters long</p>
-			<div id="setup-spells"></div>
-		</div>
-	</div>
-	<div class="overlay" id="game-over-overlay">
-		<div id="game-over-container">
-			<h1>Game Over</h1>
-			<table class="game_over_table_style">
-				<thead>
-					<tr>
-						<th colspan="5">The Line to the Barbershop is:</th>
-					</tr>
-					<tr>
-						<th>#</th>
-						<th>Name</th>
-						<th colspan="2">Discovery</th>
-						<th>Mana Cost</th>
-					</tr>
-				</thead>
-				<tbody id="game-over-table">
-				</tbody>
-			</table>
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-		</div>
-	</div>
-	<div class="overlay" id="whats-new-overlay">
-		<div id="whats-new-container">
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-			<br>
-			<br>
-			
-			<h1>What's New</h1>
+  <canvas id="game-canvas">Canvas not supported</canvas>
+  <div class="overlay" id="main-menu-overlay">
+    <div id="main-menu-container">
+      <h1>Welcome to the Barbershop, Wizards</h1>
+      <textarea id="name-input-box" placeholder="Who's Playing?"></textarea>
+      <br>
+      <p class="error-msg" id="menu-error"></p>
+      <br>
+      <input id="start-game" class="menu-button" type="button" value="Start Game" onclick="state.start()">
+      <br>
+      <input id="player-setup-button" class="menu-button" type="button" value="New Wizard" onclick="state = new Setup();">
+      <br>
+      <input id="how-to-play-button" class="menu-button" type="button" value="How To Play" onclick="state = new HowToPlay();">
+      <br>
+      <input id="whats-new-button" class="menu-button" type="button" value="What's New" onclick="state = new WhatsNew();">
+    </div>
+  </div>
+  <div class="overlay" id="how-to-play-overlay">
+    <div id="how-to-play-container">
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+      <br>
+      <br>
+      
+      <h1>How To Play</h1>
+      
+      <h2>What is this?</h2>
+      <p>What happens when wizards all arrive at the same barbershop at the same time? They fight an epic battle to determine who gets to have their beard trimmed first!</p>
+      <p>Barbershop is a multiplayer wizard battle game where everyone plays together on the same computer or laptop. Each person takes a turn casting a spell, with a short amount of time elapsing between each turn. Each player starts with a basic fireball spell, then moves on from there by writing down the new spells revealed to them at the end of every game. Every spell revealed to you is specific to your username so remember to use the same username each time.</p>
+      <p>When you play a game with your friends, I recommend making it a rule that you can't record any of your spells. True wizards have their spells memorized by heart!</p>
+      
+      <h2>Setup</h2>
+      <p>To begin a game, have each player type their username into the box. Spaces, capitalization, and everything else MATTERS! So be careful to type your username exactly the same way every time. After all the names have been entered, go ahead and press the start button!</p>
+      
+      <h2>Your turn</h2>
+      <p>You click somewhere on the map to tell your wizard to go there. The farther away from your wizard you click, the faster it will run. The big circle drawn around your wizard helps you know how far your wizard can run before your next turn begins. If you type a spell before you click, your wizard will cast that spell.</p>
+      <p>Each spell costs a specific amount of mana. You get 5 mana each turn, but you can't have more than 20 (normally). If you cast a spell, and don't have enough mana for it, the missing mana will be taken from your health.</p>
+      
+      <h2>Winning</h2>
+      <p>When there's only one wizard left, the game ends and the line to the barbershop is displayed. Next to each wizard's name, there's a random spell to add to their collection.</p>
+      
+      <br>
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+    </div>
+  </div>
+  <div class="overlay" id="setup-overlay">
+    <div id="setup-container">
+      <h1>Username Chooser</h1>
+      <input id="setup-name-box" type="text" placeholder="What is your name?"><br>
+      <input class="menu-button" type="button" value="Use This Name" onclick="
+        var names = document.getElementById('name-input-box');
+        var name = document.getElementById('setup-name-box');
+        if (!names.value.endsWith('\n') && names.value.length > 0) names.value += '\n';
+        names.value += name.value;
+        name.value = '';
+        name.focus();
+      "><br>
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()"><br>
+      <p class="error-msg" id="setup-name-too-long">Usernames can only be 16 characters long</p>
+      <div id="setup-spells"></div>
+    </div>
+  </div>
+  <div class="overlay" id="game-over-overlay">
+    <div id="game-over-container">
+      <h1>Game Over</h1>
+      <table class="game_over_table_style">
+        <thead>
+          <tr>
+            <th colspan="5">The Line to the Barbershop is:</th>
+          </tr>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th colspan="2">Discovery</th>
+            <th>Mana Cost</th>
+          </tr>
+        </thead>
+        <tbody id="game-over-table">
+        </tbody>
+      </table>
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+    </div>
+  </div>
+  <div class="overlay" id="whats-new-overlay">
+    <div id="whats-new-container">
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+      <br>
+      <br>
+      
+      <h1>What's New</h1>
 
-			<h2>May 13, 2024</h2>
-			<ul>
-				<li>There's now a what's new page!</li>
-				<li>The Arcane Aid spell has been added. Casting it gives half of your mana to the player nearest to your wand.</li>
-				<li>The way the spells are organized in the source code has been updated. This makes future development easier, but it also resets any spells you may have learned. Sorry! It probably won't happen again.</li>
-				<li>The plain green background has been replaced with a grass texture.</li>
-				<li>Each game now starts with a bunch of randomly placed obstacles to make the map more interesting.</li>
-				<li>If you type a spell incorrectly, a random side-effect will be selected from a list. It could be anything from being unable to move, to being carried away by a whirlwind, or to casting a random spell. Be careful!</li>
-			</ul>
-			
-			<h2>Nov 26, 2022</h2>
-			<ul>
-				<li>The Balance Life spell now sets a wizards health to 13 instead of 10.</li>
-				<li>When a spell is being typed, the backspace key will delete letters. Pressing the backspace key three times will clear the spell entirely.</li>
-				<li>When a spell hasn't been typed yet, three dashes will orbit the player's wizard instead of three hashtag characters.</li>
-				<li>The appearance of the movement circle has been altered slightly.</li>
-				<li>From now on, if you try to cast a spell that you don't have enough mana or health to cast without dying, the spell will fail because your wizard is too weak.</li>
-				<li>When wizards die, they drop a skull that remains on the map for the rest of the game.</li>
-			</ul>
+      <h2>July 2, 2025</h2>
+      <ul>
+        <li>The Zap spell now automatically targets other players.</li>
+        <li>Many spells that used to be able to be used on yourself now prevent you from targeting yourself. These include stun, blind, swap, and a couple others.</li>
+        <li>The invisibility spell now lasts for a few turns after being casted.</li>
+        <li>The swap and teleport spells now prevent you from moving after you cast them.</li>
+        <li>New spell: Dark Wall.</li>
+      </ul>
 
-			<br>
-			<input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
-		</div>
-	</div>
-	<script>
+      <h2>May 13, 2024</h2>
+      <ul>
+        <li>There's now a what's new page!</li>
+        <li>The Arcane Aid spell has been added. Casting it gives half of your mana to the player nearest to your wand.</li>
+        <li>The way the spells are organized in the source code has been updated. This makes future development easier, but it also resets any spells you may have learned. Sorry! It probably won't happen again.</li>
+        <li>The plain green background has been replaced with a grass texture.</li>
+        <li>Each game now starts with a bunch of randomly placed obstacles to make the map more interesting.</li>
+        <li>If you type a spell incorrectly, a random side-effect will be selected from a list. It could be anything from being unable to move, to being carried away by a whirlwind, or to casting a random spell. Be careful!</li>
+      </ul>
+      
+      <h2>Nov 26, 2022</h2>
+      <ul>
+        <li>The Balance Life spell now sets a wizards health to 13 instead of 10.</li>
+        <li>When a spell is being typed, the backspace key will delete letters. Pressing the backspace key three times will clear the spell entirely.</li>
+        <li>When a spell hasn't been typed yet, three dashes will orbit the player's wizard instead of three hashtag characters.</li>
+        <li>The appearance of the movement circle has been altered slightly.</li>
+        <li>From now on, if you try to cast a spell that you don't have enough mana or health to cast without dying, the spell will fail because your wizard is too weak.</li>
+        <li>When wizards die, they drop a skull that remains on the map for the rest of the game.</li>
+      </ul>
+
+      <br>
+      <input class="menu-button" type="button" value="Back To Menu" onclick="state = new Menu()">
+    </div>
+  </div>
+  <script>
 
 
 
 // Configuration
 var config = {
-	doencoding: true,
-	manaperturn: 5,
-	framesperround: 100,
-	walkingdistance: 200,
-	maxhealth: 20,
-	droptimer: 500
+  doencoding: true,
+  manaperturn: 5,
+  framesperround: 100,
+  walkingdistance: 200,
+  maxhealth: 20,
+  droptimer: 500
 };
 
 
@@ -271,17 +286,13 @@ var ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 var animator =
-	window.requestAnimationFrame ||
-	window.oRequestAnimationFrame ||
-	window.msRequestAnimationFrame ||
-	window.mozRequestAnimationFrame ||
-	window.webkitRequestAnimationFrame;
+  window.requestAnimationFrame ||
+  window.oRequestAnimationFrame ||
+  window.msRequestAnimationFrame ||
+  window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame;
 
 var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-var global = {
-	rememberedNames: ""
-};
 
 var magic, backfires, colors;
 
@@ -289,36 +300,37 @@ var Model, model;
 var Player;
 
 var Projectile,
-			Fireball,
-			Beam,
-			Star,
-			GreatBallOfFire,
-		Zap,
-		PoisonCloud,
-		Shield,
-		Whirlwind,
-		Obstacle;
+      Fireball,
+      Beam,
+      Star,
+      GreatBallOfFire,
+    Zap,
+    PoisonCloud,
+    Shield,
+    Whirlwind,
+    DarkWall,
+    Obstacle;
 
 var Sword;
 
 var Drop,
-		ManaDrop;
+    ManaDrop;
 
 var Info,
-		Dit;
+    Dit;
 
 var state,
-			Menu,
-				HowToPlay,
-				Setup,
-				WhatsNew,
-				Turn, 
-					Animation,
-					Sim;
+      Menu,
+        HowToPlay,
+        Setup,
+        WhatsNew,
+        Turn, 
+          Animation,
+          Sim;
 
 var mouse = {
-	x: 0,
-	y: 0
+  x: 0,
+  y: 0
 };
 
 
@@ -359,82 +371,82 @@ function hash(string) {
 };
 
 function scramble(string, seed) {
-	gen.setSeed(hash(seed));
-	var newOrder = [];
-	for(var i = 0; i < string.length; i++) {
-		newOrder.splice(Math.floor(gen.rand() * (newOrder.length + 1)), 0, string[i]);
-	}
-	string = "";
-	for(i = 0; i < newOrder.length; i++) {
-		string += newOrder[i];
-	}
-	return string;
+  gen.setSeed(hash(seed));
+  var newOrder = [];
+  for(var i = 0; i < string.length; i++) {
+    newOrder.splice(Math.floor(gen.rand() * (newOrder.length + 1)), 0, string[i]);
+  }
+  string = "";
+  for(i = 0; i < newOrder.length; i++) {
+    string += newOrder[i];
+  }
+  return string;
 }
 
 function genKey(seed) {
-	var cipher = scramble(az, seed);
-	var key = {};
-	for(var i = 0; i < cipher.length; i++) {
-		key[cipher[i]] = az[i];
-	}
-	return key;
+  var cipher = scramble(az, seed);
+  var key = {};
+  for(var i = 0; i < cipher.length; i++) {
+    key[cipher[i]] = az[i];
+  }
+  return key;
 }
 
 function encode(string, key) {
-	var output = "";
-	for(var i = 0; i < string.length; i++) {
-		output += key[string[i]];
-	}
-	return output;
+  var output = "";
+  for(var i = 0; i < string.length; i++) {
+    output += key[string[i]];
+  }
+  return output;
 }
 
 function decode(string, key) {
-	var output = "";
-	for(var i = 0; i < string.length; i++) {
-		for(var j in key) {
-			if(key[j] === string[i]) {
-				output += j;
-				break;
-			}
-		}
-	}
-	return output;
+  var output = "";
+  for(var i = 0; i < string.length; i++) {
+    for(var j in key) {
+      if(key[j] === string[i]) {
+        output += j;
+        break;
+      }
+    }
+  }
+  return output;
 }
 
 function encodeSpell(spell, player) {
-	var out = "";
-	out += encode(spell[0], player.firstKey);
-	out += encode(spell[1], genKey(player.name + out[0]));
-	out += encode(spell[2], genKey(player.name + out[0] + out[1]));
-	return out;
+  var out = "";
+  out += encode(spell[0], player.firstKey);
+  out += encode(spell[1], genKey(player.name + out[0]));
+  out += encode(spell[2], genKey(player.name + out[0] + out[1]));
+  return out;
 }
 
 function decodeSpell(spell, player) {
-	var out = "";
-	out += decode(spell[0], player.firstKey);
-	out += decode(spell[1], genKey(player.name + spell[0]));
-	out += decode(spell[2], genKey(player.name + spell[0] + spell[1]));
-	return out;
+  var out = "";
+  out += decode(spell[0], player.firstKey);
+  out += decode(spell[1], genKey(player.name + spell[0]));
+  out += decode(spell[2], genKey(player.name + spell[0] + spell[1]));
+  return out;
 }
 
 function addOrdinalSuf(i) {
-	var j = i % 10,
-		k = i % 100;
-	if (j == 1 && k != 11) {
-		return i + "st";
-	}
-	if (j == 2 && k != 12) {
-		return i + "nd";
-	}
-	if (j == 3 && k != 13) {
-		return i + "rd";
-	}
-	return i + "th";
+  var j = i % 10,
+    k = i % 100;
+  if (j == 1 && k != 11) {
+    return i + "st";
+  }
+  if (j == 2 && k != 12) {
+    return i + "nd";
+  }
+  if (j == 3 && k != 13) {
+    return i + "rd";
+  }
+  return i + "th";
 }
 
 function selectRandom(arr) {
-	var r = gen.rand() * arr.length;
-	return arr[Math.floor(r)];
+  var r = gen.rand() * arr.length;
+  return arr[Math.floor(r)];
 }
 
 function isLetter(str) {
@@ -442,92 +454,92 @@ function isLetter(str) {
 }
 
 function vTo(posFrom, posTo) {
-	return {
-		x: posTo.x - posFrom.x,
-		y: posTo.y - posFrom.y
-	};
+  return {
+    x: posTo.x - posFrom.x,
+    y: posTo.y - posFrom.y
+  };
 }
 
 function getDir(posFrom, posTo) {
-	var diff = vTo(posFrom, posTo);
-	return Math.atan2(diff.y, diff.x);
+  var diff = vTo(posFrom, posTo);
+  return Math.atan2(diff.y, diff.x);
 }
 
 function getDistSquared(pos1, pos2) {
-	return Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2);
+  return Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2);
 }
 
 function getDist(pos1, pos2) {
-	return Math.sqrt(getDistSquared(pos1, pos2));
+  return Math.sqrt(getDistSquared(pos1, pos2));
 }
 
 function getClosest(arr, pos) {
-	var dist = 10000000000000; // Anything is smaller
-	var index = 0;
-	for(var i in arr) {
-		var d = getDist(arr[i].pos, pos);
-		if(d < dist) {
-			dist = d;
-			index = i;
-		}
-	}
-	return arr[index];
+  var dist = 10000000000000; // Anything is smaller
+  var index = 0;
+  for(var i in arr) {
+    var d = getDist(arr[i].pos, pos);
+    if(d < dist) {
+      dist = d;
+      index = i;
+    }
+  }
+  return arr[index];
 }
 
 function getMouse() {
-	if(model.players[0].jinxed) {
-		return {
-			x: canvas.width - mouse.x,
-			y: canvas.height - mouse.y
-		};
-	} else {
-		return {
-			x: mouse.x,
-			y: mouse.y
-		};
-	}
+  if(model.players[0].jinxed) {
+    return {
+      x: canvas.width - mouse.x,
+      y: canvas.height - mouse.y
+    };
+  } else {
+    return {
+      x: mouse.x,
+      y: mouse.y
+    };
+  }
 }
 
 function addV(a, b) {
-	return {
-		x: a.x + b.x,
-		y: a.y + b.y
-	};
+  return {
+    x: a.x + b.x,
+    y: a.y + b.y
+  };
 }
 
 function scaleV(v, s) {
-	return {
-		x: v.x * s,
-		y: v.y * s
-	};
+  return {
+    x: v.x * s,
+    y: v.y * s
+  };
 }
 
 function normalize(v) {
-	var dist = getDist({x:0,y:0}, v);
-	return {
-		x: v.x / dist,
-		y: v.y / dist
-	};
+  var dist = getDist({x:0,y:0}, v);
+  return {
+    x: v.x / dist,
+    y: v.y / dist
+  };
 }
 
 function dot(a, b) {
-	return a.x * b.x + a.y * b.y;
+  return a.x * b.x + a.y * b.y;
 }
 
 function getMagOfV(v) {
-	return getDist({x:0,y:0}, v);
+  return getDist({x:0,y:0}, v);
 }
 
 function getDirOfV(v) {
-	return getDir({x:0,y:0}, v);
+  return getDir({x:0,y:0}, v);
 }
 
 function easeInOutQuint(t) {
-	return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
+  return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
 }
 
 function translate(pos) {
-	ctx.translate(pos.x, pos.y);
+  ctx.translate(pos.x, pos.y);
 }
 
 
@@ -535,812 +547,841 @@ function translate(pos) {
 // Util for spells
 
 function rep(func, count) {
-	for(var i = 0; i < count; i++) {
-		func();
-	}
+  for(var i = 0; i < count; i++) {
+    func();
+  }
 }
 
 function both(a, b) {
-	var c = []; // a + b
-	for(var i in a) {
-		c.push(a[i]);
-	}
-	for(var i in b) {
-		c.push(b[i]);
-	}
-	return c;
+  var c = []; // a + b
+  for(var i in a) {
+    c.push(a[i]);
+  }
+  for(var i in b) {
+    c.push(b[i]);
+  }
+  return c;
 }
 
 function filter(arr, selector) {
-	var newArr = [];
-	for(var i in arr) {
-		if(selector(arr[i])) {
-			newArr.push(arr[i]);
-		}
-	}
-	return newArr;
+  var newArr = [];
+  for(var i in arr) {
+    if(selector(arr[i])) {
+      newArr.push(arr[i]);
+    }
+  }
+  return newArr;
+}
+
+function forEach(arr, func) {
+  for(var i = 0; i < arr.length; i++) {
+    func(arr[i]);
+  }
+  return arr;
 }
 
 function player() {
-	return model.players[0];
+  return model.players[0];
+}
+
+function targetPlayer(allowSelf) {
+  var players = model.players;
+  if(!allowSelf) players = players.slice(1);
+  return getClosest(players, getMouse());
 }
 
 function stayStill() {
-	player().vel = {x:0,y:0};
+  player().vel = {x:0,y:0};
 }
 
 function randomSpell() {
-	var spells = Object.values(magic);
-	return spells[Math.floor(Math.random()*spells.length)];
+  var spells = Object.values(magic);
+  return spells[Math.floor(Math.random()*spells.length)];
 }
 
-/* Magic
+////////// Magic
 
-player => player()
-mouse => getMouse();
-projectile => <projectileName>(<pos>,<dir>)
-
-*/
 magic = {
-	
-	// Fireball towards mouse
-	"AAA": {
-		name: "Fireball I",
-		mana: 2,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
-	},
-	
-	// Teleport to mouse
-	"BAA": {
-		name: "Teleport",
-		mana: 9,
-		code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;"
-	},
-	
-	// Heal self
-	"CAA": {
-		name: "Heal",
-		mana: 11,
-		code: "var p=model.players[0];p.heal(4);"
-	},
-	
-	// Stun player closest to mouse
-	"DAA": {
-		name: "Stun",
-		mana: 11,
-		code: "getClosest(model.players,getMouse()).stun()"
-	},
-	
-	// Jinx player closest to mouse
-	"EAA": {
-		name: "Jinx",
-		mana: 14,
-		code: "getClosest(model.players,getMouse()).jinx()"
-	},
-	
-	// Beam shot towards mouse
-	"FAA": {
-		name: "Fireball II",
-		mana: 6,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
-	},
-	
-	// Zap with lightning
-	"GAA": {
-		name: "Zap",
-		mana: 10,
-		code: "var p=model.players[0];model.things.push(new Zap(p.pos,getMouse()));"
-	},
-	
-	// Swap Four Corners
-	"HAA": {
-		name: "Shifting Earth",
-		mana: 15,
-		code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
-	},
-	
-	// Poison Cloud at mouse
-	"IAA": {
-		name: "Poison Cloud",
-		mana: 7,
-		code: "model.things.push(new PoisonCloud(getMouse()));"
-	},
-	
-	// Disappear thing closest to mouse
-	"JAA": {
-		name: "Vanish",
-		mana: 9,
-		code: "getClosest(model.things,getMouse()).dead=true;"
-	},
-	
-	// Life balance
-	"KAA": {
-		name: "Balance Life",
-		mana: 20,
-		code: "getClosest(model.players,getMouse()).health=13;"
-	},
-	
-	// Shield at mouse
-	"LAA": {
-		name: "Shield",
-		mana: 16,
-		code: "model.things.push(new Shield(getMouse()));"
-	},
-	
-	// Phase until next turn
-	"MAA": {
-		name: "Ghost Walk",
-		mana: 7,
-		code: "model.players[0].phasing=true;"
-	},
-	
-	// Float at mouse
-	"NAA": {
-		name: "Whirlwind",
-		mana: 10,
-		code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
-	},
-	
-	// Sword mob at mouse
-	"OAA": {
-		name: "Magic Sword",
-		mana: 10,
-		code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
-	},
-	
-	// Vampire
-	"PAA": {
-		name: "Life Suck",
-		mana: 12,
-		code: "model.players[0].heal(2);getClosest(model.players,getMouse()).hurt(3);"
-	},
-	
-	// Swap position with another player
-	"QAA": {
-		name: "Swap",
-		mana: 11,
-		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var temp=p.pos;p.pos=o.pos;o.pos=temp;"
-	},
-	
-	// Blind player temporarily
-	"RAA": {
-		name: "Blind",
-		mana: 7,
-		code: "getClosest(model.players,getMouse()).blind();"
-	},
-	
-	// Invisibility
-	"SAA": {
-		name: "Invisibility",
-		mana: 9,
-		code: "model.players[0].invisible=true;"
-	},
-	
-	// Obstacle at mouse
-	"TAA": {
-		name: "Pillar of Stone",
-		mana: 7,
-		code: "model.things.push(new Obstacle(getMouse()));"
-	},
-	
-	// Star
-	"UAA": {
-		name: "Fireball III",
-		mana: 10,
-		code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
-	},
-	
-	// Haste
-	"VAA": {
-		name: "Haste",
-		mana: 4,
-		code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
-	},
+  
+  // Fireball towards mouse
+  "AAA": {
+    name: "Fireball I",
+    mana: 2,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));"
+  },
+  
+  // Teleport to mouse
+  "BAA": {
+    name: "Teleport",
+    mana: 9,
+    code: "var p=model.players[0].pos;var m=getMouse();(function(pos){for(var i=0;i<70;i++){model.dits.push(new Dit(\"teleport\",pos.x,pos.y));}return arguments.callee;})(p)(m);p.x=m.x;p.y=m.y;p.vel.x=0;p.vel.y=0;"
+  },
+  
+  // Heal self
+  "CAA": {
+    name: "Heal",
+    mana: 11,
+    code: "var p=model.players[0];p.heal(4);"
+  },
+  
+  // Stun player closest to mouse
+  "DAA": {
+    name: "Stun",
+    mana: 13,
+    code: "targetPlayer(false).stun()"
+  },
+  
+  // Jinx player closest to mouse
+  "EAA": {
+    name: "Jinx",
+    mana: 14,
+    code: "targetPlayer(true).jinx()"
+  },
+  
+  // Beam shot towards mouse
+  "FAA": {
+    name: "Fireball II",
+    mana: 6,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse())+Math.PI;model.things.push(new Beam(p.pos,r))"
+  },
+  
+  // Zap with lightning
+  "GAA": {
+    name: "Zap",
+    mana: 10,
+    code: "var p=model.players[0];model.things.push(new Zap(p.pos,targetPlayer(false).pos));"
+  },
+  
+  // Swap Four Corners
+  "HAA": {
+    name: "Shifting Earth",
+    mana: 15,
+    code: "state=new Animation(\"four corner\",getMouse().x,getMouse().y);"
+  },
+  
+  // Poison Cloud at mouse
+  "IAA": {
+    name: "Poison Cloud",
+    mana: 7,
+    code: "model.things.push(new PoisonCloud(getMouse()));"
+  },
+  
+  // Disappear thing closest to mouse
+  "JAA": {
+    name: "Vanish",
+    mana: 9,
+    code: "getClosest(model.things,getMouse()).dead=true;"
+  },
+  
+  // Life balance
+  "KAA": {
+    name: "Balance Life",
+    mana: 20,
+    code: "targePlayer(true).health=13;"
+  },
+  
+  // Shield at mouse
+  "LAA": {
+    name: "Shield",
+    mana: 16,
+    code: "model.things.push(new Shield(getMouse()));"
+  },
+  
+  // Phase until next turn
+  "MAA": {
+    name: "Ghost Walk",
+    mana: 7,
+    code: "model.players[0].phasing=true;"
+  },
+  
+  // Float at mouse
+  "NAA": {
+    name: "Whirlwind",
+    mana: 10,
+    code: "model.things.push(new Whirlwind(player().pos,getDir(player().pos,getMouse())));"
+  },
+  
+  // Sword mob at mouse
+  "OAA": {
+    name: "Magic Sword",
+    mana: 10,
+    code: "model.things.push(new Sword(model.players[0].name,getMouse()));"
+  },
+  
+  // Vampire
+  "PAA": {
+    name: "Life Suck",
+    mana: 12,
+    code: "model.players[0].heal(2);targetPlayer(false).hurt(3);"
+  },
+  
+  // Swap position with another player
+  "QAA": {
+    name: "Swap",
+    mana: 11,
+    code: "var p=model.players[0];var o=targetPlayer(false);var temp=p.pos;p.pos=o.pos;o.pos=temp;p.vel.x=0;p.vel.y=0;"
+  },
+  
+  // Blind player temporarily
+  "RAA": {
+    name: "Blind",
+    mana: 7,
+    code: "targetPlayer(false).blind();"
+  },
+  
+  // Invisibility
+  "SAA": {
+    name: "Invisibility",
+    mana: 9,
+    code: "model.players[0].makeInvisible();"
+  },
+  
+  // Obstacle at mouse
+  "TAA": {
+    name: "Pillar of Stone",
+    mana: 7,
+    code: "model.things.push(new Obstacle(getMouse()));"
+  },
+  
+  // Star
+  "UAA": {
+    name: "Fireball III",
+    mana: 10,
+    code: "var p=model.players[0];model.things.push(new Star(p.pos,getDir(p.pos,getMouse())+2));"
+  },
+  
+  // Haste
+  "VAA": {
+    name: "Haste",
+    mana: 4,
+    code: "var p=model.players[0];p.vel=scaleV(p.vel,2);"
+  },
 
-	// Burst of fire
-	"WAA": {
-		name: "Burst of Fire",
-		mana: 20,
-		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:12,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=2;model.things.push(new Fireball(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
-	},
+  // Burst of fire
+  "WAA": {
+    name: "Burst of Fire",
+    mana: 20,
+    code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:12,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=2;model.things.push(new Fireball(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
+  },
 
-	// Steer Fireball
-	"XAA": {
-		name: "Steer Fireball",
-		mana: 11,
-		code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
-	},
+  // Steer Fireball
+  "XAA": {
+    name: "Steer Fireball",
+    mana: 11,
+    code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));if(a.length>0){var f=getClosest(a,getMouse());var s=getMagOfV(f.vel);var d=getDir(f.pos,getMouse());f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};}"
+  },
 
-	// Dragon Breath
-	"YAA": {
-		name: "Dragon Breath",
-		mana: 20,
-		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
-	},
+  // Dragon Breath
+  "YAA": {
+    name: "Dragon Breath",
+    mana: 20,
+    code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:6,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Beam(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
+  },
 
-	// Reverse Fireball
-	"ZAA": {
-		name: "Reverse Fireball",
-		mana: 3,
-		code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
-	},
-	
-	// Fireball X towards mouse
-	"ABA": {
-		name: "Fireball X",
-		mana: 30,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
-	},
-	
-	// Fireball to the right
-	"BBA": {
-		name: "Right Flame",
-		mana: 3,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r+Math.PI/2));"
-	},
-	
-	// Fireball to the left
-	"CBA": {
-		name: "Left Flame",
-		mana: 3,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
-	},
+  // Reverse Fireball
+  "ZAA": {
+    name: "Reverse Fireball",
+    mana: 3,
+    code: "var p=model.players[0];var r=getDir(getMouse(),p.pos);model.things.push(new Fireball(p.pos,r));"
+  },
+  
+  // Fireball X towards mouse
+  "ABA": {
+    name: "Fireball X",
+    mana: 30,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new GreatBallOfFire(p.pos,r));"
+  },
+  
+  // Fireball to the right
+  "BBA": {
+    name: "Right Flame",
+    mana: 3,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r+Math.PI/2));"
+  },
+  
+  // Fireball to the left
+  "CBA": {
+    name: "Left Flame",
+    mana: 3,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r-Math.PI/2));"
+  },
 
-	// Star Shot
-	"DBA": {
-		name: "Star Shot",
-		mana: 20,
-		code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:3,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Star(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
-	},
-	
-	// The Firework
-	"EBA": {
-		name: "The Firework",
-		mana: 16,
-		code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
-	},
+  // Star Shot
+  "DBA": {
+    name: "Star Shot",
+    mana: 20,
+    code: "model.things.push({rad:0,wand:getDir(model.players[0].pos,getMouse()),grounded:true,canBounce:true,pos:model.players[0].pos,vel:model.players[0].vel,draw:x=>0,dead:false,num:3,timer:0,update:function(){this.pos = addV(this.pos,this.vel);this.timer--;if(this.timer<1){this.timer=5;model.things.push(new Star(this.pos,this.wand+(Math.random()*0.5-0.25)));this.num--;if(this.num<1)this.dead=true;}}})"
+  },
+  
+  // The Firework
+  "EBA": {
+    name: "The Firework",
+    mana: 16,
+    code: "var p=model.players[0];var r=getDir(p.pos,getMouse());model.things.push(new Fireball(p.pos,r));model.things.push(new Beam(p.pos,r));model.things.push(new Star(p.pos,r));"
+  },
 
-	// Arcane Aid
-	"FBA": {
-		name: "Arcane Aid",
-		mana: 0,
-		code: "var p=model.players[0];var o=getClosest(model.players,getMouse());var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
-	}
+  // Arcane Aid
+  "FBA": {
+    name: "Arcane Aid",
+    mana: 0,
+    code: "var p=model.players[0];var o=targetPlayer(false);var m=Math.ceil(p.mana/2);p.mana-=m;o.mana+=m;"
+  },
+
+  // Push Fire
+  "GBA": {
+    name: "Push Fire",
+    mana: 14,
+    code: "a=filter(model.things,f=>(f instanceof Fireball||f instanceof Beam||f instanceof Star||f instanceof GreatBallOfFire));a=filter(a,function(f){return getDist(f.pos,getMouse())<100;});forEach(a,function(f){var s=getMagOfV(f.vel);var d=getDir(getMouse(),f.pos);f.vel={x:Math.cos(d)*s,y:Math.sin(d)*s};});"
+  },
+
+  // Dark Wall
+  "HBA": {
+    name: "Dark Wall",
+    mana: 30,
+    code: "model.things.push(new DarkWall(getDir(player().pos,getMouse())));"
+  }
 };
 
 backfires = [
-	// Summon a whirlwind
-	"model.things.push(new Whirlwind(player().pos, Math.random() * Math.PI * 2, false));",
-	// Reset mana to 0
-	"player().mana = 0;",
-	// Stay put
-	"stayStill();",
-	// Stun
-	"player().stun();",
-	// Jinx
-	"player().jinx();",
-	// Blind
-	"player().blind();",
-	// Go opposite direction
-	"var v = player().vel; v.x*=-1; v.y*=-1;",
-	// Cast a random spell
-	"try{eval(randomSpell().code);}catch(e){};",
-	// Lose health
-	"player().hurt(1);",
-	// Lose more health
-	"player().hurt(2);"
+  // Summon a whirlwind
+  "model.things.push(new Whirlwind(player().pos, Math.random() * Math.PI * 2, false));",
+  // Reset mana to 0
+  "player().mana = 0;",
+  // Stay put
+  "stayStill();",
+  // Stun
+  "player().stun();",
+  // Jinx
+  "player().jinx();",
+  // Blind
+  "player().blind();",
+  // Go opposite direction
+  "var v = player().vel; v.x*=-1; v.y*=-1;",
+  // Cast a random spell
+  "try{eval(randomSpell().code);}catch(e){};",
+  // Lose health
+  "player().hurt(1);",
+  // Lose more health
+  "player().hurt(2);"
 ];
 
 // Avatar colors
 colors = {
-	hat: [
-		"#6b4112",
-		"#604a30",
-		"#51493f",
-		"#7f7467",
-		"#ada49a",
-		"#7a8959",
-		"#598984",
-		"#000000"
-	],
-	head: [
-		"#f9bc75",
-		"#c19562",
-		"#916737",
-		"#5b3a15",
-		"#422504"
-	],
-	beard: [
-		"#3f2c0a",
-		"#000000",
-		"#544d42",
-		"#8c8477",
-		"#cec9c0"
-	],
-	robe: [
-		"#6b4112",
-		"#604a30",
-		"#51493f",
-		"#7f7467",
-		"#ada49a",
-		"#7a8959",
-		"#598984",
-		"#000000"
-	]
+  hat: [
+    "#6b4112",
+    "#604a30",
+    "#51493f",
+    "#7f7467",
+    "#ada49a",
+    "#7a8959",
+    "#598984",
+    "#000000"
+  ],
+  head: [
+    "#f9bc75",
+    "#c19562",
+    "#916737",
+    "#5b3a15",
+    "#422504"
+  ],
+  beard: [
+    "#3f2c0a",
+    "#000000",
+    "#544d42",
+    "#8c8477",
+    "#cec9c0"
+  ],
+  robe: [
+    "#6b4112",
+    "#604a30",
+    "#51493f",
+    "#7f7467",
+    "#ada49a",
+    "#7a8959",
+    "#598984",
+    "#000000"
+  ]
 };
 
 
 
 // Model prototype
 Model = function() {
-	this.players = [];
-	this.mobs = [];
-	this.things = [];
-	this.everything = [];
-	
-	this.graveyard = [];
-	
-	this.fx = [];
-	
-	this.dits = [];
+  this.players = [];
+  this.mobs = [];
+  this.things = [];
+  this.everything = [];
+  
+  this.graveyard = [];
+  
+  this.fx = [];
+  
+  this.dits = [];
 
-	this.dropTimer = config.droptimer;
+  this.dropTimer = config.droptimer;
 };
 
 Model.prototype.drawBackground = function() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
 Model.prototype.sortByDepth = function() {
-	// Combine everything
-	this.everything = [];
-	for(var i in this.things) {
-		this.everything.push(this.things[i]);
-	}
-	for(i in this.mobs) {
-		this.everything.push(this.mobs[i]);
-	}
-	for(i in this.players) {
-		this.everything.push(this.players[i]);
-	}
-	for(i in this.fx) {
-		this.everything.push(this.fx[i]);
-	}
-	
-	// Sort by y coordinate
-	var changed;
-	do {
-		changed = false;
-		for(var i = 0; i < this.everything.length - 1; i++) {
-			if(this.everything[i].pos.y > this.everything[i+1].pos.y) {
-				var temp = this.everything[i];
-				this.everything[i] = this.everything[i+1];
-				this.everything[i+1] = temp;
-				changed = true;
-			}
-		}
-	} while(changed);
+  // Combine everything
+  this.everything = [];
+  for(var i in this.things) {
+    this.everything.push(this.things[i]);
+  }
+  for(i in this.mobs) {
+    this.everything.push(this.mobs[i]);
+  }
+  for(i in this.players) {
+    this.everything.push(this.players[i]);
+  }
+  for(i in this.fx) {
+    this.everything.push(this.fx[i]);
+  }
+  
+  // Sort by y coordinate
+  var changed;
+  do {
+    changed = false;
+    for(var i = 0; i < this.everything.length - 1; i++) {
+      if(this.everything[i].pos.y > this.everything[i+1].pos.y) {
+        var temp = this.everything[i];
+        this.everything[i] = this.everything[i+1];
+        this.everything[i+1] = temp;
+        changed = true;
+      }
+    }
+  } while(changed);
 };
 
 Model.prototype.drawLayer = function(layer) {
-	for(var i = 0; i < this.everything.length; i++) {
-		this.everything[i].draw(layer);
-	}
+  for(var i = 0; i < this.everything.length; i++) {
+    this.everything[i].draw(layer);
+  }
 };
 
 Model.prototype.drawDead = function() {
-	for(var i = 0; i < this.graveyard.length; i++) {
-		this.graveyard[i].draw("dead");
-	}
+  for(var i = 0; i < this.graveyard.length; i++) {
+    this.graveyard[i].draw("dead");
+  }
 }
 
 Model.prototype.drawDits = function() {
-	for(var i = 0; i < this.dits.length; i++) {
-		this.dits[i].draw();
-	}
+  for(var i = 0; i < this.dits.length; i++) {
+    this.dits[i].draw();
+  }
 };
 
 Model.prototype.draw = function() {
-	this.drawBackground();
-	this.sortByDepth();
-	this.drawLayer("ground");
-	this.drawDead();
-	this.drawLayer("grounded");
-	this.drawDits();
-	this.drawLayer("airborn");
-	this.drawLayer("info");
+  this.drawBackground();
+  this.sortByDepth();
+  this.drawLayer("ground");
+  this.drawDead();
+  this.drawLayer("grounded");
+  this.drawDits();
+  this.drawLayer("airborn");
+  this.drawLayer("info");
 };
 
 
 
 // Player prototype
 Player = function(name) {
-	this.name = name;
-	this.firstKey = genKey(name);
-	this.skin = {
-		hat: selectRandom(colors.hat),
-		head: selectRandom(colors.head),
-		beard: selectRandom(colors.beard),
-		robe: selectRandom(colors.robe)
-	};
-	
-	this.rad = 15;
-	
-	var margin = 50;
-	this.pos = {
-		x: (canvas.width-margin) * Math.random() + margin/2,
-		y: (canvas.height-margin) * Math.random() + margin/2
-	};
-	
-	this.course = "s";
-	this.vel = {
-		x: 0,
-		y: 0
-	};
-	
-	this.health = 20;
-	this.mana = 0;
-	
-	this.stunned = false;
-	this.jinxed = false;
-	this.jinxTimer = 0;
-	this.phasing = false;
-	this.blinded = false;
-	this.blindTimer = 0;
-	this.invisible = false;
-	this.dead = false;
-	
-	this.grounded = true;
-	this.canBounce = true;
-	this.canBeSweptUp = true;
+  this.name = name;
+  this.firstKey = genKey(name);
+  this.skin = {
+    hat: selectRandom(colors.hat),
+    head: selectRandom(colors.head),
+    beard: selectRandom(colors.beard),
+    robe: selectRandom(colors.robe)
+  };
+  
+  this.rad = 15;
+  
+  var margin = 50;
+  this.pos = {
+    x: (canvas.width-margin) * Math.random() + margin/2,
+    y: (canvas.height-margin) * Math.random() + margin/2
+  };
+  
+  this.course = "s";
+  this.vel = {
+    x: 0,
+    y: 0
+  };
+  
+  this.health = 20;
+  this.mana = 0;
+  
+  this.stunned = false;
+  this.jinxed = false;
+  this.jinxTimer = 0;
+  this.phasing = false;
+  this.blinded = false;
+  this.blindTimer = 0;
+  this.invisible = false;
+  this.invisibleTimer = 0;
+  this.dead = false;
+  
+  this.grounded = true;
+  this.canBounce = true;
+  this.canBeSweptUp = true;
 };
 
 Player.prototype.draw = function(layer) {
-	if(this.invisible) return;
+  if(this.invisible) return;
 
-	if(layer === "dead") {
-		ctx.save();
-		translate(this.pos);
+  if(layer === "dead") {
+    ctx.save();
+    translate(this.pos);
 
-		// Dark outline
-		ctx.fillStyle = "rgba(0,0,0,0.5)";
-		ctx.beginPath();
-		ctx.arc(0, 0, 11, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.fillRect(-7, 7, 14, 7);
+    // Dark outline
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.beginPath();
+    ctx.arc(0, 0, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-7, 7, 14, 7);
 
-		// Cranium and upper jaw
-		ctx.fillStyle = "white";
-		ctx.beginPath();
-		ctx.arc(0, 0, 10, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.fillRect(-6, 7, 12, 6);
+    // Cranium and upper jaw
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-6, 7, 12, 6);
 
-		// Eyes
-		ctx.fillStyle = "black";
-		ctx.beginPath();
-		ctx.arc(-4, 2, 3, 0, Math.PI * 2);
-		ctx.arc(4, 2, 3, 0, Math.PI * 2);
-		ctx.fill();
+    // Eyes
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(-4, 2, 3, 0, Math.PI * 2);
+    ctx.arc(4, 2, 3, 0, Math.PI * 2);
+    ctx.fill();
 
-		// Nose
-		ctx.fillRect(-1.5, 5, 1, 2);
-		ctx.fillRect(0.5, 5, 1, 2);
+    // Nose
+    ctx.fillRect(-1.5, 5, 1, 2);
+    ctx.fillRect(0.5, 5, 1, 2);
 
-		ctx.restore();
-		return;
-	}
-	
-	if(layer === "info") {
-		ctx.save();
-		translate(this.pos);
-		
-		// Name bar
-		ctx.fillStyle = "black";
-		if(state.blind) ctx.fillStyle = "white";
-		ctx.textAlign = "center";
-		ctx.fillText(this.name, 0, -37);
-		
-		ctx.fillStyle = "green";
-		ctx.textAlign = "right";
-		ctx.fillText(this.health, -3, -27);
-		
-		ctx.fillStyle = "blue";
-		ctx.textAlign = "left";
-		ctx.fillText(this.mana, 3, -27);
-		
-		ctx.restore();
-	}
-	
-	if(layer !== "grounded") return;
-	ctx.save();
-	translate(this.pos);
-	
-	if(this.phasing) ctx.globalAlpha = 0.5;
-	
-	// Head
-	ctx.beginPath();
-	ctx.arc(0, -4, 10, 0, 2*Math.PI);
-	ctx.fillStyle = this.skin.head;
-	ctx.fill();
-	
-	// Robe
-	ctx.beginPath();
-	ctx.moveTo(7, 3);
-	ctx.lineTo(13, 26);
-	ctx.lineTo(-13, 26);
-	ctx.lineTo(-7, 3);
-	ctx.fillStyle = this.skin.robe;
-	ctx.fill();
-	
-	// Beard
-	ctx.beginPath();
-	if(this.course === "s") {
-		ctx.moveTo(0, -2);
-		ctx.lineTo(7, 3);
-		ctx.lineTo(0, 20);
-		ctx.lineTo(-7, 3);
-	} else if(this.course === "e") {
-		ctx.moveTo(10, -2);
-		ctx.lineTo(12, 20);
-		ctx.lineTo(0, 3);
-	} else if(this.course === "w") {
-		ctx.moveTo(-10, -2);
-		ctx.lineTo(-12, 20);
-		ctx.lineTo(0, 3);
-	}
-	ctx.fillStyle = this.skin.beard;
-	ctx.fill();
-	
-	// Hat
-	ctx.beginPath();
-	ctx.moveTo(5, -13);
-	ctx.lineTo(15, -10);
-	ctx.lineTo(-15, -10);
-	ctx.lineTo(-5, -13);
-	ctx.lineTo(-2, -25);
-	ctx.lineTo(2, -25);
-	if(this.course === "s" || this.course === "w") {
-		ctx.moveTo(2, -25);
-		ctx.lineTo(08, -18);
-		ctx.lineTo(3, -20);
-	} else if(this.course === "n" || this.course === "e") {
-		ctx.moveTo(-2, -25);
-		ctx.lineTo(-3, -20);
-		ctx.lineTo(-08, -18);
-	}
-	ctx.fillStyle = this.skin.hat;
-	ctx.fill();
-	
-	ctx.restore();
+    ctx.restore();
+    return;
+  }
+  
+  if(layer === "info") {
+    ctx.save();
+    translate(this.pos);
+    ctx.font = '15px Verdana';
+    
+    // Name bar
+    ctx.fillStyle = "black";
+    if(state.blind) ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(this.name, 0, -47);
+    
+    ctx.fillStyle = "green";
+    ctx.textAlign = "right";
+    ctx.fillText(this.health, -3, -27);
+    
+    ctx.fillStyle = "blue";
+    ctx.textAlign = "left";
+    ctx.fillText(this.mana, 3, -27);
+    
+    ctx.restore();
+  }
+  
+  if(layer !== "grounded") return;
+  ctx.save();
+  translate(this.pos);
+  
+  if(this.phasing) ctx.globalAlpha = 0.5;
+  
+  // Head
+  ctx.beginPath();
+  ctx.arc(0, -4, 10, 0, 2*Math.PI);
+  ctx.fillStyle = this.skin.head;
+  ctx.fill();
+  
+  // Robe
+  ctx.beginPath();
+  ctx.moveTo(7, 3);
+  ctx.lineTo(13, 26);
+  ctx.lineTo(-13, 26);
+  ctx.lineTo(-7, 3);
+  ctx.fillStyle = this.skin.robe;
+  ctx.fill();
+  
+  // Beard
+  ctx.beginPath();
+  if(this.course === "s") {
+    ctx.moveTo(0, -2);
+    ctx.lineTo(7, 3);
+    ctx.lineTo(0, 20);
+    ctx.lineTo(-7, 3);
+  } else if(this.course === "e") {
+    ctx.moveTo(10, -2);
+    ctx.lineTo(12, 20);
+    ctx.lineTo(0, 3);
+  } else if(this.course === "w") {
+    ctx.moveTo(-10, -2);
+    ctx.lineTo(-12, 20);
+    ctx.lineTo(0, 3);
+  }
+  ctx.fillStyle = this.skin.beard;
+  ctx.fill();
+  
+  // Hat
+  ctx.beginPath();
+  ctx.moveTo(5, -13);
+  ctx.lineTo(15, -10);
+  ctx.lineTo(-15, -10);
+  ctx.lineTo(-5, -13);
+  ctx.lineTo(-2, -25);
+  ctx.lineTo(2, -25);
+  if(this.course === "s" || this.course === "w") {
+    ctx.moveTo(2, -25);
+    ctx.lineTo(08, -18);
+    ctx.lineTo(3, -20);
+  } else if(this.course === "n" || this.course === "e") {
+    ctx.moveTo(-2, -25);
+    ctx.lineTo(-3, -20);
+    ctx.lineTo(-08, -18);
+  }
+  ctx.fillStyle = this.skin.hat;
+  ctx.fill();
+  
+  ctx.restore();
 };
 
 Player.prototype.drawSpell = function(dir, spell) {
-	while(spell.length !== 3) {
-		spell = "-" + spell;
-	}
-	
-	ctx.save();
-	translate(this.pos);
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	ctx.font = "20px Runic";
-	ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
-	ctx.restore();
+  while(spell.length !== 3) {
+    spell = "-" + spell;
+  }
+  
+  ctx.save();
+  translate(this.pos);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "20px Runic";
+  ctx.fillText(spell, 35*Math.cos(dir), 25*Math.sin(dir));
+  ctx.restore();
 };
 
 Player.prototype.useMana = function(mana) {
-	// You can't use mana if doing so would kill you
-	if(this.mana + this.health - 1 < mana) return false;
+  // You can't use mana if doing so would kill you
+  if(this.mana + this.health - 1 < mana) return false;
 
-	// Subract the mana cost from the player's mana
-	this.mana -= mana;
-	
-	// Use health as mana if there isn't enough mana
-	if(this.mana < 0) {
-		this.health += this.mana;
-		this.mana = 0;
-	}
+  // Subract the mana cost from the player's mana
+  this.mana -= mana;
+  
+  // Use health as mana if there isn't enough mana
+  if(this.mana < 0) {
+    this.health += this.mana;
+    this.mana = 0;
+  }
 
-	// Report that there was sufficient health and mana to pay the cost
-	return true;
+  // Report that there was sufficient health and mana to pay the cost
+  return true;
 };
 
 Player.prototype.hurt = function(damage) {
-	this.health -= damage;
-	if(this.health <= 0) {
-		this.dead = true;
-	}
-	
-	model.fx.push(new Info("-"+damage, "damage", this.pos));
+  this.health -= damage;
+  if(this.health <= 0) {
+    this.dead = true;
+  }
+  
+  model.fx.push(new Info("-"+damage, "damage", this.pos));
 };
 
 Player.prototype.heal = function(health) {
-	this.health += health;
-	if(this.health > config.maxhealth) {
-		this.health = config.maxhealth;
-	}
-	
-	for(var i = 0; i < 10; i++) {
-		model.dits.push(new Dit("heal", this.pos));
-	}
+  this.health += health;
+  if(this.health > config.maxhealth) {
+    this.health = config.maxhealth;
+  }
+  
+  for(var i = 0; i < 10; i++) {
+    model.dits.push(new Dit("heal", this.pos));
+  }
 };
 
 Player.prototype.stun = function() {
-	this.stunned = true;
-	this.vel = {x:0,y:0};
-	
-	model.fx.push(new Info("Stunned", "stun", this.pos));
+  this.stunned = true;
+  this.vel = {x:0,y:0};
+  
+  model.fx.push(new Info("Stunned", "stun", this.pos));
 };
 
 Player.prototype.jinx = function() {
-	this.jinxed = !this.jinxed;
-	if(this.jinxed) this.jinxTimer = 4;
+  this.jinxed = !this.jinxed;
+  if(this.jinxed) this.jinxTimer = 4;
 
-	model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
+  model.fx.push(new Info(this.jinxed?"Jinxed":"Unjinxed", "jinx", this.pos));
 };
 
 Player.prototype.blind = function() {
-	this.blinded = true;
-	this.blindTimer = 2;
+  this.blinded = true;
+  this.blindTimer = 2;
 
-	model.fx.push(new Info("Blinded", "blind", this.pos));
+  model.fx.push(new Info("Blinded", "blind", this.pos));
+};
+
+Player.prototype.makeInvisible = function() {
+  this.invisible = true;
+  this.invisibleTimer = 2;
 };
 
 Player.prototype.move = function() {
-	var v = vTo(this.pos, getMouse());
-	if(getMagOfV(v) > config.walkingdistance) {
-		v = scaleV(normalize(v), config.walkingdistance);
-	}
-	v = scaleV(v, 1/config.framesperround);
-	this.vel=v;
+  var v = vTo(this.pos, getMouse());
+  if(getMagOfV(v) > config.walkingdistance) {
+    v = scaleV(normalize(v), config.walkingdistance);
+  }
+  v = scaleV(v, 1/config.framesperround);
+  this.vel=v;
 };
 
 Player.prototype.update = function() {
-	// Add velocity to position
-	this.pos = addV(this.pos, this.vel);
-	
-	// Control the direction player is facing
-	this.course = "s";
-	if(getMagOfV(this.vel) > 0) {
-		var dir = getDirOfV(this.vel);
-		if(dir < 0) this.course = "n";
-		if(Math.abs(dir) > 2.36) this.course = "w";
-		if(Math.abs(dir) < 0.79) this.course = "e";
-	}
+  // Add velocity to position
+  this.pos = addV(this.pos, this.vel);
+  
+  // Control the direction player is facing
+  this.course = "s";
+  if(getMagOfV(this.vel) > 0) {
+    var dir = getDirOfV(this.vel);
+    if(dir < 0) this.course = "n";
+    if(Math.abs(dir) > 2.36) this.course = "w";
+    if(Math.abs(dir) < 0.79) this.course = "e";
+  }
 };
 
 
 
 // Sword mob
 Sword = function(name, pos) {
-	this.name = name;
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	this.vel = {
-		x: Math.random() * 6 - 3,
-		y: Math.random() * 6 - 3
-	};
-	this.accel = 0.05;
-	
-	this.rad = 20;
-	this.attackTimer = 0;
-	
-	this.canBounce = true;
-	this.canBeReflected = true;
-	this.canBeSweptUp = true;
-	
-	this.dead = false;
+  this.name = name;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  this.vel = {
+    x: Math.random() * 6 - 3,
+    y: Math.random() * 6 - 3
+  };
+  this.accel = 0.05;
+  
+  this.rad = 20;
+  this.attackTimer = 0;
+  
+  this.canBounce = true;
+  this.canBeReflected = true;
+  this.canBeSweptUp = true;
+  
+  this.dead = false;
 };
 
 Sword.prototype.draw = function(layer) {
-	if(layer !== "airborn") return;
-	
-	ctx.save();
-	translate(this.pos);
-	ctx.rotate(getDir({x:0,y:0}, this.vel));
-	
-	ctx.strokeStyle = "grey";
-	ctx.beginPath();
-	ctx.moveTo(-30, 0);
-	ctx.lineTo(20, 0);
-	ctx.lineWidth = 5;
-	ctx.stroke();
-	
-	ctx.strokeStyle = "black";
-	ctx.beginPath();
-	ctx.moveTo(-20, -5);
-	ctx.lineTo(-20, 5);
-	ctx.stroke();
-	
-	ctx.restore();
+  if(layer !== "airborn") return;
+  
+  ctx.save();
+  translate(this.pos);
+  ctx.rotate(getDir({x:0,y:0}, this.vel));
+  
+  ctx.strokeStyle = "grey";
+  ctx.beginPath();
+  ctx.moveTo(-30, 0);
+  ctx.lineTo(20, 0);
+  ctx.lineWidth = 5;
+  ctx.stroke();
+  
+  ctx.strokeStyle = "black";
+  ctx.beginPath();
+  ctx.moveTo(-20, -5);
+  ctx.lineTo(-20, 5);
+  ctx.stroke();
+  
+  ctx.restore();
 };
 
 Sword.prototype.hurt = function(damage) {
-	this.dead = true;
+  this.dead = true;
 };
 
 Sword.prototype.update = function() {
-	// Steer towards closest player
-	var goalPlayer = getClosest(model.players, this.pos);
-	if(this.name !== goalPlayer.name) {
-		this.vel = addV(this.vel, scaleV(vTo(this.pos, goalPlayer.pos), this.accel / getDist(this.pos, goalPlayer.pos)));
-	}
-	
-	// Apply velocity to position
-	this.pos = addV(this.pos, this.vel);
-	
-	// Hurt players
-	this.attackTimer++;
-	if(this.attackTimer > 0) {
-		for(var i in model.players) {
-			var p = model.players[i];
-			if(this.name === p.name) continue;
-			if(p.phasing) continue;
-			if(getDist(this.pos, p.pos) < this.rad + p.rad) {
-				p.hurt(1);
-				this.attackTimer = -20;
-			}
-		}
-	}
+  // Steer towards closest player
+  var goalPlayer = getClosest(model.players, this.pos);
+  if(this.name !== goalPlayer.name) {
+    this.vel = addV(this.vel, scaleV(vTo(this.pos, goalPlayer.pos), this.accel / getDist(this.pos, goalPlayer.pos)));
+  }
+  
+  // Apply velocity to position
+  this.pos = addV(this.pos, this.vel);
+  
+  // Hurt players
+  this.attackTimer++;
+  if(this.attackTimer > 0) {
+    for(var i in model.players) {
+      var p = model.players[i];
+      if(this.name === p.name) continue;
+      if(p.phasing) continue;
+      if(getDist(this.pos, p.pos) < this.rad + p.rad) {
+        p.hurt(1);
+        this.attackTimer = -20;
+      }
+    }
+  }
 };
 
 
 
 // Drop prototype
 Drop = function() {
-	// this.pos
-	// this.rad
-	// this.dead
-	// this.vel
+  // this.pos
+  // this.rad
+  // this.dead
+  // this.vel
 
-	this.grounded = true;
-	this.canBeSweptUp = true;
+  this.grounded = true;
+  this.canBeSweptUp = true;
 
-	// put in model.things
+  // put in model.things
 };
 
 Drop.prototype.findSpotAwayFromPlayers = function() {
-	// Try 100 times to find a point farther away from any players
-	var point = {
-		x: 0,
-		y: 0
-	};
-	var greatestDistSoFar = 0
-	for(var i = 0; i < 100; i++) {
-		var newPoint = {
-			x: Math.random() * canvas.width,
-			y: Math.random() * canvas.height
-		};
-		var closestDist = 10000000000000;
-		for(var j = 0; j < model.players.length; j++) {
-			var dist = getDistSquared(point, newPoint);
-			if(dist < closestDist) closestDist = dist;
-		}
-		if(closestDist > greatestDistSoFar) {
-			greatestDistSoFar = closestDist;
-			point = newPoint;
-		}
-	}
+  // Try 100 times to find a point farther away from any players
+  var point = {
+    x: 0,
+    y: 0
+  };
+  var greatestDistSoFar = 0
+  for(var i = 0; i < 100; i++) {
+    var newPoint = {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height
+    };
+    var closestDist = 10000000000000;
+    for(var j = 0; j < model.players.length; j++) {
+      var dist = getDistSquared(point, newPoint);
+      if(dist < closestDist) closestDist = dist;
+    }
+    if(closestDist > greatestDistSoFar) {
+      greatestDistSoFar = closestDist;
+      point = newPoint;
+    }
+  }
 
-	return point;
+  return point;
 };
 
 Drop.prototype.update = function() {
-	// This is just in case it is given some momentum by something
-	this.vel = scaleV(this.vel, 0.9);
-	this.pos = addV(this.pos, this.vel);
+  // This is just in case it is given some momentum by something
+  this.vel = scaleV(this.vel, 0.9);
+  this.pos = addV(this.pos, this.vel);
 
-	// Check if this is being collected by a player yet
-	for(var i = 0; i < model.players.length; i++) {
-		if(getDist(this.pos, model.players[i].pos) < this.rad + model.players[i].rad) {
-			this.effect(model.players[i]);
-			this.dead = true;
-			return;
-		}
-	}
+  // Check if this is being collected by a player yet
+  for(var i = 0; i < model.players.length; i++) {
+    if(getDist(this.pos, model.players[i].pos) < this.rad + model.players[i].rad) {
+      this.effect(model.players[i]);
+      this.dead = true;
+      return;
+    }
+  }
 };
 
 // Drop.prototype.draw
@@ -1351,319 +1392,319 @@ Drop.prototype.update = function() {
 
 // ManaDrop prototype
 ManaDrop = function() {
-	this.pos = this.findSpotAwayFromPlayers();
-	this.vel = {
-		x: 0,
-		y: 0
-	};
-	this.rad = 10;
-	this.dead = false;
+  this.pos = this.findSpotAwayFromPlayers();
+  this.vel = {
+    x: 0,
+    y: 0
+  };
+  this.rad = 10;
+  this.dead = false;
 };
 ManaDrop.prototype = new Drop();
 
 ManaDrop.prototype.draw = function(layer) {
-	if(layer != "grounded") return;
+  if(layer != "grounded") return;
 
-	ctx.save();
-	translate(this.pos);
+  ctx.save();
+  translate(this.pos);
 
-	ctx.strokeStyle = "blue";
-	ctx.beginPath();
-	ctx.arc(0, 0, this.rad-2, 0, Math.PI * 2);
-	ctx.lineWidth = 4;
-	ctx.stroke();
+  ctx.strokeStyle = "blue";
+  ctx.beginPath();
+  ctx.arc(0, 0, this.rad-2, 0, Math.PI * 2);
+  ctx.lineWidth = 4;
+  ctx.stroke();
 
-	ctx.restore();
+  ctx.restore();
 };
 
 ManaDrop.prototype.effect = function(player) {
-	player.mana += 5;
-	// todo add effect
+  player.mana += 5;
+  // todo add effect
 };
 
 
 
 // Projectile prototype
 Projectile = function() {
-	this.canBounce = true;
-	this.canBeReflected = true;
-	this.canBeSweptUp = true;
-	this.update = function() {
-		this.pos = addV(this.pos, this.vel);
-		
-		var dist = getMagOfV(this.vel);
-		dist = -dist*dist*dist/100;
-		for(var i = 0; i < 3; i++) {
-			var shift = {x:Math.random()*2-1,y:Math.random()*2-1};
-			shift = scaleV(shift, this.rad/2);
-			if(Math.random() < this.sparkChance) model.dits.push(new Dit(this.sparkType, this.pos.x+this.vel.x*dist+shift.x, this.pos.y+this.vel.y*dist+shift.y));
-		}
+  this.canBounce = true;
+  this.canBeReflected = true;
+  this.canBeSweptUp = true;
+  this.update = function() {
+    this.pos = addV(this.pos, this.vel);
+    
+    var dist = getMagOfV(this.vel);
+    dist = -dist*dist*dist/100;
+    for(var i = 0; i < 3; i++) {
+      var shift = {x:Math.random()*2-1,y:Math.random()*2-1};
+      shift = scaleV(shift, this.rad/2);
+      if(Math.random() < this.sparkChance) model.dits.push(new Dit(this.sparkType, this.pos.x+this.vel.x*dist+shift.x, this.pos.y+this.vel.y*dist+shift.y));
+    }
 
-		for(var i in model.players) {
-			if(model.players[i].phasing) continue;
-			var dist = getDist(this.pos, model.players[i].pos);
-			if(dist < model.players[i].rad + this.rad) {
-				model.players[i].hurt(this.damage);
-				this.dead = true;
-				break;
-			}
-		}
-	};
+    for(var i in model.players) {
+      if(model.players[i].phasing) continue;
+      var dist = getDist(this.pos, model.players[i].pos);
+      if(dist < model.players[i].rad + this.rad) {
+        model.players[i].hurt(this.damage);
+        this.dead = true;
+        break;
+      }
+    }
+  };
 };
 
 
 
 // Fireball
 Fireball = function(pos, dir) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 10;
-	
-	this.sparkType = "redSpark";
-	this.sparkChance = 0.5;
-	
-	var speed = 5;
-	this.vel = {
-		x: Math.cos(dir) * speed,
-		y: Math.sin(dir) * speed
-	};
-	
-	this.pos = addV(this.pos, scaleV(this.vel, 8));
-	
-	this.damage = 5;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 10;
+  
+  this.sparkType = "redSpark";
+  this.sparkChance = 0.5;
+  
+  var speed = 5;
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  
+  this.pos = addV(this.pos, scaleV(this.vel, 8));
+  
+  this.damage = 5;
+  
+  this.dead = false;
 };
 Fireball.prototype = new Projectile();
 
 Fireball.prototype.draw = function(layer) {
-	if(layer === "airborn") {
-		ctx.save();
-		translate(this.pos);
-		ctx.rotate(getDir({x:0,y:0},this.vel));
-		
-		ctx.fillStyle = "red";
-		ctx.beginPath();
-		ctx.moveTo(this.rad, 0);
-		ctx.lineTo(0, this.rad);
-		ctx.lineTo(-2*this.rad, 0);
-		ctx.lineTo(0, -this.rad);
-		ctx.fill();
-		
-		ctx.restore();
-	}
+  if(layer === "airborn") {
+    ctx.save();
+    translate(this.pos);
+    ctx.rotate(getDir({x:0,y:0},this.vel));
+    
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.moveTo(this.rad, 0);
+    ctx.lineTo(0, this.rad);
+    ctx.lineTo(-2*this.rad, 0);
+    ctx.lineTo(0, -this.rad);
+    ctx.fill();
+    
+    ctx.restore();
+  }
 };
 
 
 
 // Beam
 Beam = function(pos, dir) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 7;
-	
-	this.sparkType = "blueSpark";
-	this.sparkChance = 0.5;
-	
-	var speed = 6;
-	this.vel = {
-		x: Math.cos(dir) * speed,
-		y: Math.sin(dir) * speed
-	};
-	
-	this.pos = addV(this.pos, scaleV(this.vel, 5));
-	
-	this.damage = 10;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 7;
+  
+  this.sparkType = "blueSpark";
+  this.sparkChance = 0.5;
+  
+  var speed = 6;
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  
+  this.pos = addV(this.pos, scaleV(this.vel, 5));
+  
+  this.damage = 10;
+  
+  this.dead = false;
 };
 Beam.prototype = new Projectile();
 
 Beam.prototype.draw = function(layer) {
-	if(layer === "airborn") {
-		ctx.save();
-		translate(this.pos);
-		ctx.rotate(getDir({x:0,y:0},this.vel));
+  if(layer === "airborn") {
+    ctx.save();
+    translate(this.pos);
+    ctx.rotate(getDir({x:0,y:0},this.vel));
 
-		ctx.fillStyle = "blue";
-		ctx.beginPath();
-		ctx.moveTo(this.rad, 0);
-		ctx.lineTo(0, this.rad);
-		ctx.lineTo(-2*this.rad, 0);
-		ctx.lineTo(0, -this.rad);
-		ctx.fill();
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.moveTo(this.rad, 0);
+    ctx.lineTo(0, this.rad);
+    ctx.lineTo(-2*this.rad, 0);
+    ctx.lineTo(0, -this.rad);
+    ctx.fill();
 
-		ctx.restore();
-	}
+    ctx.restore();
+  }
 };
 
 
 
 // Star
 Star = function(pos, dir) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 5;
-	
-	this.sparkType = "whiteSpark";
-	this.sparkChance = 0.5;
-	
-	var speed = 7;
-	this.vel = {
-		x: Math.cos(dir) * speed,
-		y: Math.sin(dir) * speed
-	};
-	
-	this.pos = addV(this.pos, scaleV(this.vel, 2));
-	
-	this.damage = 14;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 5;
+  
+  this.sparkType = "whiteSpark";
+  this.sparkChance = 0.5;
+  
+  var speed = 7;
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  
+  this.pos = addV(this.pos, scaleV(this.vel, 2));
+  
+  this.damage = 14;
+  
+  this.dead = false;
 };
 Star.prototype = new Projectile();
 
 Star.prototype.draw = function(layer) {
-	if(layer === "airborn") {
-		ctx.save();
-		translate(this.pos);
-		ctx.rotate(getDir({x:0,y:0},this.vel));
+  if(layer === "airborn") {
+    ctx.save();
+    translate(this.pos);
+    ctx.rotate(getDir({x:0,y:0},this.vel));
 
-		ctx.fillStyle = "white";
-		ctx.beginPath();
-		ctx.moveTo(this.rad, 0);
-		ctx.lineTo(0, this.rad);
-		ctx.lineTo(-2*this.rad, 0);
-		ctx.lineTo(0, -this.rad);
-		ctx.lineTo(this.rad, 0);
-		ctx.fill();
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(this.rad, 0);
+    ctx.lineTo(0, this.rad);
+    ctx.lineTo(-2*this.rad, 0);
+    ctx.lineTo(0, -this.rad);
+    ctx.lineTo(this.rad, 0);
+    ctx.fill();
 
-		ctx.restore();
-	}
+    ctx.restore();
+  }
 };
 
 
 
 // Great Ball of Fire
 GreatBallOfFire = function(pos, dir) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 80;
-	this.rad2 = this.rad * 0.6;
-	this.rad3 = this.rad * 0.2;
-	
-	this.sparkType = "redSpark";
-	this.sparkChance = 1;
-	
-	var speed = 10;
-	this.vel = {
-		x: Math.cos(dir) * speed,
-		y: Math.sin(dir) * speed
-	};
-	
-	this.pos = addV(this.pos, scaleV(this.vel, 10));
-	
-	this.damage = 19;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 80;
+  this.rad2 = this.rad * 0.6;
+  this.rad3 = this.rad * 0.2;
+  
+  this.sparkType = "redSpark";
+  this.sparkChance = 1;
+  
+  var speed = 10;
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  
+  this.pos = addV(this.pos, scaleV(this.vel, 10));
+  
+  this.damage = 19;
+  
+  this.dead = false;
 };
 GreatBallOfFire.prototype = new Projectile();
 
 GreatBallOfFire.prototype.draw = function(layer) {
-	if(layer === "airborn") {
-		ctx.save();
-		translate(this.pos);
-		ctx.rotate(getDir({x:0,y:0},this.vel));
-		
-		ctx.fillStyle = "red";
-		ctx.beginPath();
-		ctx.moveTo(this.rad, 0);
-		ctx.lineTo(0, this.rad);
-		ctx.lineTo(-2*this.rad, 0);
-		ctx.lineTo(0, -this.rad);
-		ctx.fill();
+  if(layer === "airborn") {
+    ctx.save();
+    translate(this.pos);
+    ctx.rotate(getDir({x:0,y:0},this.vel));
+    
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.moveTo(this.rad, 0);
+    ctx.lineTo(0, this.rad);
+    ctx.lineTo(-2*this.rad, 0);
+    ctx.lineTo(0, -this.rad);
+    ctx.fill();
 
-		ctx.fillStyle = "orange";
-		ctx.beginPath();
-		ctx.moveTo(this.rad2, 0);
-		ctx.lineTo(0, this.rad2);
-		ctx.lineTo(-2*this.rad2, 0);
-		ctx.lineTo(0, -this.rad2);
-		ctx.fill();
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(this.rad2, 0);
+    ctx.lineTo(0, this.rad2);
+    ctx.lineTo(-2*this.rad2, 0);
+    ctx.lineTo(0, -this.rad2);
+    ctx.fill();
 
-		ctx.fillStyle = "yellow";
-		ctx.beginPath();
-		ctx.moveTo(this.rad3, 0);
-		ctx.lineTo(0, this.rad3);
-		ctx.lineTo(-2*this.rad3, 0);
-		ctx.lineTo(0, -this.rad3);
-		ctx.lineTo(this.rad3, 0);
-		ctx.fill();
-		
-		ctx.restore();
-	}
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.moveTo(this.rad3, 0);
+    ctx.lineTo(0, this.rad3);
+    ctx.lineTo(-2*this.rad3, 0);
+    ctx.lineTo(0, -this.rad3);
+    ctx.lineTo(this.rad3, 0);
+    ctx.fill();
+    
+    ctx.restore();
+  }
 };
 
 
 
 // Zap
 Zap = function(posFrom, posTo) {
-	this.pos = posTo;
-	this.pArr = [{
-		x: posFrom.x,
-		y: posFrom.y
-	}];
-	var dist = getDist(posFrom, posTo);
-	var dir = getDir(posFrom, posTo);
-	var step = 50;
-	var range = 0.5;
-	for(var i = step; i < dist; i += step) {
-		var angle = range/2 - Math.random()*range;
-		this.pArr.push({
-			x: posFrom.x + Math.cos(dir+angle) * i,
-			y: posFrom.y + Math.sin(dir+angle) * i
-		});
-	}
-	this.pArr.push({
-		x: posTo.x,
-		y: posTo.y
-	});
-	
-	var rad = 20;
-	for(i in model.players) {
-		if(model.players[i].phasing) continue;
-		if(getDist(model.players[i].pos,posTo) < model.players[i].rad + rad) model.players[i].hurt(3);
-	}
-	
-	this.dead = false;
+  this.pos = posTo;
+  this.pArr = [{
+    x: posFrom.x,
+    y: posFrom.y
+  }];
+  var dist = getDist(posFrom, posTo);
+  var dir = getDir(posFrom, posTo);
+  var step = 50;
+  var range = 0.5;
+  for(var i = step; i < dist; i += step) {
+    var angle = range/2 - Math.random()*range;
+    this.pArr.push({
+      x: posFrom.x + Math.cos(dir+angle) * i,
+      y: posFrom.y + Math.sin(dir+angle) * i
+    });
+  }
+  this.pArr.push({
+    x: posTo.x,
+    y: posTo.y
+  });
+  
+  var rad = 20;
+  for(i in model.players) {
+    if(model.players[i].phasing) continue;
+    if(getDist(model.players[i].pos,posTo) < model.players[i].rad + rad) model.players[i].hurt(3);
+  }
+  
+  this.dead = false;
 };
 
 Zap.prototype.draw = function(layer) {
-	if(layer !== "grounded") return;
-	ctx.save();
+  if(layer !== "grounded") return;
+  ctx.save();
 
-	ctx.lineWidth = 5;
-	ctx.strokeStyle = "blue";
-	ctx.beginPath();
-	ctx.moveTo(this.pArr[0].x, this.pArr[0].y);
-	for(var i = 1; i < this.pArr.length; i++) {
-		ctx.lineTo(this.pArr[i].x, this.pArr[i].y);
-	}
-	ctx.stroke();
-	this.dead = true;
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "blue";
+  ctx.beginPath();
+  ctx.moveTo(this.pArr[0].x, this.pArr[0].y);
+  for(var i = 1; i < this.pArr.length; i++) {
+    ctx.lineTo(this.pArr[i].x, this.pArr[i].y);
+  }
+  ctx.stroke();
+  this.dead = true;
 
-	ctx.restore();
+  ctx.restore();
 };
 
 Zap.prototype.update = function() {
@@ -1673,458 +1714,526 @@ Zap.prototype.update = function() {
 
 // Poison Cloud
 PoisonCloud = function(pos) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 75;
-	
-	this.timerSet = 20;
-	this.timer = this.timerSet;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 75;
+  
+  this.timerSet = 20;
+  this.timer = this.timerSet;
+  
+  this.dead = false;
 }
 
 PoisonCloud.prototype.draw = function(layer) {
-	if(layer !== "airborn") return;
-	ctx.beginPath();
-	ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
-	ctx.globalAlpha = 0.5;
-	ctx.fillStyle = "green";
-	ctx.fill();
-	ctx.globalAlpha = 1;
-	ctx.lineWidth = 3;
-	ctx.strokeStyle = "darkgreen";
-	ctx.stroke();
+  if(layer !== "airborn") return;
+  ctx.beginPath();
+  ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "green";
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "darkgreen";
+  ctx.stroke();
 };
 
 PoisonCloud.prototype.update = function() {
-	this.timer--;
-	if(this.timer < 0) {
-		this.timer = this.timerSet;
-		for(var i in model.players) {
-			if(model.players[i].phasing) continue;
-			if(getDist(this.pos, model.players[i].pos) < this.rad) {
-				model.players[i].hurt(1);
-			}
-		}
-	}
+  this.timer--;
+  if(this.timer < 0) {
+    this.timer = this.timerSet;
+    for(var i in model.players) {
+      if(model.players[i].phasing) continue;
+      if(getDist(this.pos, model.players[i].pos) < this.rad) {
+        model.players[i].hurt(1);
+      }
+    }
+  }
 };
 
 
 
 // Shield
 Shield = function(pos) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 75;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 75;
+  
+  this.dead = false;
 }
 
 Shield.prototype.draw = function(layer) {
-	if(layer !== "airborn") return;
-	ctx.beginPath();
-	ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
-	ctx.globalAlpha = 0.5;
-	ctx.fillStyle = "lightblue";
-	ctx.fill();
-	ctx.globalAlpha = 1;
-	ctx.lineWidth = 3;
-	ctx.strokeStyle = "blue";
-	ctx.stroke();
+  if(layer !== "airborn") return;
+  ctx.beginPath();
+  ctx.arc(this.pos.x, this.pos.y, this.rad, 0, 2*Math.PI);
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "lightblue";
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "blue";
+  ctx.stroke();
 };
 
 Shield.prototype.update = function() {
-	for(var i in model.everything) {
-		var t = model.everything[i];
-		if(t.canBeReflected) {
-			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
-				var norm = normalize(vTo(this.pos, t.pos));
-				var vel = dot(t.vel, norm);
-				if(vel < 0) {
-					t.vel = addV(t.vel, scaleV(norm, vel * -2));
-				}
-			}
-		}
-	}
+  for(var i in model.everything) {
+    var t = model.everything[i];
+    if(t.canBeReflected) {
+      if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+        var norm = normalize(vTo(this.pos, t.pos));
+        var vel = dot(t.vel, norm);
+        if(vel < 0) {
+          t.vel = addV(t.vel, scaleV(norm, vel * -2));
+        }
+      }
+    }
+  }
+};
+
+
+
+// Dark Wall
+DarkWall = function(dir) {
+  var screenSize = Math.sqrt(
+    canvas.width * canvas.width +
+    canvas.height * canvas.height);
+  var screenCenter = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+  };
+  var speed = 1;
+
+  this.pos = {
+    x: screenCenter.x - Math.cos(dir) * (screenSize/2 + 200),
+    y: screenCenter.y - Math.sin(dir) * (screenSize/2 + 200)
+  };
+  this.vel = {
+    x: Math.cos(dir) * speed,
+    y: Math.sin(dir) * speed
+  };
+  this.dir = dir;
+  this.rad = 0;
+
+  this.width = screenSize + 100;
+
+  this.dead = false;
+};
+
+DarkWall.prototype.draw = function(layer) {
+  const thickness = 50;
+  const rumbleStrength = 5;
+
+  if(layer !== "airborn") return;
+
+  ctx.save();
+  ctx.translate(this.pos.x, this.pos.y);
+  ctx.translate(
+    Math.random() * rumbleStrength * 2 - rumbleStrength,
+    Math.random() * rumbleStrength * 2 - rumbleStrength);
+  ctx.rotate(this.dir);
+  
+  ctx.fillStyle = "black";
+  ctx.fillRect(-thickness/2, -this.width/2, thickness, this.width);
+
+  ctx.restore();
+};
+
+DarkWall.prototype.update = function() {
+  this.pos = addV(this.pos, this.vel);
+
+  // Destroy players that are inside
+  model.players.forEach((player) => {
+    var normal = normalize(this.vel);
+    var dist = Math.abs(dot(normal, vTo(this.pos, player.pos)));
+    if(dist < 10) player.hurt(5); // player will die very quickly
+  });
+
+  // Particle effects
+  for(var i = 0; i < 10; i++) {
+    // TODO
+  }
+
+  // Off map?
+  const distFromCenter = getDist(this.pos, {x:canvas.width/2,y:canvas.height/2});
+  if(distFromCenter > this.width/2 + 300) {
+    this.dead = true;
+  }
 };
 
 
 
 // Obstacle
 Obstacle = function(pos) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.rad = 25;
-	
-	this.dead = false;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.rad = 25;
+  
+  this.dead = false;
 };
 
 Obstacle.prototype.draw = function(layer) {
-	if(layer !== "grounded") return;
-	
-	ctx.save();
-	translate(this.pos);
-	
-	ctx.fillStyle = "grey";
-	ctx.strokeStyle = "black";
-	ctx.lineWidth = 3;
-	ctx.beginPath();
-	ctx.arc(0, 20, this.rad, 0, Math.PI);
-	ctx.arc(0, 0, this.rad, Math.PI, 2*Math.PI);
-	ctx.lineTo(this.rad, 20);
-	ctx.moveTo(this.rad, 0);
-	ctx.arc(0, 0, this.rad, 0, Math.PI);
-	ctx.fill();
-	ctx.stroke();
-	
-	ctx.restore();
+  if(layer !== "grounded") return;
+  
+  ctx.save();
+  translate(this.pos);
+  
+  ctx.fillStyle = "grey";
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 20, this.rad, 0, Math.PI);
+  ctx.arc(0, 0, this.rad, Math.PI, 2*Math.PI);
+  ctx.lineTo(this.rad, 20);
+  ctx.moveTo(this.rad, 0);
+  ctx.arc(0, 0, this.rad, 0, Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  
+  ctx.restore();
 };
 
 Obstacle.prototype.update = function() {
-	for(var i in model.everything) {
-		var t = model.everything[i];
-		if(t.canBounce) {
-			if(t instanceof Player && t.phasing) break; // Don't bounce phasing players
+  for(var i in model.everything) {
+    var t = model.everything[i];
+    if(t.canBounce) {
+      if(t instanceof Player && t.phasing) break; // Don't bounce phasing players
 
-			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
-				var norm = normalize(vTo(this.pos, t.pos));
-				var vel = dot(t.vel, norm);
-				if(vel < 0) {
-					t.vel = addV(t.vel, scaleV(norm, vel * -2));
-				}
-			}
-			if(getDist(this.pos, t.pos) < this.rad + t.rad) {
-				t.pos = addV(t.pos, scaleV(normalize(vTo(this.pos, t.pos)), 4));
-			}
-		}
-	}
+      if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+        var norm = normalize(vTo(this.pos, t.pos));
+        var vel = dot(t.vel, norm);
+        if(vel < 0) {
+          t.vel = addV(t.vel, scaleV(norm, vel * -2));
+        }
+      }
+      if(getDist(this.pos, t.pos) < this.rad + t.rad) {
+        t.pos = addV(t.pos, scaleV(normalize(vTo(this.pos, t.pos)), 4));
+      }
+    }
+  }
 };
 
 
 
 // Float
 Whirlwind = function(pos, dir, startWithHeadStart) {
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
 
-	this.speed = 5;
-	this.vel = {
-		x: Math.cos(dir) * this.speed,
-		y: Math.sin(dir) * this.speed
-	};
-	
-	this.rad = 60;
-	this.spinSpeed = 8;
-	this.rot = 0;
-	this.lines = [];
-	for(var i = 0; i < 10; i++) {
-		this.lines.push({
-			start: Math.random() * Math.PI * 2,
-			rad: Math.random() * this.rad * 0.75 + this.rad / 4
-		});
-		this.lines[i].end = this.lines[i].start + Math.random() * Math.PI * 0.7 + 1;
-		this.lines[i].startPos = {
-			x: Math.cos(this.lines[i].start) * this.lines[i].rad,
-			y: Math.sin(this.lines[i].start) * this.lines[i].rad
-		}
-	}
+  this.speed = 5;
+  this.vel = {
+    x: Math.cos(dir) * this.speed,
+    y: Math.sin(dir) * this.speed
+  };
+  
+  this.rad = 60;
+  this.spinSpeed = 8;
+  this.rot = 0;
+  this.lines = [];
+  for(var i = 0; i < 10; i++) {
+    this.lines.push({
+      start: Math.random() * Math.PI * 2,
+      rad: Math.random() * this.rad * 0.75 + this.rad / 4
+    });
+    this.lines[i].end = this.lines[i].start + Math.random() * Math.PI * 0.7 + 1;
+    this.lines[i].startPos = {
+      x: Math.cos(this.lines[i].start) * this.lines[i].rad,
+      y: Math.sin(this.lines[i].start) * this.lines[i].rad
+    }
+  }
 
-	if(startWithHeadStart === undefined || startWithHeadStart) {
-		var headStart = scaleV(this.vel, this.rad / this.speed + 4);
-		this.pos = addV(this.pos, headStart);
-	}
-	
-	this.dead = false;
+  if(startWithHeadStart === undefined || startWithHeadStart) {
+    var headStart = scaleV(this.vel, this.rad / this.speed + 4);
+    this.pos = addV(this.pos, headStart);
+  }
+  
+  this.dead = false;
 };
 
 Whirlwind.prototype.draw = function(layer) {
-	if(layer !== "ground") return;
-	
-	ctx.save();
-	translate(this.pos);
-	
-	ctx.strokeStyle = "#93d6ea";
-	ctx.beginPath();
-	for(var i = 0; i < this.lines.length; i++) {
-		ctx.save();
-		ctx.rotate(this.rot / this.lines[i].rad);
-		ctx.moveTo(this.lines[i].startPos.x, this.lines[i].startPos.y);
-		ctx.arc(0, 0, this.lines[i].rad, this.lines[i].start, this.lines[i].end);
-		ctx.restore();
-	}
-	ctx.lineCap = "round";
-	ctx.lineWidth = 3;
-	ctx.stroke();
-	
-	ctx.restore();
+  if(layer !== "ground") return;
+  
+  ctx.save();
+  translate(this.pos);
+  
+  ctx.strokeStyle = "#93d6ea";
+  ctx.beginPath();
+  for(var i = 0; i < this.lines.length; i++) {
+    ctx.save();
+    ctx.rotate(this.rot / this.lines[i].rad);
+    ctx.moveTo(this.lines[i].startPos.x, this.lines[i].startPos.y);
+    ctx.arc(0, 0, this.lines[i].rad, this.lines[i].start, this.lines[i].end);
+    ctx.restore();
+  }
+  ctx.lineCap = "round";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  ctx.restore();
 };
 
 Whirlwind.prototype.update = function() {
-	// Bounce off sides
-	if((this.pos.x < this.rad) || (this.pos.x > canvas.width - this.rad)) this.dead = true;
-	if((this.pos.y < this.rad) || (this.pos.y > canvas.height - this.rad)) this.dead = true;
-	
-	// Move self
-	this.pos = addV(this.pos, this.vel);
-	this.rot += this.spinSpeed;
-	
-	// Move anything grounded, and suck things in
-	for(var i in model.everything) {
-		var thing = model.everything[i];
-		if(thing.canBeSweptUp != undefined && thing.canBeSweptUp) {
-			if(getDist(thing.pos, this.pos) < this.rad) {
-				// Bring things with it
-				thing.pos = addV(thing.pos, this.vel);
+  // Bounce off sides
+  if((this.pos.x < this.rad) || (this.pos.x > canvas.width - this.rad)) this.dead = true;
+  if((this.pos.y < this.rad) || (this.pos.y > canvas.height - this.rad)) this.dead = true;
+  
+  // Move self
+  this.pos = addV(this.pos, this.vel);
+  this.rot += this.spinSpeed;
+  
+  // Move anything grounded, and suck things in
+  for(var i in model.everything) {
+    var thing = model.everything[i];
+    if(thing.canBeSweptUp != undefined && thing.canBeSweptUp) {
+      if(getDist(thing.pos, this.pos) < this.rad) {
+        // Bring things with it
+        thing.pos = addV(thing.pos, this.vel);
 
-				// Suck things in
-				if(getDist(this.pos, thing.pos) != 0) {
-					thing.vel = scaleV(thing.vel, 0.96);
-					thing.vel = addV(thing.vel, scaleV(normalize(vTo(thing.pos, this.pos)), 0.16));
-				}
-			}
-		}
-	}
+        // Suck things in
+        if(getDist(this.pos, thing.pos) != 0) {
+          thing.vel = scaleV(thing.vel, 0.96);
+          thing.vel = addV(thing.vel, scaleV(normalize(vTo(thing.pos, this.pos)), 0.16));
+        }
+      }
+    }
+  }
 };
 
 
 
 // Info
 Info = function(text, type, pos) {
-	this.text = text;
-	this.pos = {
-		x: pos.x,
-		y: pos.y
-	};
-	
-	this.color = {
-		"damage": "red",
-		"heal": "green",
-		"stun": "red",
-		"poison": "green",
-		"jinx": "blue",
-		"blind": "red",
-		"alertproblem": "red",
-		"weak": "red"
-	}[type];
-	
-	this.timer = 0;
-	this.deadTime = 30;
-	
-	this.dead = false;
+  this.text = text;
+  this.pos = {
+    x: pos.x,
+    y: pos.y
+  };
+  
+  this.color = {
+    "damage": "red",
+    "heal": "green",
+    "stun": "red",
+    "poison": "green",
+    "jinx": "blue",
+    "blind": "red",
+    "alertproblem": "red",
+    "weak": "red"
+  }[type];
+  
+  this.timer = 0;
+  this.deadTime = 30;
+  
+  this.dead = false;
 };
 
 Info.prototype.draw = function(layer) {
-	if(layer !== "info") return;
-	
-	ctx.save();
-	translate(this.pos);
-	
-	ctx.globalAlpha = 1 - this.timer / this.deadTime;
-	
-	ctx.fillStyle = this.color;
-	ctx.textAlign = "center";
-	ctx.fillText(this.text, 0, -50 - Math.sqrt(this.timer));
-	
-	ctx.restore();
+  if(layer !== "info") return;
+  
+  ctx.save();
+  translate(this.pos);
+  
+  ctx.globalAlpha = 1 - this.timer / this.deadTime;
+  
+  ctx.fillStyle = this.color;
+  ctx.textAlign = "center";
+  ctx.fillText(this.text, 0, -50 - Math.sqrt(this.timer));
+  
+  ctx.restore();
 };
 
 Info.prototype.update = function(layer) {
-	this.timer++;
-	if(this.timer > this.deadTime) this.dead = true;
+  this.timer++;
+  if(this.timer > this.deadTime) this.dead = true;
 };
 
 
 
 // Dit
 Dit = function(type, a, b, c, d) {
-	this.t = type;
-	this.d = [];
-	switch(type) {
-		case "redSpark":
-		case "blueSpark":
-		case "whiteSpark":
-			this.d.push(a);
-			this.d.push(b);
-			this.d.push(Math.random() * 2.0 - 1.0);
-			this.d.push(Math.random() * 2.0 - 1.0);
-			this.d.push(Math.random() * 20);
-			break;
-		case "teleport":
-			var r = Math.random() * 2*Math.PI;
-			var d = Math.random() * 2.0;
-			this.d.push(a);
-			this.d.push(b);
-			this.d.push(Math.cos(r)*d);
-			this.d.push(1.5*Math.sin(r)*d);
-			this.d.push(Math.random() * 10 + 10);
-			break;
-		case "heal":
-			this.d.push(a.x + Math.random()*30-15);
-			this.d.push(a.y + Math.random()*40-20);
-			this.d.push(Math.random()*10+10);
-			this.d.push(Math.random()*10+this.d[2]);
-			break;
-	}
+  this.t = type;
+  this.d = [];
+  switch(type) {
+    case "redSpark":
+    case "blueSpark":
+    case "whiteSpark":
+      this.d.push(a);
+      this.d.push(b);
+      this.d.push(Math.random() * 2.0 - 1.0);
+      this.d.push(Math.random() * 2.0 - 1.0);
+      this.d.push(Math.random() * 20);
+      break;
+    case "teleport":
+      var r = Math.random() * 2*Math.PI;
+      var d = Math.random() * 2.0;
+      this.d.push(a);
+      this.d.push(b);
+      this.d.push(Math.cos(r)*d);
+      this.d.push(1.5*Math.sin(r)*d);
+      this.d.push(Math.random() * 10 + 10);
+      break;
+    case "heal":
+      this.d.push(a.x + Math.random()*30-15);
+      this.d.push(a.y + Math.random()*40-20);
+      this.d.push(Math.random()*10+10);
+      this.d.push(Math.random()*10+this.d[2]);
+      break;
+    case "darkness":
+      break;
+  }
 };
 
 Dit.prototype.draw = function() {
-	switch(this.t) {
-		case "redSpark":
-			ctx.fillStyle = "red";
-			break;
-		case "blueSpark":
-		case "teleport":
-			ctx.fillStyle = "blue";
-			break;
-		case "whiteSpark":
-			ctx.fillStyle = "white";
-			break;
-	}
-	switch(this.t) {
-		case "redSpark":
-		case "blueSpark":
-		case "whiteSpark":
-		case "teleport":
-			ctx.fillRect(this.d[0] - 3, this.d[1] - 3, 6, 6);
-			break;
-		case "heal":
-			if(this.d[3] > this.d[2]) break;
-			ctx.save();
-			ctx.translate(this.d[0], this.d[1]);
-			ctx.beginPath();
-			ctx.moveTo(-5, 0);
-			ctx.lineTo(5, 0);
-			ctx.moveTo(0, -5);
-			ctx.lineTo(0, 5);
-			ctx.strokeStyle = "#ef4040";
-			ctx.lineWidth = 3;
-			ctx.globalAlpha = this.d[3] / 10;
-			ctx.stroke();
-			ctx.restore();
-			break;
-	}
+  switch(this.t) {
+    case "redSpark":
+      ctx.fillStyle = "red";
+      break;
+    case "blueSpark":
+    case "teleport":
+      ctx.fillStyle = "blue";
+      break;
+    case "whiteSpark":
+      ctx.fillStyle = "white";
+      break;
+  }
+  switch(this.t) {
+    case "redSpark":
+    case "blueSpark":
+    case "whiteSpark":
+    case "teleport":
+      ctx.fillRect(this.d[0] - 3, this.d[1] - 3, 6, 6);
+      break;
+    case "heal":
+      if(this.d[3] > this.d[2]) break;
+      ctx.save();
+      ctx.translate(this.d[0], this.d[1]);
+      ctx.beginPath();
+      ctx.moveTo(-5, 0);
+      ctx.lineTo(5, 0);
+      ctx.moveTo(0, -5);
+      ctx.lineTo(0, 5);
+      ctx.strokeStyle = "#ef4040";
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = this.d[3] / 10;
+      ctx.stroke();
+      ctx.restore();
+      break;
+  }
 };
 
 Dit.prototype.update = function() {
-	switch(this.t) {
-		case "redSpark":
-		case "blueSpark":
-		case "whiteSpark":
-		case "teleport":
-			this.d[0] += this.d[2];
-			this.d[1] += this.d[3];
-			this.d[4]--;
-			return this.d[4] < 0;
-		case "heal":
-			this.d[1] -= this.d[3] < this.d[2] ? 2.0 : 0;
-			this.d[3]--;
-			return this.d[3] < 0;
-	}
+  switch(this.t) {
+    case "redSpark":
+    case "blueSpark":
+    case "whiteSpark":
+    case "teleport":
+      this.d[0] += this.d[2];
+      this.d[1] += this.d[3];
+      this.d[4]--;
+      return this.d[4] < 0;
+    case "heal":
+      this.d[1] -= this.d[3] < this.d[2] ? 2.0 : 0;
+      this.d[3]--;
+      return this.d[3] < 0;
+  }
 };
 
 
 
 // Menu
 Menu = function() {
-	l("how-to-play-overlay").style.display = "none";
-	l("setup-overlay").style.display = "none";
-	l("game-over-overlay").style.display = "none";
-	l("whats-new-overlay").style.display = "none";
-	l("name-input-box").value = "";
-	l("main-menu-overlay").style.display = "block";
-	l("menu-error").style.display = "none";
-	l("name-input-box").focus();
-
-	l("name-input-box").value = global.rememberedNames;
-	
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+  l("how-to-play-overlay").style.display = "none";
+  l("setup-overlay").style.display = "none";
+  l("game-over-overlay").style.display = "none";
+  l("whats-new-overlay").style.display = "none";
+  l("main-menu-overlay").style.display = "block";
+  l("menu-error").style.display = "none";
+  l("name-input-box").focus();
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
 Menu.prototype.start = function() {
-	// Get list of names
-	var list = l("name-input-box").value;
-	global.rememberedNames = list;
-	list = list.split("\n");
-	
-	// Filter out duplicates and blanks
-	var temp = [];
-	for(var i = 0; i < list.length; i++) {
-		if(temp.indexOf(list[i]) >= 0) {
-			l("menu-error").innerHTML = "You may not use the same name more than once.";
-			l("menu-error").style.display = "block";
-			return;
-		} else if(list[i].length > 16) {
-			l("menu-error").innerHTML = "Usernames can only be 16 characters long.";
-			l("menu-error").style.display = "block";
-			return;
-		} else if(list[i] !== "") {
-			temp.push(list[i]);
-		}
-	}
-	list = temp;
-	
-	// Be sure there are at least 2 names
-	if(list.length < 2) {
-		l("menu-error").innerHTML = "You must enter at least two unique names.";
-		l("menu-error").style.display = "block";
-		return;
-	}
-	
-	// Create game model, add players to it in random order
-	model = new Model();
-	var players = [];
-	while(list.length > 0) {
-		var which = Math.floor(Math.random() * list.length);
-		model.players.push(new Player(list[which]));
-		list.splice(which, 1);
-	}
-	
-	// Space players out from each other
-	for(var i = 0; i < 100; i++) {
-		for(var j = 0; j < model.players.length; j++) {
-			var p = getClosest(filter(model.players, p=>p!=model.players[j]), model.players[j].pos);
-			var norm = vTo(model.players[j].pos, p.pos);
-			norm = scaleV(normalize(norm), -5);
-			p = model.players[j];
-			p.pos = addV(p.pos, norm);
-			margin = 50;
-			if(p.pos.x < margin) p.pos.x = margin;
-			if(p.pos.x > canvas.width - margin) p.pos.x = canvas.width - margin;
-			if(p.pos.y < margin) p.pos.y = margin;
-			if(p.pos.y > canvas.height - margin) p.pos.y = canvas.height - margin;
-		}
-	}
+  // Get list of names
+  var list = l("name-input-box").value;
+  list = list.split("\n");
+  
+  // Filter out duplicates and blanks
+  var temp = [];
+  for(var i = 0; i < list.length; i++) {
+    if(temp.indexOf(list[i]) >= 0) {
+      l("menu-error").innerHTML = "You may not use the same name more than once.";
+      l("menu-error").style.display = "block";
+      return;
+    } else if(list[i].length > 16) {
+      l("menu-error").innerHTML = "Usernames can only be 16 characters long.";
+      l("menu-error").style.display = "block";
+      return;
+    } else if(list[i] !== "") {
+      temp.push(list[i]);
+    }
+  }
+  list = temp;
+  
+  // Be sure there are at least 2 names
+  if(list.length < 2) {
+    l("menu-error").innerHTML = "You must enter at least two unique names.";
+    l("menu-error").style.display = "block";
+    return;
+  }
+  
+  // Create game model, add players to it in random order
+  model = new Model();
+  var players = [];
+  while(list.length > 0) {
+    var which = Math.floor(Math.random() * list.length);
+    model.players.push(new Player(list[which]));
+    list.splice(which, 1);
+  }
+  
+  // Space players out from each other
+  for(var i = 0; i < 100; i++) {
+    for(var j = 0; j < model.players.length; j++) {
+      var p = getClosest(filter(model.players, p=>p!=model.players[j]), model.players[j].pos);
+      var norm = vTo(model.players[j].pos, p.pos);
+      norm = scaleV(normalize(norm), -5);
+      p = model.players[j];
+      p.pos = addV(p.pos, norm);
+      margin = 50;
+      if(p.pos.x < margin) p.pos.x = margin;
+      if(p.pos.x > canvas.width - margin) p.pos.x = canvas.width - margin;
+      if(p.pos.y < margin) p.pos.y = margin;
+      if(p.pos.y > canvas.height - margin) p.pos.y = canvas.height - margin;
+    }
+  }
 
-	// Randomly spawn obstacles
-	var numObstacles = canvas.width/2 * canvas.height/2 / (200 * 200); // Spawn 1 for every 200x200 pixel area
-	var padding = 10;
-	for(var i = 0; i < numObstacles; i++) {
-		var x = (canvas.width / 2 - padding * 2) * Math.random() + padding;
-		var y = (canvas.height / 2 - padding * 2) * Math.random() + padding;
-		// Spawn 4 in a symetric pattern
-		model.things.push(new Obstacle({x: x, y: y}));
-		model.things.push(new Obstacle({x: x, y: canvas.height - y}));
-		model.things.push(new Obstacle({x: canvas.width - x, y: y}));
-		model.things.push(new Obstacle({x: canvas.width - x, y: canvas.height - y}));
-	}
+  // Randomly spawn obstacles
+  var numObstacles = canvas.width/2 * canvas.height/2 / (200 * 200); // Spawn 1 for every 200x200 pixel area
+  var padding = 10;
+  for(var i = 0; i < numObstacles; i++) {
+    var x = (canvas.width / 2 - padding * 2) * Math.random() + padding;
+    var y = (canvas.height / 2 - padding * 2) * Math.random() + padding;
+    // Spawn 4 in a symetric pattern
+    model.things.push(new Obstacle({x: x, y: y}));
+    model.things.push(new Obstacle({x: x, y: canvas.height - y}));
+    model.things.push(new Obstacle({x: canvas.width - x, y: y}));
+    model.things.push(new Obstacle({x: canvas.width - x, y: canvas.height - y}));
+  }
 
-	// Close main menu
-	l("main-menu-overlay").style.display = "none";
-	
-	// Start game
-	state = new Turn();
-	state.skipClick = true;
+  // Close main menu
+  l("main-menu-overlay").style.display = "none";
+  
+  // Start game
+  state = new Turn();
+  state.skipClick = true;
 };
 
 Menu.prototype.update = function() {
@@ -2134,9 +2243,9 @@ Menu.prototype.update = function() {
 
 // How To Play
 HowToPlay = function() {
-	l("main-menu-overlay").style.display = "none";
-	l("how-to-play-overlay").style.display = "block";
-	l("how-to-play-overlay").scrollTop = 0;
+  l("main-menu-overlay").style.display = "none";
+  l("how-to-play-overlay").style.display = "block";
+  l("how-to-play-overlay").scrollTop = 0;
 };
 
 HowToPlay.prototype.update = function() {
@@ -2146,9 +2255,9 @@ HowToPlay.prototype.update = function() {
 
 // How To Play
 WhatsNew = function() {
-	l("main-menu-overlay").style.display = "none";
-	l("whats-new-overlay").style.display = "block";
-	l("whats-new-overlay").scrollTop = 0;
+  l("main-menu-overlay").style.display = "none";
+  l("whats-new-overlay").style.display = "block";
+  l("whats-new-overlay").scrollTop = 0;
 };
 
 WhatsNew.prototype.update = function() {
@@ -2158,401 +2267,404 @@ WhatsNew.prototype.update = function() {
 
 // Setup
 Setup = function() {
-	l("main-menu-overlay").style.display = "none";
-	l("setup-name-box").value = "";
-	l("setup-overlay").style.display = "block";
-	l("setup-name-too-long").style.display = "none";
-	l("setup-name-box").focus();
-	
-	this.player = new Player("");
+  l("main-menu-overlay").style.display = "none";
+  l("setup-name-box").value = "";
+  l("setup-overlay").style.display = "block";
+  l("setup-name-too-long").style.display = "none";
+  l("setup-name-box").focus();
+  
+  this.player = new Player("");
 };
 
 Setup.prototype.update = function() {
-	this.player = new Player(l("setup-name-box").value);
-	this.player.pos = {
-		x: canvas.width / 2,
-		y: canvas.height / 4 * 3
-	};
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	this.player.draw("grounded");
-	
-	if(this.player.name.length > 16) {
-		l("setup-name-too-long").style.display = "block";
-		l("setup-spells").innerHTML = "";
-		return;
-	} else {
-		l("setup-name-too-long").style.display = "none";
-		l("setup-spells").innerHTML = "To cast a basic Fireball,<br>you must type:<br>" + decodeSpell("AAA", this.player);
-	}
+  this.player = new Player(l("setup-name-box").value);
+  this.player.pos = {
+    x: canvas.width / 2,
+    y: canvas.height / 4 * 3
+  };
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  this.player.draw("grounded");
+  
+  if(this.player.name.length > 16) {
+    l("setup-name-too-long").style.display = "block";
+    l("setup-spells").innerHTML = "";
+    return;
+  } else {
+    l("setup-name-too-long").style.display = "none";
+    l("setup-spells").innerHTML = "To cast a basic Fireball,<br>you must type:<br>" + decodeSpell("AAA", this.player);
+  }
 };
 
 
 
 // Turn prototype
 Turn = function() {
-	this.input = "";
-	this.spellRot = 0;
-	
-	this.skipClick = false;
-	
-	this.blind = model.players[0].blinded;
-	
-	var p = model.players[0].pos;
-	
-	// Move circle gradient (Positive)
-	this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
-	this.moveCircleGrad.addColorStop(0, "rgba(50, 50, 255, 0)");
-	this.moveCircleGrad.addColorStop(1, "rgba(50, 50, 255, 0.1)");
-	
-	// Move circle gradient (Negative)
-	this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
-	this.moveCircleGradNeg.addColorStop(0, "rgba(150, 150, 255, 0)");
-	this.moveCircleGradNeg.addColorStop(1, "rgba(150, 150, 255, 0.3)");
-	
-	// Current player setup
-	var p = model.players[0];
-	p.vel.x = 0;
-	p.vel.y = 0;
-	p.phasing = false;
-	if(p.mana < 20 - config.manaperturn) p.mana += config.manaperturn;
-	else if(p.mana < 20) p.mana = 20;
-	if(p.blindTimer > 0) {
-		p.blindTimer--;
-		if(p.blindTimer == 0) p.blinded = false;
-	}
-	if(p.jinxTimer > 0) {
-		p.jinxTimer--;
-		if(p.jinxTimer == 0 && p.jinxed) p.jinx();
-	}
-	p.invisible = false;
+  this.input = "";
+  this.spellRot = 0;
+  
+  this.skipClick = false;
+  
+  this.blind = model.players[0].blinded;
+  
+  var p = model.players[0].pos;
+  
+  // Move circle gradient (Positive)
+  this.moveCircleGrad = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+  this.moveCircleGrad.addColorStop(0, "rgba(50, 50, 255, 0)");
+  this.moveCircleGrad.addColorStop(1, "rgba(50, 50, 255, 0.1)");
+  
+  // Move circle gradient (Negative)
+  this.moveCircleGradNeg = ctx.createRadialGradient(p.x, p.y, config.walkingdistance - 60, p.x, p.y, config.walkingdistance);
+  this.moveCircleGradNeg.addColorStop(0, "rgba(150, 150, 255, 0)");
+  this.moveCircleGradNeg.addColorStop(1, "rgba(150, 150, 255, 0.3)");
+  
+  // Current player setup
+  var p = model.players[0];
+  p.vel.x = 0;
+  p.vel.y = 0;
+  p.phasing = false;
+  if(p.mana < 20 - config.manaperturn) p.mana += config.manaperturn;
+  else if(p.mana < 20) p.mana = 20;
+  if(p.blindTimer > 0) {
+    p.blindTimer--;
+    if(p.blindTimer == 0) p.blinded = false;
+  }
+  if(p.jinxTimer > 0) {
+    p.jinxTimer--;
+    if(p.jinxTimer == 0 && p.jinxed) p.jinx();
+  }
+  if(p.invisibleTimer > 0) {
+    p.invisibleTimer--;
+    if(p.invisibleTimer == 0 && p.invisible) p.invisible = false;
+  }
 };
 
 Turn.prototype.draw = function() {
-	var p = model.players[0];
-	
-	if(this.blind) {
-		ctx.fillStyle = "black";
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		p.draw("grounded");
-		ctx.fillStyle = "white";
-		p.drawSpell(this.spellRot, this.input);
-	} else {
-		model.draw();
-		ctx.fillStyle = "black";
-		p.drawSpell(this.spellRot, this.input);
-	}
-	p.draw("info");
-	
-	ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
-	ctx.beginPath();
-	ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 30, 0, 2*Math.PI);
-	ctx.lineWidth = 60;
-	ctx.stroke();
+  var p = model.players[0];
+  
+  if(this.blind) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    p.draw("grounded");
+    ctx.fillStyle = "white";
+    p.drawSpell(this.spellRot, this.input);
+  } else {
+    model.draw();
+    ctx.fillStyle = "black";
+    p.drawSpell(this.spellRot, this.input);
+  }
+  p.draw("info");
+  
+  ctx.strokeStyle = this.blind ? this.moveCircleGradNeg : this.moveCircleGrad;
+  ctx.beginPath();
+  ctx.arc(p.pos.x, p.pos.y, config.walkingdistance - 30, 0, 2*Math.PI);
+  ctx.lineWidth = 60;
+  ctx.stroke();
 };
 
 Turn.prototype.newInput = function(char) {
-	if(this.input.length === 3) {
-		this.input = this.input[1] + this.input[2] + char;
-	} else {
-		this.input += char;
-	}
+  if(this.input.length === 3) {
+    this.input = this.input[1] + this.input[2] + char;
+  } else {
+    this.input += char;
+  }
 };
 
 Turn.prototype.backspaceKeyPressed = function() {
-	if(this.input.length == 0) return;
-	this.input = this.input.substring(0, this.input.length - 1);
+  if(this.input.length == 0) return;
+  this.input = this.input.substring(0, this.input.length - 1);
 };
 
 Turn.prototype.click = function() {
-	if(this.skipClick) {
-		this.skipClick = false;
-		return;
-	}
+  if(this.skipClick) {
+    this.skipClick = false;
+    return;
+  }
 
-	// End turn
-	state = new Sim();
+  // End turn
+  state = new Sim();
 
-	// Move the player
-	model.players[0].move();
-	
-	// Only continue casting if a spell has been entered
-	if(this.input.length !== 3) return;
-	
-	// Get spell
-	var spell = this.input;
-	
-	// Encode spell
-	if(config.doencoding) {
-		spell = encodeSpell(spell, model.players[0]);
-	}
-	
-	// Attempt to get spell
-	spell = magic[spell]; // retrieve spell from spell book
-	if(spell === undefined) {
-		// The spell wasn't found in the spellbook
-		// cast a random backfire
-		backfire = backfires[Math.floor(Math.random() * backfires.length)];
-		try {
-			eval(backfire);
-		} catch(e) {
-			// backfire failed somehow
-			// do nothing
-		}
-		return;
-	}
-	// Cast the spell if player has enough mana
-	try {
-		if(model.players[0].useMana(spell.mana))
-			eval(spell.code);
-		else
-			model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
-	} catch(e) {
-		// The spell failed somehow
-		// do nothing
-	}
+  // Move the player
+  model.players[0].move();
+  
+  // Only continue casting if a spell has been entered
+  if(this.input.length !== 3) return;
+  
+  // Get spell
+  var spell = this.input;
+  
+  // Encode spell
+  if(config.doencoding) {
+    spell = encodeSpell(spell, model.players[0]);
+  }
+  
+  // Attempt to get spell
+  spell = magic[spell]; // retrieve spell from spell book
+  if(spell === undefined) {
+    // The spell wasn't found in the spellbook
+    // cast a random backfire
+    backfire = backfires[Math.floor(Math.random() * backfires.length)];
+    try {
+      eval(backfire);
+    } catch(e) {
+      // backfire failed somehow
+      // do nothing
+    }
+    return;
+  }
+  // Cast the spell if player has enough mana
+  try {
+    if(model.players[0].useMana(spell.mana))
+      eval(spell.code);
+    else
+      model.fx.push(new Info("Too Weak", "weak", model.players[0].pos));
+  } catch(e) {
+    // The spell failed somehow
+    // do nothing
+  }
 };
 
 Turn.prototype.update = function() {
-	this.spellRot += 0.05;
-	this.draw();
+  this.spellRot += 0.05;
+  this.draw();
 };
 
 
 
 // Sim prototype
 Sim = function() {
-	this.timer = config.framesperround / model.players.length;
+  this.timer = config.framesperround / model.players.length;
 };
 
 Sim.prototype.draw = function() {
-	model.draw();
+  model.draw();
 };
 
 Sim.prototype.updatePlayers = function() {
-	for(var i = 0; i < model.players.length; i++) {
-		model.players[i].update();
-	};
-	for(i = 0; i < model.players.length; i++) {
-		if(model.players[i].dead) {
-			model.graveyard.push(model.players[i]);
-			model.players.splice(i, 1);
-			i--;
-		}
-	}
+  for(var i = 0; i < model.players.length; i++) {
+    model.players[i].update();
+  };
+  for(i = 0; i < model.players.length; i++) {
+    if(model.players[i].dead) {
+      model.graveyard.push(model.players[i]);
+      model.players.splice(i, 1);
+      i--;
+    }
+  }
 };
 
 Sim.prototype.updateMobs = function() {
-	for(var i = 0; i < model.mobs.length; i++) {
-		model.mobs[i].update();
-	};
-	for(i = 0; i < model.mobs.length; i++) {
-		if(model.mobs[i].dead) {
-			model.mobs.splice(i, 1);
-			i--;
-		}
-	}
+  for(var i = 0; i < model.mobs.length; i++) {
+    model.mobs[i].update();
+  };
+  for(i = 0; i < model.mobs.length; i++) {
+    if(model.mobs[i].dead) {
+      model.mobs.splice(i, 1);
+      i--;
+    }
+  }
 };
 
 Sim.prototype.updateThings = function() {
-	for(var i = 0; i < model.things.length; i++) {
-		model.things[i].update();
-	}
-	for(i = 0; i < model.things.length; i++) {
-		if(model.things[i].dead) {
-			model.things.splice(i, 1);
-			i--;
-		}
-	}
+  for(var i = 0; i < model.things.length; i++) {
+    model.things[i].update();
+  }
+  for(i = 0; i < model.things.length; i++) {
+    if(model.things[i].dead) {
+      model.things.splice(i, 1);
+      i--;
+    }
+  }
 };
 
 Sim.prototype.updateFX = function() {
-	for(var i = 0; i < model.fx.length; i++) {
-		model.fx[i].update();
-	}
-	for(i = 0; i < model.fx.length; i++) {
-		if(model.fx[i].dead) {
-			model.fx.splice(i, 1);
-			i--;
-		}
-	}
-	
-	for(i = 0; i < model.dits.length; i++) {
-		if(model.dits[i].update()) {
-			model.dits.splice(i, 1);
-			i--;
-		}
-	}
+  for(var i = 0; i < model.fx.length; i++) {
+    model.fx[i].update();
+  }
+  for(i = 0; i < model.fx.length; i++) {
+    if(model.fx[i].dead) {
+      model.fx.splice(i, 1);
+      i--;
+    }
+  }
+  
+  for(i = 0; i < model.dits.length; i++) {
+    if(model.dits[i].update()) {
+      model.dits.splice(i, 1);
+      i--;
+    }
+  }
 };
 
 Sim.prototype.bounceThings = function() {
-	for(var i in model.everything) {
-		if(model.everything[i].canBounce) {
-			var p = model.everything[i].pos;
-			var v = model.everything[i].vel;
-			var r = model.everything[i].rad;
-			if((p.x < r && v.x < 0) || (p.x > canvas.width-r && v.x > 0)) v.x = 0 - v.x;
-			if((p.y < r && v.y < 0) || (p.y > canvas.height-r && v.y > 0)) v.y = 0 - v.y;
-		}
-	}
+  for(var i in model.everything) {
+    if(model.everything[i].canBounce) {
+      var p = model.everything[i].pos;
+      var v = model.everything[i].vel;
+      var r = model.everything[i].rad;
+      if((p.x < r && v.x < 0) || (p.x > canvas.width-r && v.x > 0)) v.x = 0 - v.x;
+      if((p.y < r && v.y < 0) || (p.y > canvas.height-r && v.y > 0)) v.y = 0 - v.y;
+    }
+  }
 };
 
 Sim.prototype.update = function() {
-	this.updateThings();
-	this.updateFX();
-	this.updatePlayers();
-	this.bounceThings();
-	this.draw();
-	
-	if(model.players.length < 2) {
-		state = new GameOver();
-		return;
-	}
+  this.updateThings();
+  this.updateFX();
+  this.updatePlayers();
+  this.bounceThings();
+  this.draw();
+  
+  if(model.players.length < 2) {
+    state = new GameOver();
+    return;
+  }
 
-	// Regularly add a mana drop to the map
-	model.dropTimer--;
-	if(model.dropTimer < 0) {
-		model.dropTimer = config.droptimer;
-		model.things.push(new ManaDrop());
-	}
-	
-	this.timer--;
-	if(this.timer < 0) {
-		var temp = model.players.splice(0, 1)[0];
-		model.players.push(temp);
-		while(model.players[0].stunned) {
-			var temp = model.players.splice(0, 1)[0];
-			temp.stunned = false;
-			model.players.push(temp);
-		}
-		state = new Turn();
-	}
+  // Regularly add a mana drop to the map
+  model.dropTimer--;
+  if(model.dropTimer < 0) {
+    model.dropTimer = config.droptimer;
+    model.things.push(new ManaDrop());
+  }
+  
+  this.timer--;
+  if(this.timer < 0) {
+    var temp = model.players.splice(0, 1)[0];
+    model.players.push(temp);
+    while(model.players[0].stunned) {
+      var temp = model.players.splice(0, 1)[0];
+      temp.stunned = false;
+      model.players.push(temp);
+    }
+    state = new Turn();
+  }
 };
 
 
 
 // Animation
 Animation = function(type, a, b) {
-	this.type = type;
-	switch(this.type) {
-		case "four corner":
-			// Change positions of everything
-			for(var i in model.players) {
-				var p = model.players[i].pos;
-				if(p.x < a) p.x += canvas.width - a;
-				else if(p.x > a) p.x -= a;
-				if(p.y < b) p.y += canvas.height - b;
-				else if(p.y > b) p.y -= b;
-			}
-			for(var i in model.things) {
-				var p = model.things[i].pos;
-				if(p.x < a) p.x += canvas.width - a;
-				else if(p.x > a) p.x -= a;
-				if(p.y < b) p.y += canvas.height - b;
-				else if(p.y > b) p.y -= b;
-			}
-				
-			// Setup animation
-			this.startPos = [
-				{x: 0, y: 0},
-				{x: a, y: 0},
-				{x: 0, y: b},
-				{x: a, y: b}
-			];
-			ctx.lineWidth = 10;
-			ctx.strokeStyle = "black";
-			ctx.beginPath();
-			ctx.rect(0, 0, canvas.width, canvas.height);
-			ctx.moveTo(a, 0);
-			ctx.lineTo(a, canvas.height);
-			ctx.moveTo(0, b);
-			ctx.lineTo(canvas.width, b);
-			ctx.stroke();
-			this.corners = [
-				ctx.getImageData(0, 0, a, b),
-				ctx.getImageData(a, 0, canvas.width - a, b),
-				ctx.getImageData(0, b, a, canvas.height - b),
-				ctx.getImageData(a, b, canvas.width - a, canvas.height - b)
-			];
-			this.goalDiff = [
-				{x:canvas.width-a,y:canvas.height-b},
-				{x:-a,y:canvas.height-b},
-				{x:canvas.width-a,y:-b},
-				{x:-a,y:-b}
-			];
-			this.inc = 0.02;
-			this.ani = this.inc;
-			break;
-	}
+  this.type = type;
+  switch(this.type) {
+    case "four corner":
+      // Change positions of everything
+      for(var i in model.players) {
+        var p = model.players[i].pos;
+        if(p.x < a) p.x += canvas.width - a;
+        else if(p.x > a) p.x -= a;
+        if(p.y < b) p.y += canvas.height - b;
+        else if(p.y > b) p.y -= b;
+      }
+      for(var i in model.things) {
+        var p = model.things[i].pos;
+        if(p.x < a) p.x += canvas.width - a;
+        else if(p.x > a) p.x -= a;
+        if(p.y < b) p.y += canvas.height - b;
+        else if(p.y > b) p.y -= b;
+      }
+        
+      // Setup animation
+      this.startPos = [
+        {x: 0, y: 0},
+        {x: a, y: 0},
+        {x: 0, y: b},
+        {x: a, y: b}
+      ];
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = "black";
+      ctx.beginPath();
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.moveTo(a, 0);
+      ctx.lineTo(a, canvas.height);
+      ctx.moveTo(0, b);
+      ctx.lineTo(canvas.width, b);
+      ctx.stroke();
+      this.corners = [
+        ctx.getImageData(0, 0, a, b),
+        ctx.getImageData(a, 0, canvas.width - a, b),
+        ctx.getImageData(0, b, a, canvas.height - b),
+        ctx.getImageData(a, b, canvas.width - a, canvas.height - b)
+      ];
+      this.goalDiff = [
+        {x:canvas.width-a,y:canvas.height-b},
+        {x:-a,y:canvas.height-b},
+        {x:canvas.width-a,y:-b},
+        {x:-a,y:-b}
+      ];
+      this.inc = 0.02;
+      this.ani = this.inc;
+      break;
+  }
 };
 
 Animation.prototype.draw = function() {
-	switch(this.type) {
-		case "four corner":
-			ctx.fillStyle = "black";
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			for(var i = 0; i < 4; i++) {
-				var pos = addV(this.startPos[i], scaleV(this.goalDiff[i], easeInOutQuint(this.ani)));
-				ctx.putImageData(
-					this.corners[i],
-					pos.x,
-					pos.y
-				);
-			}
-			break;
-	}
+  switch(this.type) {
+    case "four corner":
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for(var i = 0; i < 4; i++) {
+        var pos = addV(this.startPos[i], scaleV(this.goalDiff[i], easeInOutQuint(this.ani)));
+        ctx.putImageData(
+          this.corners[i],
+          pos.x,
+          pos.y
+        );
+      }
+      break;
+  }
 };
 
 Animation.prototype.update = function() {
-	switch(this.type) {
-		case "four corner":
-			this.draw();
-			this.ani += this.inc;
-			if(this.ani >= 1) {
-				state = new Sim();
-			}
-			break;
-	}
+  switch(this.type) {
+    case "four corner":
+      this.draw();
+      this.ani += this.inc;
+      if(this.ani >= 1) {
+        state = new Sim();
+      }
+      break;
+  }
 };
 
 
 
 // Game Over
 GameOver = function() {
-	// Dim background
-	ctx.globalAlpha = 0.5;
-	ctx.fillStyle = "white";
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	ctx.globalAlpha = 1;
-	
-	// Game Over overlay setup
-	var tab = l("game-over-table");
-	tab.innerHTML = "";
-	
-	// Add last player to graveyard
-	if(model.players.length > 0) {
-		model.graveyard.push(model.players[0]);
-	}
-	
-	// Make a list of spell codes
-	var spellCodes = [];
-	for(var i in magic) {
-		spellCodes.push(i);
-	}
-	
-	// Generate table row for every player
-	for(var i = model.graveyard.length-1; i >= 0; i--) {
-		var p = model.graveyard[i];
-		var discovery = "RFQ";
-		while(discovery == "RFQ") discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
-		var discName = magic[discovery].name;
-		var discCost = magic[discovery].mana;
-		discovery = decodeSpell(discovery, p);
-		
-		tab.innerHTML += "<tr><td>"+addOrdinalSuf(model.graveyard.length - i)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
-	}
-	
-	// Game Over overlay display
-	l("game-over-overlay").style.display = "block";
+  // Dim background
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 1;
+  
+  // Game Over overlay setup
+  var tab = l("game-over-table");
+  tab.innerHTML = "";
+  
+  // Add last player to graveyard
+  if(model.players.length > 0) {
+    model.graveyard.push(model.players[0]);
+  }
+  
+  // Make a list of spell codes
+  var spellCodes = [];
+  for(var i in magic) {
+    spellCodes.push(i);
+  }
+  
+  // Generate table row for every player
+  for(var i = model.graveyard.length-1; i >= 0; i--) {
+    var p = model.graveyard[i];
+    var discovery = "RFQ";
+    while(discovery == "RFQ") discovery = spellCodes[Math.floor(Math.random() * spellCodes.length)];
+    var discName = magic[discovery].name;
+    var discCost = magic[discovery].mana;
+    discovery = decodeSpell(discovery, p);
+    
+    tab.innerHTML += "<tr><td>"+addOrdinalSuf(model.graveyard.length - i)+"</td><td>"+p.name+"</td><td>"+discovery+"</td><td>"+discName+"</td><td>"+discCost+"</td></tr>";
+  }
+  
+  // Game Over overlay display
+  l("game-over-overlay").style.display = "block";
 };
 
 GameOver.prototype.update = function() {
@@ -2565,33 +2677,33 @@ GameOver.prototype.update = function() {
 state = new Menu();
 
 function draw() {
-	animator(draw);
-	state.update();
+  animator(draw);
+  state.update();
 }
 
 
 
 // Event handlers
 window.addEventListener("keydown", function(e) {
-	if(state instanceof Turn) {
-		var char = String.fromCharCode(e.keyCode);
-		if(isLetter(char)) {
-			state.newInput(char);
-		} else if(e.keyCode == 8) {
-			state.backspaceKeyPressed();
-		}
-	}
+  if(state instanceof Turn) {
+    var char = String.fromCharCode(e.keyCode);
+    if(isLetter(char)) {
+      state.newInput(char);
+    } else if(e.keyCode == 8) {
+      state.backspaceKeyPressed();
+    }
+  }
 }, false);
 
 window.addEventListener("mousemove", function(e) {
-	mouse.x = e.clientX;
-	mouse.y = e.clientY;
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
 }, false);
 
 window.addEventListener("click", function(e) {
-	if(state instanceof Turn) {
-		state.click();
-	}
+  if(state instanceof Turn) {
+    state.click();
+  }
 }, false);
 
 
@@ -2601,6 +2713,6 @@ draw();
 
 
 
-	</script>
+  </script>
 </body>
 </html>
